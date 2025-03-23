@@ -1,0 +1,182 @@
+[tool.poetry]
+name = "bestway"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = {extras = ["standart"], version = "^0.112.2"}
+uvicorn = {extras = ["standart"], version = "^0.30.6"}
+dependency-injector = "^4.41.0"
+pydantic-settings = "^2.4.0"
+celery = "^5.4.0"
+redis = "^5.0.8"
+uptrace = "^1.26.0"
+opentelemetry-api = "^1.27.0"
+opentelemetry-sdk = "^1.27.0"
+opentelemetry-instrumentation-fastapi = "^0.48b0"
+sqlalchemy = "^2.0.33"
+psycopg2-binary = "^2.9.9"
+asyncpg = "^0.29.0"
+greenlet = "^3.0.3"
+alembic = "^1.13.2"
+flower = "^2.0.1"
+python-multipart = "^0.0.9"
+pandas = "^2.2.2"
+openpyxl = "^3.1.5"
+pyjwt = "^2.9.0"
+faker = "^28.4.1"
+aiohttp = "^3.10.5"
+pydantic = {extras = ["email"], version = "^2.9.2"}
+aiohttp-retry = "^2.8.3"
+xlsxwriter = "^3.2.0"
+pyarrow = "^18.0.0"
+aiocache = "^0.12.3"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.11.2"
+ruff = "^0.6.3"
+isort = "^5.13.2"
+pre-commit-hooks = "^4.6.0"
+black = "^24.8.0"
+pre-commit = "^3.8.0"
+pytest = "^8.3.2"
+pytest-cov = "^5.0.0"
+httpx = "^0.27.2"
+pytest-asyncio = "^0.24.0"
+factory-boy = "^3.3.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "*/__init__.py",
+    "*/schema/*",
+    "*/tests/*",
+    "*/router.py",
+    "*/schemas.py",
+    "*/migrations/*",
+    "src/translations/*",
+    "*/replen_optimizer/tasks.py",
+    "*/general/management/*",
+    "*/exceptions/*",
+    "*/calculators/*",
+    ".gitignore",
+    "*.env*",
+    "*/.gitlab*",
+    "*/Dockerfile",
+    "*/alembic*",
+    "*/docker-*",
+    "*/README*",
+    "*/CHANGELOG.md",
+    "app/alembic/*",
+    "*/migrations/"
+]
+
+line-length = 90
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+# Rules for ruff here --> https://docs.astral.sh/ruff/rules/
+select = ["E", "F", "W", "D"]  # Default + iSort + Pydocstyle
+
+# Skip unused variable rules
+# Excluded as unsupported "E121", "E123", "E126", "E127", "W503", "W504"
+ignore = [
+    "D100", "D101", "D102", "D103", "D104", "D105",
+    "D106", "D107", "D200", "D204", "D205", "D400",
+    "E731", "E722", "F821", "E402", "F405", "F403",
+    "D208", "E203",
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F405"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "pep257"  # Accepts: "google", "numpy", or "pep257".
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 108 # Настройка длины из flake8 setup.cfg
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+
+default_section = "THIRDPARTY"
+known_first_party = ["config"]
+
+sections = [
+    "FUTURE",
+    "STDLIB",
+    "FIRSTPARTY",
+    "THIRDPARTY",
+    "LOCALFOLDER",
+]
+
+skip_glob = ["*/migrations/*", "*/alembic/*"]
+
+[tool.mypy]
+python_version = "3.11"
+disallow_untyped_defs = true
+ignore_missing_imports = true
+show_error_codes = true
+no_implicit_optional = true
+explicit_package_bases=true
+mypy_path = ["./src"]
+exclude = [
+  ".venv",
+  "venv",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-vv -ra --cov=src --cov-branch --cov-report=term --cov-report=html --cov-report=xml"
+log_cli = false
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore:Unmanaged access of declarative attribute.*:sqlalchemy.exc.SAWarning",
+]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "**/__init__.py",
+    "src/main.py",
+    "src/worker.py",
+    "**/base.py",
+    "**/interfaces/*.py",
+    "**/fake/*.py",
+    "**/fake.py",
+    "src/config/*",
+    "**/db.py",
+    "**/schemas.py",
+    "**/models/**",
+    "**/exceptions.py",
+    "**/dto.py",
+    "**/enums.py",
+    "**/factories/**",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "__init__",
+    "from .* import .*",
+    "router = .*",
+]

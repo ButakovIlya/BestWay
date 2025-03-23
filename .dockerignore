@@ -1,0 +1,15 @@
+venv
+.venv
+logs/*
+.vscode
+.env
+.env.template
+.idea
+**/__pycache__
+**/.pytest_cache
+**/.ruff_cache
+.pre-commit-config.yaml
+README.md
+**/.mypy_cache
+.coverage
+htmlcov

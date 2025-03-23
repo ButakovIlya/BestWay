@@ -1,0 +1,97 @@
+version: '3'
+
+services:
+  web:
+    container_name: web-bestway-local
+    build:
+      context: .
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    networks:
+      - bestway-local
+    command: bash -c "alembic upgrade head && uvicorn src.main:app"
+    # command: bash -c "uvicorn src.main:app"
+
+
+  redis:
+    container_name: bestway-redis
+    image: redis:latest
+    expose:
+      - 6379
+    networks:
+      - bestway-local
+    volumes:
+      - redis-data-local:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
+  nginx:
+    container_name: nginx-bestway-local
+    image: nginx:latest
+    ports:
+      - 80:80
+    depends_on:
+      - web
+    volumes:
+      - ./config/nginx-local.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - bestway-local
+
+  db:
+    container_name: db-bestway-local
+    image: postgres:15-alpine
+    env_file:
+      - .env.db
+    expose:
+      - 5432
+    ports:
+      - ${POSTGRES_PORT:-5436}:5432
+    networks:
+      - bestway-local
+    volumes:
+      - postgres-data-local:/var/lib/postgresql/data/
+
+  # celery-default:
+  #   container_name: celery-default-bestway-local
+  #   build:
+  #     context: .
+  #   command: celery -A src.worker:app worker --loglevel=info --hostname=bestway
+  #   volumes:
+  #     - ./:/app
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - web
+  #   networks:
+  #     - bestway-local
+
+  # flower:
+  #   container_name: flower-bestway-local
+  #   build:
+  #     context: .
+  #   command: celery -A src.worker:app flower
+  #   ports:
+  #     - 5555:5555
+  #   volumes:
+  #     - ./:/app
+  #   env_file:
+  #     - ./.env
+  #   depends_on:
+  #     - redis
+  #   networks:
+  #     - bestway-local
+
+volumes:
+  redis-data-local:
+  postgres-data-local:
+
+networks:
+  bestway-local:
+    driver: bridge
