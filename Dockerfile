@@ -12,7 +12,7 @@ WORKDIR /app
 COPY ./requirements.txt /app/requirements.txt
 
 # Установка Python-зависимостей
-RUN pip install --no-cache-dir --upgrade -r /app/requirements.txt
+RUN pip install /app/requirements.txt
 
 # Копируем весь проект
 COPY . /app
