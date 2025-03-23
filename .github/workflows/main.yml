@@ -34,17 +34,17 @@ jobs:
 
             echo "📦 Создаём .env"
             cat <<EOF > .env
-            APP__NAME=BestWay
-            APP__DEBUG=${{ secrets.APP_DEBUG }}
+            APP__NAME=${{ secrets.APP__NAME }}
+            APP__DEBUG=${{ secrets.APP__DEBUG }}
 
             UPTRACE__ENABLED=False
             UPTRACE__DSN=
 
-            DB__NAME=${{ secrets.DB_NAME }}
-            DB__USER=${{ secrets.DB_USER }}
-            DB__PASSWORD=${{ secrets.DB_PASSWORD }}
-            DB__HOST=db
-            DB__PORT=5432
+            DB__NAME=${{ secrets.DB__NAME }}
+            DB__USER=${{ secrets.DB__USER }}
+            DB__PASSWORD=${{ secrets.DB__PASSWORD }}
+            DB__HOST=${{ secrets.DB__HOST }}
+            DB__PORT=${{ secrets.DB__PORT }}
             DB__POOL_SIZE=2
             DB__MAX_OVERFLOW=4
 
@@ -54,11 +54,11 @@ jobs:
             UVICORN_RELOAD=false
             UVICORN_TIMEOUT_KEEP_ALIVE=5
 
-            JWT__SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
-            JWT__ALGORITHM=HS256
+            JWT__SECRET_KEY=${{ secrets.JWT__SECRET_KEY }}
+            JWT__ALGORITHM=${{ secrets.JWT__ALGORITHM }}
 
-            SMS__SERVICE_URL=${{ secrets.SMS_SERVICE_URL }}
-            SMS__API_KEY=${{ secrets.SMS_API_KEY }}
+            SMS__SERVICE_URL=${{ secrets.SMS__SERVICE_URL }}
+            SMS__API_KEY=${{ secrets.SMS__API_KEY }}
             SMS__CACHE_TIMEOUT=300
             EOF
 
@@ -70,9 +70,9 @@ jobs:
             EOF
 
             echo "🧹 Останавливаем старые контейнеры (если есть)..."
-            docker-compose down
+            docker compose down
 
             echo "🚀 Собираем и запускаем новые контейнеры..."
-            docker-compose up -d --build
+            docker compose up -d --build
 
             echo "✅ Готово!"
