@@ -1,0 +1,78 @@
+name: Deploy Docker Container and Front-end to Server
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Copy project files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASS }}
+          port: 22
+          source: "."  # копируем весь проект
+          target: "/home/bestway-app"
+
+      - name: Run docker-compose on server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASS }}
+          port: 22
+          script: |
+            cd /home/bestway-app
+
+            echo "📦 Создаём .env"
+            cat <<EOF > .env
+            APP__NAME=BestWay
+            APP__DEBUG=${{ secrets.APP_DEBUG }}
+
+            UPTRACE__ENABLED=False
+            UPTRACE__DSN=
+
+            DB__NAME=${{ secrets.DB_NAME }}
+            DB__USER=${{ secrets.DB_USER }}
+            DB__PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB__HOST=db
+            DB__PORT=5432
+            DB__POOL_SIZE=2
+            DB__MAX_OVERFLOW=4
+
+            UVICORN_HOST=0.0.0.0
+            UVICORN_PORT=8000
+            UVICORN_WORKERS=4
+            UVICORN_RELOAD=false
+            UVICORN_TIMEOUT_KEEP_ALIVE=5
+
+            JWT__SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+            JWT__ALGORITHM=HS256
+
+            SMS__SERVICE_URL=${{ secrets.SMS_SERVICE_URL }}
+            SMS__API_KEY=${{ secrets.SMS_API_KEY }}
+            SMS__CACHE_TIMEOUT=300
+            EOF
+
+            echo "📦 Создаём .env.db"
+            cat <<EOF > .env.db
+            POSTGRES_DB=${{ secrets.DB_NAME }}
+            POSTGRES_USER=${{ secrets.DB_USER }}
+            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+            EOF
+
+            echo "🧹 Останавливаем старые контейнеры (если есть)..."
+            docker-compose down
+
+            echo "🚀 Собираем и запускаем новые контейнеры..."
+            docker-compose up -d --build
+
+            echo "✅ Готово!"
