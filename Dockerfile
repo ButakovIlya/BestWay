@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.12-slim
 
 # Настройки интерпретатора Python
 ENV PYTHONPATH=/app/src
@@ -8,11 +8,12 @@ ENV PYTHONDONTWRITEBYTECODE=1
 # Рабочая директория внутри контейнера
 WORKDIR /app
 
-# Копируем зависимости
+# Копируем requirements.txt
 COPY ./requirements.txt /app/requirements.txt
 
-# Установка Python-зависимостей
-RUN pip install /app/requirements.txt
+# Обновим pip и установим зависимости из requirements.txt
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r /app/requirements.txt
 
-# Копируем весь проект
+# Копируем остальной проект
 COPY . /app
