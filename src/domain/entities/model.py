@@ -1,7 +1,7 @@
 from domain.entities.entity import Entity
 
 
-class Resource(Entity):
+class Model(Entity):
     def __init__(
         self,
         id: int | None,

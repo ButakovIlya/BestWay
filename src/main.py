@@ -19,6 +19,13 @@ async def api_exception_handler(request: Request, exc: APIException):
         }
     )
 
+# @app.exception_handler(ValueError)
+# async def value_error_exception_handler(request: Request, exc: ValueError):
+#     return JSONResponse(
+#         status_code=400,
+#         content={"detail": str(exc)},
+#     )
+
 # @app.exception_handler(RequestValidationError)
 # async def validation_exception_handler(request: Request, exc: RequestValidationError):
 #     print(exc.errors())

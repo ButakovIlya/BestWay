@@ -16,6 +16,9 @@ def create_app() -> Celery:
     )
     app.autodiscover_tasks(TASKS_PACKAGES, related_name="__init__")
     container = Container()
+    container.wire(modules=[
+        "api.public.profile",
+    ])
     container.wire(packages=["infrastructure"])
     app.container = container
     config_loggers()

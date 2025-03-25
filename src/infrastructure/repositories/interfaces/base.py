@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Any, Generic, Type, TypeVar
 
 
-from domain.entities.resource import Resource
+from domain.entities.model import Model
 
 
-TResource = TypeVar("TResource", bound=Resource)
+TModel = TypeVar("TModel", bound=Model)
 
 
 class Repository(ABC):
@@ -18,31 +18,31 @@ class Repository(ABC):
         pass
 
 
-class ResourceRepository(Repository, Generic[TResource]):
-    ENTITY: Type[Resource]
+class ModelRepository(Repository, Generic[TModel]):
+    ENTITY: Type[Model]
 
     @abstractmethod
-    def convert_to_model(self, entity: TResource) -> Any:
+    def convert_to_model(self, entity: TModel) -> Any:
         pass
 
     @abstractmethod
-    def convert_to_entity(self, model: Any) -> TResource:
+    def convert_to_entity(self, model: Any) -> TModel:
         pass
 
     # CREATE
     @abstractmethod
-    async def create(self, data: TResource) -> TResource:
+    async def create(self, data: TModel) -> TModel:
         """Создать один объект"""
         pass
 
     @abstractmethod
-    async def bulk_create(self, data: list[TResource]) -> list[TResource]:
+    async def bulk_create(self, data: list[TModel]) -> list[TModel]:
         """Создать несколько объектов"""
         pass
 
     # READ
     @abstractmethod
-    async def get_by_id(self, resource_id: int) -> TResource:
+    async def get_by_id(self, model_id: int) -> TModel:
         """Получить объект по ID"""
         pass
 
@@ -52,7 +52,7 @@ class ResourceRepository(Repository, Generic[TResource]):
         filters: dict[str, Any] | None = None,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> list[TResource]:
+    ) -> list[TModel]:
         """Получить список объектов с возможностью фильтрации и пагинации"""
         pass
 
@@ -63,14 +63,14 @@ class ResourceRepository(Repository, Generic[TResource]):
 
     # UPDATE
     @abstractmethod
-    async def update(self, resource_id: int, data: dict[str, Any]) -> TResource:
+    async def update(self, model_id: int, data: dict[str, Any]) -> TModel:
         """Обновить объект по ID"""
         pass
 
     @abstractmethod
     async def bulk_update(
         self, data: list[dict[str, Any]], batch_size: int = 100000
-    ) -> list[TResource]:
+    ) -> list[TModel]:
         """Массовое обновление объектов"""
         pass
 
@@ -81,7 +81,7 @@ class ResourceRepository(Repository, Generic[TResource]):
         pass
 
     @abstractmethod
-    async def delete_by_id(self, resource_id: int) -> None:
+    async def delete_by_id(self, model_id: int) -> None:
         """Удалить объект по ID"""
         pass
 

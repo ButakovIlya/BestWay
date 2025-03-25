@@ -1,13 +1,13 @@
 from typing import Optional
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from domain.entities.user import User
 from infrastructure.models.alchemy.users import User as UserModel
-from infrastructure.repositories.alchemy.base import SqlAlchemyResourceRepository
+from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository
 from infrastructure.repositories.interfaces import UserRepository
 
 
-class SqlAlchemyUsersRepository(SqlAlchemyResourceRepository[User], UserRepository):
+class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository):
     MODEL = UserModel
     ENTITY = User
 

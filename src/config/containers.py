@@ -4,9 +4,13 @@ from typing import AsyncGenerator
 
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
+from application.use_cases.users.retrieve import UserRetrieveUseCase
+from application.use_cases.users.update import UserUpdateUseCase
 from config.settings import Settings
 
+from infrastructure.managers.base import StorageManager
 from infrastructure.managers.jwt_manager import JWTManager
+from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
 from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
 from infrastructure.repositories.alchemy.db import Database
@@ -63,6 +67,12 @@ class Container(containers.DeclarativeContainer):
     redis = providers.Container(DBContainer, settings=settings)
 
     jwt_manager = providers.Singleton(JWTManager, settings=settings)
+
+    storage_manager: providers.Provider[StorageManager] = providers.Singleton(
+        LocalStorageManager,
+        settings=settings,
+    )
+    
     ###################
     #### Use cases ####
     ###################
@@ -81,6 +91,18 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
         redis_client=clients.container.redis_cache,
         jwt_manager=jwt_manager
+    )
+
+
+    user_retrieve_use_case: providers.Provider[UserRetrieveUseCase] = providers.Factory(
+        UserRetrieveUseCase,
+        uow=db.container.uow,
+    )
+
+    user_update_use_case: providers.Provider[UserUpdateUseCase] = providers.Factory(
+        UserUpdateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
     )
 
 

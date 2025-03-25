@@ -1,5 +1,8 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, AsyncGenerator
+
+from fastapi.staticfiles import StaticFiles
 
 import api
 from api import routers
@@ -30,6 +33,10 @@ def create_app(settings: Settings) -> FastAPI:
     add_middlewares(app, settings)
     include_routers(app, settings)
     # add_exception_hanlers(app)
+    
+    MEDIA_DIR = Path("storage/media")
+    app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+
     return app
 
 

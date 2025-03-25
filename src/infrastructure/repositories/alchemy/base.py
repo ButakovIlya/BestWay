@@ -1,15 +1,15 @@
-from typing import Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from pydantic import BaseModel
 
 from sqlalchemy import and_, delete, exists, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from domain.entities.resource import Resource
+from domain.entities.model import Model
 from infrastructure.models.alchemy.base import Base
-from infrastructure.repositories.interfaces.base import Repository, ResourceRepository
+from infrastructure.repositories.interfaces.base import Repository, ModelRepository
 
-TResource = TypeVar("TResource", bound=Resource)
+TModel = TypeVar("TModel", bound=Model)
 
 
 class SqlAlchemyRepository(Repository):
@@ -19,18 +19,18 @@ class SqlAlchemyRepository(Repository):
         self._session = session
 
 
-class SqlAlchemyResourceRepository(SqlAlchemyRepository, ResourceRepository[TResource]):
-    ENTITY: Type[Resource]
+class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
+    ENTITY: Type[Model]
     LIST_DTO: Type[BaseModel]
 
     ###############
     ### Getters ###
     ###############
 
-    async def get_by_id(self, resource_id: int) -> TResource:
-        model = await self._session.get(self.model, resource_id)
+    async def get_by_id(self, model_id: int) -> TModel:
+        model = await self._session.get(self.MODEL, model_id)
         if not model:
-            raise ValueError("Resource not found")
+            raise ValueError("Model not found")
         return self.convert_to_entity(model)
 
     async def get_list(
@@ -60,7 +60,7 @@ class SqlAlchemyResourceRepository(SqlAlchemyRepository, ResourceRepository[TRes
         objects = result.all()
         return [self.LIST_DTO(**vars(obj)) for obj in objects]
 
-    async def filter_by_id_list(self, id_list: list[int]) -> list[TResource]:
+    async def filter_by_id_list(self, id_list: list[int]) -> list[TModel]:
         stmt = select(self.MODEL).filter(getattr(self.MODEL, "id").in_(id_list))
         result = await self._session.scalars(stmt)
         return [self.convert_to_entity(row) for row in result.all()]
@@ -69,13 +69,13 @@ class SqlAlchemyResourceRepository(SqlAlchemyRepository, ResourceRepository[TRes
     ### Creators ###
     ################
 
-    async def create(self, data: TResource) -> TResource:
+    async def create(self, data: TModel) -> TModel:
         model = self.convert_to_model(data)
         self._session.add(model)
         await self._session.flush()
         return self.convert_to_entity(model)
 
-    async def bulk_create(self, data: list[TResource]) -> list:
+    async def bulk_create(self, data: list[TModel]) -> list:
         models = [self.convert_to_model(entity) for entity in data]
         self._session.add_all(models)
         await self._session.flush(models)
@@ -85,21 +85,14 @@ class SqlAlchemyResourceRepository(SqlAlchemyRepository, ResourceRepository[TRes
     ### Updators ###
     ################
 
-    async def update(self, resource_id: int, data: TResource) -> TResource:
-        model = await self._session.get(self.model, resource_id)
-        if not model:
-            raise ValueError("Resource not found")
-        for key, value in data.dict().items():
-            setattr(model, key, value)
-        await self._session.flush()
-        return self.convert_to_entity(model)
+    async def update(self, data: TModel) -> None:
+        await self.bulk_update([data])
 
-    async def bulk_update(self, data: list, batch_size: int = 100000) -> list:
-        for i in range(0, len(data), batch_size):
-            batch = data[i : i + batch_size]
-            await self._session.execute(update(self.MODEL), batch)
-
-        return data
+    async def bulk_update(self, entities: list[TModel]) -> None:
+        models = [self.convert_to_model(entity) for entity in entities]
+        await self._session.execute(
+            update(self.MODEL), [vars(model) for model in models]
+        )
 
     async def reset_fields(self, scenario_id: int, fields: list[str]) -> None:
         stmt = (
@@ -112,10 +105,10 @@ class SqlAlchemyResourceRepository(SqlAlchemyRepository, ResourceRepository[TRes
     ################
     ### Deleters ###
     ################
-    async def delete_by_id(self, resource_id: int) -> None:
-        model = await self._session.get(self.model, resource_id)
+    async def delete_by_id(self, model_id: int) -> None:
+        model = await self._session.get(self.MODEL, model_id)
         if not model:
-            raise ValueError("Resource not found")
+            raise ValueError("Model not found")
         await self._session.delete(model)
         await self._session.flush()
 

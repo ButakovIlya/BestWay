@@ -56,35 +56,16 @@ class ApiSettings(BaseModel):
 
 class StorageSettings(BaseModel):
     storage_directory: str = "storage"
-    resource_directory: str = "resources"
-    results_directory: str = "results"
-    actual_data_directory: str = "actual_data"
-    upload_resource_file_log_directory: str = "logs"
-    cross_validation_file_log_directory: str = "cross_validation"
+    media_directory: str = "media"
 
     @property
     def storage_path(self) -> Path:
         return BASE_DIRECTORY / self.storage_directory
 
     @property
-    def resource_path(self) -> Path:
-        return self.storage_path / self.resource_directory
+    def media_path(self) -> Path:
+        return self.storage_path / self.media_directory
 
-    @property
-    def results_path(self) -> Path:
-        return self.storage_path / self.results_directory
-
-    @property
-    def actual_data_path(self) -> Path:
-        return self.storage_path / self.actual_data_directory
-
-    @property
-    def upload_resource_file_log_path(self) -> Path:
-        return self.storage_path / self.upload_resource_file_log_directory
-
-    @property
-    def cross_validation_file_log_path(self) -> Path:
-        return self.storage_path / self.cross_validation_file_log_directory
 
 
 class JWTSettings(BaseModel):
@@ -105,19 +86,19 @@ class CentrifugoSettings(BaseModel):
 
 
 class RedisSettings(BaseModel):
-    host: str = "redis://redis:6379/2"
+    host: str = "redis://localhost:6379/2"
     password: str = ""
 
 
 class TaskSettings(BaseModel):
     app_name: str = "bestway"
-    broker_url: str = "redis://redis:6379/0"
-    result_url: str = "redis://redis:6379/1"
+    broker_url: str = "redis://localhost:6379/0"
+    result_url: str = "redis://localhost:6379/1"
 
 
 class SmsSettings(BaseSettings):
-    service_url: str
-    api_key: str
+    service_url: str = ""
+    api_key: str = ""
     cache_timeout: int = 300  # По умолчанию 5 минут
 
     class Config:
@@ -125,11 +106,25 @@ class SmsSettings(BaseSettings):
         env_nested_delimiter="__",
 
 
+class StorageSettings(BaseModel):
+    storage_directory: str = "storage"
+    media_directory: str = "media"
+    max_file_size_mb: int = 10
+
+    @property
+    def storage_path(self) -> Path:
+        return BASE_DIRECTORY / self.storage_directory
+
+    @property
+    def media_path(self) -> Path:
+        return self.storage_path / self.media_directory
+
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     task: TaskSettings = TaskSettings()
     uptrace: UptraceSettings = UptraceSettings()
     db: DBSettings = DBSettings()
+    storage: StorageSettings = StorageSettings()
     redis: RedisSettings = RedisSettings()
     api: ApiSettings = ApiSettings()
     jwt: JWTSettings = JWTSettings()
