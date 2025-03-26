@@ -40,6 +40,13 @@ jobs:
             UPTRACE__ENABLED=False
             UPTRACE__DSN=
 
+            REDIS__HOST=redis://redis:6379/2
+            REDIS__PASSWORD=
+
+            TASK__APP_NAME=bestway
+            TASK__BROKER_URL=redis://redis:6379/0
+            TASK__RESULT_URL=redis://redis:6379/1
+
             DB__NAME=${{ secrets.DB__NAME }}
             DB__USER=${{ secrets.DB__USER }}
             DB__PASSWORD=${{ secrets.DB__PASSWORD }}
