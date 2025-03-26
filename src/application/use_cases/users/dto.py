@@ -50,7 +50,7 @@ class FullUserUpdateDTO(BaseModel):
     is_admin: Optional[bool] = None
 
     class Config:
-        orm_mode = True
+        from_attributes  = True
 
 class UserListFullOutputDTO(UserDTO):
     pass

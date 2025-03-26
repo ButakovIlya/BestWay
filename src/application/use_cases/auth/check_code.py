@@ -1,5 +1,4 @@
 from fastapi import HTTPException
-from api.schemas import UserDTO
 from domain.entities.user import User
 from infrastructure.managers.dto import UserCreateDTO
 from infrastructure.managers.jwt_manager import JWTManager
