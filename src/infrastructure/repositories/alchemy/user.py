@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from domain.entities.user import User
 from infrastructure.models.alchemy.users import User as UserModel

@@ -1,9 +1,10 @@
 from io import BytesIO
-from typing import Optional, Annotated
+from typing import Optional
 
 from datetime import datetime
 
-from pydantic import BaseModel, EmailStr, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field
+
 
 
 class UserCreateDTO(BaseModel):
@@ -44,12 +45,16 @@ class UserRetrieveDTO(BaseModel):
 
 
 class UserUpdateDTO(BaseModel):
-    first_name: Optional[Annotated[str, StringConstraints(max_length=255)]] = None
-    email: Optional[EmailStr] = None
-    phone: Optional[Annotated[str, StringConstraints(pattern=r'^\d{11}$')]] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    email: Optional[str] = None
+    description: Optional[str] = None
+
+
+class UserPhotoDTO(BaseModel):
     photo: Optional[BytesIO] = None
     filename: Optional[str] = None
 
-    model_config = {
-        "arbitrary_types_allowed": True
-    }
+    class Config:
+        arbitrary_types_allowed = True

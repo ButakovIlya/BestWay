@@ -4,6 +4,7 @@ from typing import AsyncGenerator
 
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
+from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update import UserUpdateUseCase
 from config.settings import Settings
@@ -72,7 +73,7 @@ class Container(containers.DeclarativeContainer):
         LocalStorageManager,
         settings=settings,
     )
-    
+
     ###################
     #### Use cases ####
     ###################
@@ -104,6 +105,13 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
         storage_manager=storage_manager,
     )
+
+    user_photo_update_use_case: providers.Provider[UserPhotoUpdateUseCase] = providers.Factory(
+        UserPhotoUpdateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+    )
+
 
 
     @classmethod

@@ -1,6 +1,5 @@
 from application.use_cases.base import UseCase
-from application.use_cases.users.dto import UserRetrieveDTO, UserDTO
-from domain.entities.user import User
+from application.use_cases.users.dto import UserDTO
 from infrastructure.uow import UnitOfWork
 
 

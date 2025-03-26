@@ -2,14 +2,13 @@
 
 
 
-from pydantic import BaseModel
-
-
-class UserFileFiels(BaseModel):
-    photo: str = "photo"
-
-
 from enum import Enum
+
+
+class UserFileFiels(Enum):
+    PHOTO: str = "photo"
+
+
 
 class ModelType(str, Enum):
     USERS = "users"

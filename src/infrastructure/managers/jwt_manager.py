@@ -24,7 +24,7 @@ class JWTManager:
         }
         return jwt.encode(
             payload,
-            self.jwt_settigns.secret_key, 
+            self.jwt_settigns.secret_key,
             algorithm=self.jwt_settigns.algorithm
         )
 
@@ -41,7 +41,7 @@ class JWTManager:
         }
         return jwt.encode(
             payload,
-            self.jwt_settigns.secret_key, 
+            self.jwt_settigns.secret_key,
             algorithm=self.jwt_settigns.algorithm
         )
 

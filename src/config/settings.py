@@ -71,8 +71,8 @@ class StorageSettings(BaseModel):
 class JWTSettings(BaseModel):
     secret_key: str = "secret"
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
-    refresh_token_expire_days: int = 30
+    access_token_expire_minutes: int = 600000
+    refresh_token_expire_days: int = 600000
 
 
 class CentrifugoSettings(BaseModel):

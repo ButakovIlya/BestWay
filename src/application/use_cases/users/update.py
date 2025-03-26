@@ -3,13 +3,14 @@ from application.use_cases.base import UseCase
 from application.use_cases.users.dto import UserDTO, UserUpdateDTO
 from domain.entities.user import User
 from infrastructure.managers.base import StorageManager
+from infrastructure.managers.enum import UserFileFiels
 from infrastructure.repositories.base import UnitOfWork
 
 class UserUpdateUseCase(UseCase):
     """
     Update user info.
     """
-    FIELDS_TO_SKIP_IN_DATA: list[str] = ["photo"]
+    FIELDS_TO_SKIP_IN_DATA: list[str] = [field.value for field in UserFileFiels]
 
     def __init__(
         self,
@@ -28,17 +29,10 @@ class UserUpdateUseCase(UseCase):
 
             update_data = data.model_dump(exclude_unset=False)
             for key, value in update_data.items():
-                if not key in self.FIELDS_TO_SKIP_IN_DATA:
-                    setattr(user, key, value) 
+                if key not in self.FIELDS_TO_SKIP_IN_DATA:
+                    setattr(user, key, value)
 
-            if data.filename:
-                if user.photo:
-                    self._storage_manager.delete_resource_file_by_path(user.photo)
-                filepath = self._storage_manager.save_user_photo(data.filename, data.photo)
-                user.photo = filepath
-            
             await self._uow.users.update(user)
             user: User = await self._uow.users.get_by_id(user.id)
 
-        return user
         return UserDTO.model_validate(user)

@@ -27,4 +27,4 @@ class User(Entity):
         self.photo = photo
         self.description = description
 
-        self.registration_date = datetime.now()
+        self.registration_date = registration_date

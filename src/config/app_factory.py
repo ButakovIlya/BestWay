@@ -15,7 +15,6 @@ from config.uptrace import config_uptrace
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.middleware.authentication import AuthenticationMiddleware
 
 from .exceptions import handlers
 
@@ -33,7 +32,7 @@ def create_app(settings: Settings) -> FastAPI:
     add_middlewares(app, settings)
     include_routers(app, settings)
     # add_exception_hanlers(app)
-    
+
     MEDIA_DIR = Path("storage/media")
     app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 

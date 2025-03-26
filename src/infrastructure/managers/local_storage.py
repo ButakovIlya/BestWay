@@ -36,11 +36,15 @@ class LocalStorageManager(StorageManager):
     def _validate_file(self, filename: str, file: BytesIO) -> None:
         extension = Path(filename).suffix.lower()
         if extension not in self.ALLOWED_PHOTO_EXTENSIONS:
-            raise ValueError(f"Недопустимый формат файла: {extension}. Разрешены: {', '.join(self.ALLOWED_PHOTO_EXTENSIONS)}")
+            raise ValueError(
+                f"Недопустимый формат файла: {extension}. Разрешены: {', '.join(self.ALLOWED_PHOTO_EXTENSIONS)}"
+            )
 
         file_size = len(file.getvalue())
         if file_size > self._max_file_size_bytes:
-            raise ValueError(f"Размер файла превышает допустимый лимит в {self._settings.storage.max_file_size_mb}MB")
+            raise ValueError(
+                f"Размер файла превышает допустимый лимит в {self._settings.storage.max_file_size_mb}MB"
+            )
 
     def get_resource_file(self, filepath: str) -> BytesIO:
         return BytesIO((self._settings.storage.storage_path / filepath).read_bytes())

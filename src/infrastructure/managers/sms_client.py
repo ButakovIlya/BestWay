@@ -11,11 +11,11 @@ from infrastructure.redis.redis_cache import RedisCache
 class SmsClient:
     """Менеджер для отправки SMS и кеширования кодов подтверждения."""
 
-    SPAM_ATTEMPT_KEY_PREFIX = "sms_attempts:"
-    SPAM_TIMESTAMP_KEY = "sms_last_attempt:"
-    MAX_ATTEMPTS = 50
-    COOLDOWN_SECONDS = 1 # 5 минут
-    BLOCK_SECONDS = 24 * 60 * 60  # 1 день
+    SPAM_ATTEMPT_KEY_PREFIX: str = "sms_attempts:"
+    SPAM_TIMESTAMP_KEY: str = "sms_last_attempt:"
+    MAX_ATTEMPTS: int = 50
+    COOLDOWN_SECONDS: int = 1 # 5 минут
+    BLOCK_SECONDS: int = 24 * 60 * 60  # 1 день
 
     def __init__(self, redis_cache: RedisCache, settings: SmsSettings):
         self._redis_cache = redis_cache
