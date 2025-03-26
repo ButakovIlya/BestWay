@@ -58,6 +58,8 @@ class DBContainer(containers.DeclarativeContainer):
         SqlAlchemyUnitOfWork, session_factory=db.provided.session_factory
     )
 
+    session = providers.Factory(lambda db: db.session_factory(), db) 
+
 
 class Container(containers.DeclarativeContainer):
     settings: providers.Provider[Settings] = providers.Singleton(Settings)
@@ -105,7 +107,7 @@ class Container(containers.DeclarativeContainer):
         UserDeleteUseCase,
         uow=db.container.uow,
     )
-    
+
     user_retrieve_use_case: providers.Provider[UserRetrieveUseCase] = providers.Factory(
         UserRetrieveUseCase,
         uow=db.container.uow,

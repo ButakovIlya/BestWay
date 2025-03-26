@@ -1,4 +1,3 @@
-from api.permissions.is_admin import is_admin
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.dto import FullUserUpdateDTO, UserCreateDTO, UserDTO
 from application.use_cases.users.create_user import UserCreateUseCase

@@ -1,4 +1,4 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import TypeVar
 
 from domain.entities.model import Model
@@ -16,7 +16,7 @@ class UserRepository(ModelRepository):
     async def exists_by_phone(self, phone: str) -> bool:
         """Получить пользователя по телефону"""
         pass
-    
+
     @abstractmethod
     async def delete_by_phone(self, phone: str) -> bool:
         """Удалить пользователя по телефону"""

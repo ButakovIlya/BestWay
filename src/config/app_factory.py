@@ -1,8 +1,6 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 from typing import Any, AsyncGenerator, Callable
 
-from fastapi.staticfiles import StaticFiles
 
 import api
 from api import routers
@@ -38,7 +36,7 @@ def create_app(settings: Settings) -> FastAPI:
     # app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
     app.openapi = custom_openapi(app, settings)  # type: ignore
-    
+
     return app
 
 

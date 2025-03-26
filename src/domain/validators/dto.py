@@ -14,13 +14,3 @@ class ResourceDuplicateValidationError(BaseModel):
     indexes: list[int]
 
 
-ResourceValidationError: TypeAlias = (
-    ResourceTechnicalValidationError | ResourceDuplicateValidationError
-)
-
-
-class ColumnType(str, Enum):
-    string = "string"
-    number = "number"
-    date = "date"
-    select = "select"

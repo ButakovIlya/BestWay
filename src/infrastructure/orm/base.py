@@ -1,56 +1,98 @@
-# from fastapi import APIRouter, HTTPException, Depends
-# from sqlalchemy.orm import Session
-# from typing import List, Type
+from typing import Generic, Type, List, TypeVar
 
-# from . import models, schemas
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Body
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 
-# class BaseViewSet:
-#     model: Type[models.Base]
-#     schema_read: Type[schemas.BaseModel]
-#     schema_create: Type[schemas.BaseModel]
-#     schema_update: Type[schemas.BaseModel]
-#     prefix: str
-#     tags: list
+from config.containers import Container
+from config.exceptions import APIException
+from infrastructure.models.alchemy.base import Base
 
-#     def __init__(self):
-#         self.router = APIRouter(prefix=self.prefix, tags=self.tags)
+TCreate = TypeVar("TCreate", bound=BaseModel)
+TUpdate = TypeVar("TUpdate", bound=BaseModel)
+TRead = TypeVar("TRead", bound=BaseModel)
 
-#         self.router.add_api_route("/", self.list_items, response_model=List[self.schema_read], methods=["GET"])
-#         self.router.add_api_route("/{item_id}", self.get_item, response_model=self.schema_read, methods=["GET"])
-#         self.router.add_api_route("/", self.create_item, response_model=self.schema_read, methods=["POST"])
-#         self.router.add_api_route("/{item_id}", self.update_item, response_model=self.schema_read, methods=["PUT"])
-#         self.router.add_api_route("/{item_id}", self.delete_item, methods=["DELETE"])
+class BaseViewSet(Generic[TCreate, TUpdate, TRead]):
+    model: Type[Base]
+    schema_read: Type[TRead]
+    schema_create: Type[TCreate]
+    schema_update: Type[TUpdate]
+    prefix: str
+    tags: list
 
-#     def list_items(self, db: Session = Depends(get_db)):
-#         return db.query(self.model).all()
+    def __init__(self):
+        self.router = APIRouter(prefix=self.prefix, tags=self.tags)
 
-#     def get_item(self, item_id: int, db: Session = Depends(get_db)):
-#         obj = db.query(self.model).filter(self.model.id == item_id).first()
-#         if not obj:
-#             raise HTTPException(status_code=404, detail="Item not found")
-#         return obj
+        self.router.add_api_route("/", self.list, response_model=List[self.schema_read], methods=["GET"])
+        self.router.add_api_route("/{item_id}", self.get, response_model=self.schema_read, methods=["GET"])
+        self.router.add_api_route("/", self.create, response_model=self.schema_read, methods=["POST"])
+        self.router.add_api_route("/{item_id}", self.update, response_model=self.schema_read, methods=["PUT"])
+        self.router.add_api_route("/{item_id}", self.delete, methods=["DELETE"])
 
-#     def create_item(self, item: schemas.BaseModel, db: Session = Depends(get_db)):
-#         db_obj = self.model(**item.dict())
-#         db.add(db_obj)
-#         db.commit()
-#         db.refresh(db_obj)
-#         return db_obj
+    @inject
+    async def list(
+        self,
+        session: AsyncSession = Depends(Provide[Container.db.session])
+    ):
+        result = await session.execute(select(self.model))
+        return result.scalars().all()
 
-#     def update_item(self, item_id: int, item: schemas.BaseModel, db: Session = Depends(get_db)):
-#         db_obj = db.query(self.model).filter(self.model.id == item_id).first()
-#         if not db_obj:
-#             raise HTTPException(status_code=404, detail="Item not found")
-#         for field, value in item.dict().items():
-#             setattr(db_obj, field, value)
-#         db.commit()
-#         db.refresh(db_obj)
-#         return db_obj
+    @inject
+    async def get(
+        self,
+        item_id: int,
+        session: AsyncSession = Depends(Provide[Container.db.session])
+    ):
+        result = await session.execute(select(self.model).where(self.model.id == item_id))
+        obj = result.scalar_one_or_none()
+        if not obj:
+            raise APIException(code=404, message="Item not found")
+        return obj
 
-#     def delete_item(self, item_id: int, db: Session = Depends(get_db)):
-#         db_obj = db.query(self.model).filter(self.model.id == item_id).first()
-#         if not db_obj:
-#             raise HTTPException(status_code=404, detail="Item not found")
-#         db.delete(db_obj)
-#         db.commit()
-#         return {"detail": "Deleted"}
+    @inject
+    async def create(
+        self,
+        item_data: TCreate = Body(...),
+        session: AsyncSession = Depends(Provide[Container.db.session])
+    ):
+        db_obj = self.model(**item_data.model_dump())
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @inject
+    async def update(
+        self,
+        item_id: int,
+        item_data: BaseModel = Body(...),
+        session: AsyncSession = Depends(Provide[Container.db.session])
+    ):
+        result = await session.execute(select(self.model).where(self.model.id == item_id))
+        db_obj = result.scalar_one_or_none()
+        if not db_obj:
+            raise APIException(code=404, message="Item not found")
+        
+        for field, value in item_data.model_dump(exclude_unset=True).items():
+            setattr(db_obj, field, value)
+        
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @inject
+    async def delete(
+        self,
+        item_id: int,
+        session: AsyncSession = Depends(Provide[Container.db.session])
+    ):
+        result = await session.execute(select(self.model).where(self.model.id == item_id))
+        db_obj = result.scalar_one_or_none()
+        if not db_obj:
+            raise APIException(code=404, message="Item not found")
+        
+        await session.delete(db_obj)
+        await session.commit()
+        return {"detail": "Deleted"}
