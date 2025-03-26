@@ -1,6 +1,6 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Any, AsyncGenerator
+from typing import Any, AsyncGenerator, Callable
 
 from fastapi.staticfiles import StaticFiles
 
@@ -15,6 +15,7 @@ from config.uptrace import config_uptrace
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.utils import get_openapi
 
 from .exceptions import handlers
 
@@ -33,9 +34,11 @@ def create_app(settings: Settings) -> FastAPI:
     include_routers(app, settings)
     # add_exception_hanlers(app)
 
-    MEDIA_DIR = Path("storage/media")
-    app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+    # MEDIA_DIR = Path("storage/media")
+    # app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
+    app.openapi = custom_openapi(app, settings)  # type: ignore
+    
     return app
 
 
@@ -65,3 +68,29 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     async with Container.lifespan(wireable_packages=[api]) as container:
         app.container = container  # type: ignore
         yield
+
+
+def custom_openapi(app: FastAPI, settings: Settings) -> Callable:
+    def wrapper() -> Any:
+        if app.openapi_schema:
+            return app.openapi_schema
+
+        openapi_schema = get_openapi(
+            title=app.title,
+            version=app.version,
+            openapi_version=app.openapi_version,
+            routes=app.routes,
+        )
+        openapi_schema["security"] = [{"BearerAuth": []}]
+        openapi_schema["components"]["securitySchemes"] = {
+            "BearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+            },
+        }
+
+        app.openapi_schema = openapi_schema
+        return app.openapi_schema
+
+    return wrapper
