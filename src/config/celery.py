@@ -18,6 +18,8 @@ def create_app() -> Celery:
     container = Container()
     container.wire(modules=[
         "api.public.profile",
+        "api.public.auth",
+        "api.admin.users",
     ])
     container.wire(packages=["infrastructure"])
     app.container = container

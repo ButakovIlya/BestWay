@@ -32,7 +32,7 @@ def create_app(settings: Settings) -> FastAPI:
     config_uptrace(app)
     add_middlewares(app, settings)
     include_routers(app, settings)
-    # add_exception_hanlers(app)
+    add_exception_hanlers(app)
 
     # MEDIA_DIR = Path("storage/media")
     # app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")

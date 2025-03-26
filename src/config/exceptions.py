@@ -51,6 +51,6 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 handlers = {
     APIException: api_exception_handler,
     RequestValidationError: request_validation_exception_handler,
-    ValidationError: pydantic_validation_exception_handler,  # 👈 обязательно
+    ValidationError: pydantic_validation_exception_handler,
 
 }

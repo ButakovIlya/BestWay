@@ -7,6 +7,7 @@ class CheckHealthSchema(BaseModel):
 
 class UserDTO(BaseModel):
     id: int = Field(gt=0, alias="user_id")
-    phone: str = Field(alias="sub")
+    phone: str = Field(alias="phone")
+    is_admin: bool = Field(alias="is_admin")
 
     model_config = ConfigDict(extra="ignore")

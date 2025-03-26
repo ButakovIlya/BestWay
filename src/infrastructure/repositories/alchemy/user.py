@@ -1,5 +1,5 @@
 from typing import Optional
-from sqlalchemy import select
+from sqlalchemy import delete, exists, select
 
 from domain.entities.user import User
 from infrastructure.models.alchemy.users import User as UserModel
@@ -16,6 +16,18 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def exists_by_phone(self, phone: str) -> bool:
+        stmt = select(
+            exists().where(self.MODEL.phone == phone)
+        )
+        result = await self._session.execute(stmt)
+        return bool(result.scalar())
+
+    async def delete_by_phone(self, phone: str) -> bool:
+        stmt = delete(self.MODEL).where(self.MODEL.phone == phone)
+        result = await self._session.execute(stmt)
+        await self._session.commit()
+        return result.rowcount > 0
 
     def convert_to_model(self, entity: User) -> UserModel:
         return UserModel(

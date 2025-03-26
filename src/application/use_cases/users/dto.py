@@ -3,14 +3,7 @@ from typing import Optional
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
-
-
-
-class UserCreateDTO(BaseModel):
-    name: str = Field(..., min_length=1, max_length=255)
-    phone: str = Field(..., min_length=10, max_length=15)
-
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 class UserDTO(BaseModel):
     id: int | None = None
@@ -26,6 +19,38 @@ class UserDTO(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
+
+class UserCreateDTO(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=15)
+    first_name: str | None = Field(None, min_length=1, max_length=255)
+    last_name: str | None = Field(None, min_length=1, max_length=255)
+    middle_name: str | None = Field(None, min_length=1, max_length=255)
+    is_admin: bool | None = Field(default=False)
+
+
+class UserDeleteDTO(BaseModel):
+    phone: str = Field(..., min_length=10, max_length=15)
+
+
+class UserUpdateDTO(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    email: Optional[str] = None
+    description: Optional[str] = None
+
+
+class FullUserUpdateDTO(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    description: Optional[str] = None
+    is_banned: Optional[bool] = None
+    is_admin: Optional[bool] = None
+
+    class Config:
+        orm_mode = True
 
 class UserListFullOutputDTO(UserDTO):
     pass
@@ -43,13 +68,6 @@ class UserRetrieveDTO(BaseModel):
     user_id: int
 
 
-
-class UserUpdateDTO(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    middle_name: Optional[str] = None
-    email: Optional[str] = None
-    description: Optional[str] = None
 
 
 class UserPhotoDTO(BaseModel):

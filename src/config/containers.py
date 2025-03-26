@@ -4,9 +4,10 @@ from typing import AsyncGenerator
 
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
+from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
-from application.use_cases.users.update import UserUpdateUseCase
+from application.use_cases.users.update_user import UserUpdateUseCase
 from config.settings import Settings
 
 from infrastructure.managers.base import StorageManager
@@ -95,6 +96,16 @@ class Container(containers.DeclarativeContainer):
     )
 
 
+    # users
+    user_create_use_case: providers.Provider[UserCreateUseCase] = providers.Factory(
+        UserCreateUseCase,
+        uow=db.container.uow,
+    )
+    user_delete_use_case: providers.Provider[UserDeleteUseCase] = providers.Factory(
+        UserDeleteUseCase,
+        uow=db.container.uow,
+    )
+    
     user_retrieve_use_case: providers.Provider[UserRetrieveUseCase] = providers.Factory(
         UserRetrieveUseCase,
         uow=db.container.uow,

@@ -1,8 +1,8 @@
 import jwt
 import datetime
-from typing import Any
 
 from config.settings import JWTSettings
+from infrastructure.managers.dto import UserCreateDTO
 
 class JWTManager:
     """Менеджер для работы с JWT-токенами."""
@@ -10,7 +10,7 @@ class JWTManager:
     def __init__(self, settings: JWTSettings):
         self.jwt_settigns = settings.jwt
 
-    def create_access_token(self, subject: Any, user_id: int) -> str:
+    def create_access_token(self, data: UserCreateDTO) -> str:
         """Создает access token."""
         expire = datetime.datetime.now() + datetime.timedelta(
             minutes=self.jwt_settigns.access_token_expire_minutes
@@ -18,9 +18,10 @@ class JWTManager:
 
         payload = {
             "token_type": "access",
-            "sub": str(subject),
+            "phone": data.phone,
             "exp": expire,
-            "user_id": user_id
+            "user_id": data.user_id,
+            "is_admin": data.is_admin
         }
         return jwt.encode(
             payload,
@@ -28,16 +29,17 @@ class JWTManager:
             algorithm=self.jwt_settigns.algorithm
         )
 
-    def create_refresh_token(self, subject: Any, user_id: int) -> str:
+    def create_refresh_token(self, data: UserCreateDTO) -> str:
         """Создает refresh token."""
         expire = datetime.datetime.now() + datetime.timedelta(
             days=self.jwt_settigns.refresh_token_expire_days
         )
         payload = {
-            "token_type": "refresh",
-            "sub": str(subject),
+            "token_type": "access",
+            "phone": data.phone,
             "exp": expire,
-            "user_id": user_id
+            "user_id": data.user_id,
+            "is_admin": data.is_admin
         }
         return jwt.encode(
             payload,

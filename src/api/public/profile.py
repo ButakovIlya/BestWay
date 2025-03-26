@@ -9,7 +9,7 @@ from fastapi import File, UploadFile, status
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request
 
-from application.use_cases.users.update import UserUpdateUseCase
+from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
 
 router = APIRouter(tags=["/Profile"], prefix="/profile")

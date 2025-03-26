@@ -1,6 +1,6 @@
-from api.health import router as health_router
-from api.users import router as user_router
-from api.auth import router as auth_router
+from api.public.health import router as health_router
+from api.admin.users import router as user_router
+from api.public.auth import router as auth_router
 from api.public.profile import router as profile_router
 
 

@@ -87,3 +87,19 @@ class RouteComment(Base):
 
     author: Mapped["User"] = relationship("User", back_populates="comments")
     route: Mapped["Route"] = relationship("Route", back_populates="comments")
+
+
+class Photo(Base):
+    __tablename__ = "photos"
+
+    url: Mapped[str] = mapped_column(String, nullable=False)
+    uploaded_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.now, server_default="now()"
+    )
+    uploaded_by: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+    place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), nullable=True)
+    route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"), nullable=True)
+
+    # place: Mapped["Place"] = relationship("Place", back_populates="photos")
+    # route: Mapped["Route"] = relationship("Route", back_populates="photos")
+    # uploader: Mapped["User"] = relationship("User", back_populates="uploaded_photos")
