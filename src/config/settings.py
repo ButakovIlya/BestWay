@@ -86,14 +86,14 @@ class CentrifugoSettings(BaseModel):
 
 
 class RedisSettings(BaseModel):
-    host: str = "redis://localhost:6379/2"
+    host: str = "redis://redis:6379/2"
     password: str = ""
 
 
 class TaskSettings(BaseModel):
     app_name: str = "bestway"
-    broker_url: str = "redis://localhost:6379/0"
-    result_url: str = "redis://localhost:6379/1"
+    broker_url: str = "redis://redis:6379/0"
+    result_url: str = "redis://redis:6379/1"
 
 
 class SmsSettings(BaseSettings):
