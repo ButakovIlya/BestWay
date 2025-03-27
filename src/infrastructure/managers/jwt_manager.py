@@ -50,7 +50,10 @@ class JWTManager:
     def verify_token(self, token: str) -> dict:
         """Проверяет и декодирует токен."""
         try:
-            payload = jwt.decode(token, self.jwt_settigns.secret_key, algorithms=[self.jwt_settigns.algorithm])
+            payload = jwt.decode(
+                token, self.jwt_settigns.secret_key,
+                algorithms=[self.jwt_settigns.algorithm]
+            )
             return payload
         except jwt.ExpiredSignatureError:
             raise ValueError("Token has expired")

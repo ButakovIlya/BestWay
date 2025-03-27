@@ -54,20 +54,6 @@ class ApiSettings(BaseModel):
         return f"{self.prefix}{self.openapi_endpoint}"
 
 
-class StorageSettings(BaseModel):
-    storage_directory: str = "storage"
-    media_directory: str = "media"
-
-    @property
-    def storage_path(self) -> Path:
-        return BASE_DIRECTORY / self.storage_directory
-
-    @property
-    def media_path(self) -> Path:
-        return self.storage_path / self.media_directory
-
-
-
 class JWTSettings(BaseModel):
     secret_key: str = "secret"
     algorithm: str = "HS256"

@@ -1,4 +1,3 @@
-# schemas/place.py
 from pydantic import BaseModel
 from typing import Optional
 
@@ -23,8 +22,15 @@ class PlaceCreate(BaseModel):
     photo: Optional[str] = None
     map_name: Optional[str] = None
 
+
 class PlaceUpdate(BaseModel):
-    pass
+    name: str
+    category: PlaceCategory
+    type: Optional[PlaceType] = None
+    tags: Optional[str] = None
+    coordinates: Optional[str] = None
+    map_name: Optional[str] = None
+
 
 class PlaceRead(BaseModel):
     id: int
@@ -37,4 +43,4 @@ class PlaceRead(BaseModel):
     map_name: Optional[str] = None
 
     class Config:
-        orm_mode = True
+        from_attributes = True

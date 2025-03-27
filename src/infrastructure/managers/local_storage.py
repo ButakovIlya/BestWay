@@ -37,7 +37,8 @@ class LocalStorageManager(StorageManager):
         extension = Path(filename).suffix.lower()
         if extension not in self.ALLOWED_PHOTO_EXTENSIONS:
             raise ValueError(
-                f"Недопустимый формат файла: {extension}. Разрешены: {', '.join(self.ALLOWED_PHOTO_EXTENSIONS)}"
+                f"Недопустимый формат файла: {extension}."
+                f"Разрешены: {', '.join(self.ALLOWED_PHOTO_EXTENSIONS)}"
             )
 
         file_size = len(file.getvalue())

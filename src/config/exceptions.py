@@ -1,5 +1,4 @@
 from fastapi import Request
-from fastapi.exception_handlers import request_validation_exception_handler
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
@@ -50,7 +49,7 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 
 handlers = {
     APIException: api_exception_handler,
-    RequestValidationError: request_validation_exception_handler,
-    ValidationError: pydantic_validation_exception_handler,
+    # RequestValidationError: request_validation_exception_handler,
+    # ValidationError: pydantic_validation_exception_handler,
 
 }

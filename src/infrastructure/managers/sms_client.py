@@ -26,7 +26,7 @@ class SmsClient:
         self._validate_phone(payload.phone)
         headers, json_payload = self._build_payload(payload)
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as _:
             try:
                 # response = await client.post(
                 #     self.settings.service_url,

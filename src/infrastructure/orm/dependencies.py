@@ -1,14 +1,8 @@
-from typing import AsyncGenerator
-from sqlalchemy.ext.asyncio import AsyncSession
-from dependency_injector.wiring import inject, Provide
-from fastapi import Depends
-from config.containers import Container
+from fastapi import Request, Body
+from pydantic import BaseModel
+from typing import Type
 
-
-@inject
-async def get_db_session(
-    session_factory = Depends(Provide[Container.db.provided.session_factory]),
-) -> AsyncGenerator[AsyncSession, None]:
-    async_session_factory = session_factory
-    async with async_session_factory() as session:
-        yield session
+async def request_body_schema_from_self(request: Request, body: dict = Body(...)) -> BaseModel:
+    self_instance = request.scope["route"].endpoint.__self__
+    schema: Type[BaseModel] = self_instance.schema_create
+    return schema(**body)
