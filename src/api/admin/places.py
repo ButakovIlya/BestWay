@@ -1,5 +1,6 @@
 from infrastructure.models.alchemy.routes import Place
 from infrastructure.orm.base import BaseViewSet
+from infrastructure.permissions.enums import RoleEnum
 
 from .schemas import PlaceCreate, PlacePatch, PlacePut, PlaceRead
 
@@ -12,3 +13,5 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead]):
     schema_patch = PlacePatch
     prefix = "/places"
     tags = ["Places"]
+
+    authentication_classes = [RoleEnum.ADMIN]

@@ -9,7 +9,6 @@ from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
 
-
 router = APIRouter(tags=["Users"], prefix="/users", dependencies=[Depends(is_admin)])
 
 

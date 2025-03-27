@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from domain.entities.entity import Entity
 from infrastructure.permissions.enums import RoleEnum
 

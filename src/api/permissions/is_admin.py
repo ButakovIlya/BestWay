@@ -1,4 +1,4 @@
-from fastapi import  Request
+from fastapi import Request
 
 from api.permissions.exceptions import UserIsNotAdminError
 

@@ -4,7 +4,6 @@ from infrastructure.permissions.dependencies import permission_dependency, role_
 from infrastructure.permissions.enums import PermissionEnum, RoleEnum
 
 
-
 # --- Отдельные декораторы ---
 def has_roles(roles: List[RoleEnum]):
     def decorator(func: Callable):

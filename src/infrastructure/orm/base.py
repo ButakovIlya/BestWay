@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.containers import Container
 from config.exceptions import APIException
 from infrastructure.models.alchemy.base import Base
-from infrastructure.orm.dependencies import request_body_schema_from_self
+from infrastructure.orm.dependencies import request_body_schema_from_self, role_required
 from infrastructure.permissions.dependencies import permission_dependency
-from infrastructure.permissions.enums import PermissionEnum
+from infrastructure.permissions.enums import PermissionEnum, RoleEnum
 
 TRead = TypeVar("TRead", bound=BaseModel)
 TCreate = TypeVar("TCreate", bound=BaseModel)
@@ -28,6 +28,8 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
     prefix: str
     tags: list
 
+    authentication_classes: list[RoleEnum] = []
+
     permissions: dict[str, list[PermissionEnum]] = {
         "list": [PermissionEnum.ALLOW_ANY],
         "get": [PermissionEnum.ALLOW_ANY],
@@ -38,7 +40,11 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
     }
 
     def __init__(self):
-        self.router = APIRouter(prefix=self.prefix, tags=self.tags)
+        self.router = APIRouter(
+            prefix=self.prefix,
+            tags=self.tags,
+            dependencies=[Depends(role_required(self.authentication_classes))],
+        )
 
         # Create
         self.router.add_api_route(
