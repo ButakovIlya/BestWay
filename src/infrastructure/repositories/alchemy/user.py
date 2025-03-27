@@ -1,4 +1,5 @@
 from typing import Optional
+
 from sqlalchemy import delete, exists, select
 
 from domain.entities.user import User
@@ -17,9 +18,7 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
         return result.scalar_one_or_none()
 
     async def exists_by_phone(self, phone: str) -> bool:
-        stmt = select(
-            exists().where(self.MODEL.phone == phone)
-        )
+        stmt = select(exists().where(self.MODEL.phone == phone))
         result = await self._session.execute(stmt)
         return bool(result.scalar())
 

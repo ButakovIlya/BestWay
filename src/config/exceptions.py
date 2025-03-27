@@ -14,12 +14,9 @@ class APIException(Exception):
 async def api_exception_handler(request: Request, exc: APIException):
     return JSONResponse(
         status_code=exc.code,
-        content={
-            "code": exc.code,
-            "message": exc.message,
-            "link": exc.link
-        }
+        content={"code": exc.code, "message": exc.message, "link": exc.link},
     )
+
 
 async def request_validation_exception_handler(request: Request, exc: RequestValidationError):
     error_messages = "; ".join(
@@ -30,9 +27,10 @@ async def request_validation_exception_handler(request: Request, exc: RequestVal
         content={
             "code": 422,
             "message": f"Ошибка валидации: {error_messages}",
-            "link": "https://docs.api/errors#validation"
-        }
+            "link": "https://docs.api/errors#validation",
+        },
     )
+
 
 async def pydantic_validation_exception_handler(request: Request, exc: ValidationError):
     error_messages = "; ".join(
@@ -43,13 +41,13 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
         content={
             "code": 422,
             "message": f"Ошибка валидации: {error_messages}",
-            "link": "https://docs.api/errors#validation"
-        }
+            "link": "https://docs.api/errors#validation",
+        },
     )
+
 
 handlers = {
     APIException: api_exception_handler,
     # RequestValidationError: request_validation_exception_handler,
     # ValidationError: pydantic_validation_exception_handler,
-
 }

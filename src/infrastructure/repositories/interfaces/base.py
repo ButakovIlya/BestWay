@@ -1,9 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Type, TypeVar
 
-
 from domain.entities.model import Model
-
 
 TModel = TypeVar("TModel", bound=Model)
 
@@ -68,9 +66,7 @@ class ModelRepository(Repository, Generic[TModel]):
         pass
 
     @abstractmethod
-    async def bulk_update(
-        self, data: list[dict[str, Any]], batch_size: int = 100000
-    ) -> list[TModel]:
+    async def bulk_update(self, data: list[dict[str, Any]], batch_size: int = 100000) -> list[TModel]:
         """Массовое обновление объектов"""
         pass
 

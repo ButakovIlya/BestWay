@@ -19,9 +19,7 @@ class DBSettings(BaseModel):
 
     @property
     def dsn(self) -> str:
-        print(
-            f"{self.dialect}://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
-        )
+        print(f"{self.dialect}://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}")
         return f"{self.dialect}://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
         # print(f"{self.dialect}://root:root@localhost:5432/bestway")
         # return f"{self.dialect}://root:root@localhost:5432/bestway"
@@ -89,7 +87,7 @@ class SmsSettings(BaseSettings):
 
     class Config:
         env_prefix = "SMS__"
-        env_nested_delimiter="__",
+        env_nested_delimiter = ("__",)
 
 
 class StorageSettings(BaseModel):
@@ -104,6 +102,7 @@ class StorageSettings(BaseModel):
     @property
     def media_path(self) -> Path:
         return self.storage_path / self.media_directory
+
 
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()

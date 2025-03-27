@@ -1,2 +1,2 @@
+from .routes import Place, Route, RouteComment, RoutePlace
 from .users import User
-from .routes import Route, Place, RouteComment, RoutePlace

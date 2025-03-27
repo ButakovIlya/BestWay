@@ -60,11 +60,11 @@ class JwtTokenUserMiddleware(BaseHTTPMiddleware):
         self._validate_token_type(payload)
         self._validate_expiration_time(payload)
         validated = self._validate_payload(payload)
-
         return User(
             id=validated.id,
             phone=validated.phone,
             is_admin=validated.is_admin,
+            role=validated.role,
         )
 
     def _decode_token(self, token: str) -> dict:

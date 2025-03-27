@@ -6,6 +6,7 @@ from infrastructure.repositories.interfaces.base import ModelRepository
 
 TModel = TypeVar("TModel", bound=Model)
 
+
 class UserRepository(ModelRepository):
     @abstractmethod
     async def get_by_phone(self, phone: str) -> TModel:

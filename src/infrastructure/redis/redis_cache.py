@@ -1,8 +1,6 @@
+from redis import Redis  # type: ignore
 
 from infrastructure.redis.base import AbstractRedisCache
-
-
-from redis import Redis  # type: ignore
 
 
 class RedisCache(AbstractRedisCache):

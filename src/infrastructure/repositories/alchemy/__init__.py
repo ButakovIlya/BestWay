@@ -1,3 +1,1 @@
-from infrastructure.repositories.alchemy.user import (
-    SqlAlchemyUsersRepository,
-)
+from infrastructure.repositories.alchemy.user import SqlAlchemyUsersRepository

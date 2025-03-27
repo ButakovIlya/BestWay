@@ -59,13 +59,9 @@ class LocalStorageManager(StorageManager):
         with open(new_filepath, "wb") as new_file:
             new_file.write(file.getvalue())
 
-    def _generate_filename(
-        self, model_name: ModelType, filename: str | None
-    ) -> str:
+    def _generate_filename(self, model_name: ModelType, filename: str | None) -> str:
         timestamp = datetime.now(UTC).strftime(self.FILENAME_TIMESTAMP_FORMAT)
-        extension = (
-            Path(filename).suffix if filename else self.DEFAULT_PHOTO_EXTENSION
-        )
+        extension = Path(filename).suffix if filename else self.DEFAULT_PHOTO_EXTENSION
         return f"{model_name.value}_{timestamp}{extension}"
 
     def _get_media_filepath(self, directory: str, filename: str) -> Path:

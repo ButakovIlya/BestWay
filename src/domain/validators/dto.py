@@ -1,4 +1,3 @@
-
 from pydantic import BaseModel
 
 
@@ -10,5 +9,3 @@ class ResourceTechnicalValidationError(BaseModel):
 class ResourceDuplicateValidationError(BaseModel):
     fields: list[str]
     indexes: list[int]
-
-

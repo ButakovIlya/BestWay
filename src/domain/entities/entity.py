@@ -7,7 +7,5 @@ class Entity:
             attribute.strip("_") if attribute.startswith("_") else attribute: value
             for attribute, value in vars(self).items()
         }
-        attributes_repr = ", ".join(
-            f"{key}={value}" for key, value in attributes.items()
-        )
+        attributes_repr = ", ".join(f"{key}={value}" for key, value in attributes.items())
         return f"{self.__class__.__name__}({attributes_repr})"

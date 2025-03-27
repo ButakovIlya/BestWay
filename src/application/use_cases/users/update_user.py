@@ -7,10 +7,12 @@ from infrastructure.managers.base import StorageManager
 from infrastructure.managers.enum import UserFileFiels
 from infrastructure.repositories.base import UnitOfWork
 
+
 class UserUpdateUseCase(UseCase):
     """
     Update user info.
     """
+
     FIELDS_TO_SKIP_IN_DATA: list[str] = [field.value for field in UserFileFiels]
 
     def __init__(
@@ -26,10 +28,7 @@ class UserUpdateUseCase(UseCase):
             try:
                 user: User = await self._uow.users.get_by_id(user_id)
             except ValueError:
-                raise APIException(
-                    code=404,
-                    message=f"Пользователь с id '{user_id}' не существует"
-                )
+                raise APIException(code=404, message=f"Пользователь с id '{user_id}' не существует")
 
             if not user:
                 raise UserNotFound("Пользователь не найден")

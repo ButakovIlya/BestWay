@@ -1,9 +1,9 @@
+from datetime import datetime
 from io import BytesIO
 from typing import Optional
 
-from datetime import datetime
-
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
+
 
 class UserDTO(BaseModel):
     id: int | None = None
@@ -50,24 +50,23 @@ class FullUserUpdateDTO(BaseModel):
     is_admin: Optional[bool] = None
 
     class Config:
-        from_attributes  = True
+        from_attributes = True
+
 
 class UserListFullOutputDTO(UserDTO):
     pass
 
 
 class PhoneNumberDTO(BaseModel):
-    phone: str  = Field(None, min_length=10, max_length=15)
+    phone: str = Field(None, min_length=10, max_length=15)
 
 
 class PhoneCodeDTO(BaseModel):
-    code: str  = Field(None, max_length=4, min_length=4)
+    code: str = Field(None, max_length=4, min_length=4)
 
 
 class UserRetrieveDTO(BaseModel):
     user_id: int
-
-
 
 
 class UserPhotoDTO(BaseModel):

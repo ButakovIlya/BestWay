@@ -2,12 +2,12 @@ import asyncio
 from logging.config import fileConfig
 
 from alembic import context
+from sqlalchemy.ext.asyncio import AsyncConnection
 
 from config.containers import Container
 from config.settings import Settings
-from infrastructure.models.alchemy.base import Base
 from infrastructure.models.alchemy import *
-from sqlalchemy.ext.asyncio import AsyncConnection
+from infrastructure.models.alchemy.base import Base
 
 settings = Settings()
 container = Container()

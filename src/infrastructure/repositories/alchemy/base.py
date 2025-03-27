@@ -1,13 +1,12 @@
 from typing import Type, TypeVar
 
 from pydantic import BaseModel
-
 from sqlalchemy import and_, delete, exists, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from domain.entities.model import Model
 from infrastructure.models.alchemy.base import Base
-from infrastructure.repositories.interfaces.base import Repository, ModelRepository
+from infrastructure.repositories.interfaces.base import ModelRepository, Repository
 
 TModel = TypeVar("TModel", bound=Model)
 
@@ -53,9 +52,7 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         if show_errors:
             result = await self.get_show_error_result(scenario_id, per_page, page)
         else:
-            result = await self._session.scalars(
-                stmt.order_by(getattr(self.MODEL, "id").desc())
-            )
+            result = await self._session.scalars(stmt.order_by(getattr(self.MODEL, "id").desc()))
 
         objects = result.all()
         return [self.LIST_DTO(**vars(obj)) for obj in objects]
@@ -90,9 +87,7 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
 
     async def bulk_update(self, entities: list[TModel]) -> None:
         models = [self.convert_to_model(entity) for entity in entities]
-        await self._session.execute(
-            update(self.MODEL), [vars(model) for model in models]
-        )
+        await self._session.execute(update(self.MODEL), [vars(model) for model in models])
 
     async def reset_fields(self, scenario_id: int, fields: list[str]) -> None:
         stmt = (

@@ -2,6 +2,10 @@ from contextlib import asynccontextmanager
 from types import ModuleType
 from typing import AsyncGenerator
 
+from dependency_injector import containers, providers
+from redis.client import AbstractRedis  # type: ignore
+
+from application.use_cases import UserCreateUseCase
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
@@ -9,21 +13,15 @@ from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.settings import Settings
-
 from infrastructure.managers.base import StorageManager
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
-from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
-from infrastructure.repositories.alchemy.db import Database
 from infrastructure.redis import init_redis_pool
 from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.redis.redis_cache import RedisCache
-from redis.client import AbstractRedis  # type: ignore
-
-from dependency_injector import containers, providers
-
-from application.use_cases import UserCreateUseCase
+from infrastructure.repositories.alchemy.db import Database
+from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
 
 
 class ClientsContainer(containers.DeclarativeContainer):
@@ -41,18 +39,14 @@ class ClientsContainer(containers.DeclarativeContainer):
     )
 
     sms_client: providers.Provider[SmsClient] = providers.Resource(
-        SmsClient,
-        redis_cache=redis_cache,
-        settings=settings.provided.sms
+        SmsClient, redis_cache=redis_cache, settings=settings.provided.sms
     )
 
 
 class DBContainer(containers.DeclarativeContainer):
     settings = providers.Dependency(instance_of=Settings)
 
-    db: providers.Provider[Database] = providers.Singleton(
-        Database, settings=settings.provided.db
-    )
+    db: providers.Provider[Database] = providers.Singleton(Database, settings=settings.provided.db)
 
     uow: providers.Provider[UnitOfWork] = providers.Factory(
         SqlAlchemyUnitOfWork, session_factory=db.provided.session_factory
@@ -85,18 +79,16 @@ class Container(containers.DeclarativeContainer):
         UserCreateUseCase,
         uow=db.container.uow,
     )
-    send_code_use_case: providers.Provider[SendSmsCodeUseCase]  = providers.Factory(
-        SendSmsCodeUseCase,
-        sms_client=clients.container.sms_client
+    send_code_use_case: providers.Provider[SendSmsCodeUseCase] = providers.Factory(
+        SendSmsCodeUseCase, sms_client=clients.container.sms_client
     )
 
     verify_sms_code_use_case: providers.Provider[VerifySmsCodeUseCase] = providers.Factory(
         VerifySmsCodeUseCase,
         uow=db.container.uow,
         redis_client=clients.container.redis_cache,
-        jwt_manager=jwt_manager
+        jwt_manager=jwt_manager,
     )
-
 
     # users
     user_create_use_case: providers.Provider[UserCreateUseCase] = providers.Factory(
@@ -125,13 +117,9 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
     )
 
-
-
     @classmethod
     @asynccontextmanager
-    async def lifespan(
-        cls, wireable_packages: list[ModuleType]
-    ) -> AsyncGenerator["Container", None]:
+    async def lifespan(cls, wireable_packages: list[ModuleType]) -> AsyncGenerator["Container", None]:
         container = cls()
         container.wire(packages=wireable_packages)
         yield container

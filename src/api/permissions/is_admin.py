@@ -1,15 +1,9 @@
-from functools import wraps
-from typing import Any, Callable
+from fastapi import  Request
 
 from api.permissions.exceptions import UserIsNotAdminError
 
 
-def is_admin(func: Callable) -> Callable:
-    @wraps(func)
-    async def wrapper(*args: Any, **kwargs: Any) -> Any:
-        request = kwargs.get("request")
-        if request and request.state.user and request.state.user.is_admin:
-            return await func(*args, **kwargs)
-        raise UserIsNotAdminError()
-
-    return wrapper
+async def is_admin(request: Request):
+    user = getattr(request.state, "user", None)
+    if not user or not getattr(user, "is_admin", False):
+        raise UserIsNotAdminError

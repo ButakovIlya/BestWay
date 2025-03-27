@@ -1,5 +1,5 @@
-from fastapi import FastAPI
 import uptrace
+from fastapi import FastAPI
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 from config.settings import Settings

@@ -79,7 +79,7 @@ exclude = [
     "*/migrations/"
 ]
 
-line-length = 90
+line-length = 108
 indent-width = 4
 target-version = "py311"
 
@@ -109,21 +109,23 @@ convention = "pep257"  # Accepts: "google", "numpy", or "pep257".
 [tool.ruff.lint.pycodestyle]
 max-line-length = 108 # Настройка длины из flake8 setup.cfg
 
+[tool.black]
+line-length = 108
+target-version = ["py311"]
+
 [tool.isort]
 profile = "black"
-multi_line_output = 3
-include_trailing_comma = true
-force_grid_wrap = 0
-use_parentheses = true
+line_length = 108
 
-default_section = "THIRDPARTY"
-known_first_party = ["config"]
+known_first_party = ["config", "infrastructure", "domain", "application", "api"]
+known_third_party = ["fastapi", "sqlalchemy", "pydantic", "dependency_injector"]
 
+# Порядок секций (без дубликатов)
 sections = [
     "FUTURE",
     "STDLIB",
-    "FIRSTPARTY",
     "THIRDPARTY",
+    "FIRSTPARTY",
     "LOCALFOLDER",
 ]
 

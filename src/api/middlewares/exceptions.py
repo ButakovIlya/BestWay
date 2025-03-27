@@ -6,6 +6,7 @@ class AuthenticationError(DomainException):
     message = "Authentication token is invalid."
     detail = "The provided token is malformed, missing, or failed verification."
 
+
 class TokenExpiredError(DomainException):
     code = 10002
     message = "Authentication token has expired."

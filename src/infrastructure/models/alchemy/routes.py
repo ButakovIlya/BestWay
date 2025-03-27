@@ -1,6 +1,8 @@
-from sqlalchemy import String, ForeignKey, DateTime, Enum
-from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
+
+from sqlalchemy import DateTime, Enum, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from domain.entities.enums import PlaceCategory, PlaceType
 from infrastructure.models.alchemy.base import Base
 from infrastructure.models.alchemy.users import User
@@ -23,9 +25,7 @@ class Place(Base):
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
     map_name: Mapped[str | None] = mapped_column(default=None, server_default=None)
 
-    route_places: Mapped[list["RoutePlace"]] = relationship(
-        "RoutePlace", back_populates="place"
-    )
+    route_places: Mapped[list["RoutePlace"]] = relationship("RoutePlace", back_populates="place")
 
 
 class Route(Base):
@@ -33,9 +33,7 @@ class Route(Base):
 
     name: Mapped[str] = mapped_column(String, index=True)
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now, server_default="now()"
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, server_default="now()")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, server_default="now()"
     )
@@ -46,9 +44,7 @@ class Route(Base):
     places: Mapped[list["RoutePlace"]] = relationship(
         "RoutePlace", back_populates="route", cascade="all, delete-orphan"
     )
-    likes: Mapped[list["Like"]] = relationship(
-        "Like", back_populates="route", cascade="all, delete-orphan"
-    )
+    likes: Mapped[list["Like"]] = relationship("Like", back_populates="route", cascade="all, delete-orphan")
     comments: Mapped[list["RouteComment"]] = relationship(
         "RouteComment", back_populates="route", cascade="all, delete-orphan"
     )
@@ -93,9 +89,7 @@ class Photo(Base):
     __tablename__ = "photos"
 
     url: Mapped[str] = mapped_column(String, nullable=False)
-    uploaded_at: Mapped[datetime] = mapped_column(
-        DateTime, default=datetime.now, server_default="now()"
-    )
+    uploaded_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, server_default="now()")
     uploaded_by: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), nullable=True)
     route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"), nullable=True)

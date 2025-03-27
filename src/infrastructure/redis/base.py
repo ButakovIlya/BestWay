@@ -1,4 +1,5 @@
 from abc import abstractmethod
+
 from redis.client import AbstractRedis  # type: ignore
 
 

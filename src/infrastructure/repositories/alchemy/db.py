@@ -1,11 +1,6 @@
-from config.settings import DBSettings
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
 
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-)
+from config.settings import DBSettings
 
 
 class Database:
@@ -16,9 +11,7 @@ class Database:
             max_overflow=settings.max_overflow,
             echo=settings.echo,
         )
-        self._session_factory = async_sessionmaker(
-            bind=self._engine, expire_on_commit=False
-        )
+        self._session_factory = async_sessionmaker(bind=self._engine, expire_on_commit=False)
 
     @property
     def engine(self) -> AsyncEngine:

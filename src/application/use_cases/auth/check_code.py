@@ -1,9 +1,10 @@
 from fastapi import HTTPException
+
+from application.use_cases.auth.dto import SmsPayloadDTO, TokenDTO
+from application.use_cases.base import UseCase
 from domain.entities.user import User
 from infrastructure.managers.dto import UserCreateDTO
 from infrastructure.managers.jwt_manager import JWTManager
-from application.use_cases.base import UseCase
-from application.use_cases.auth.dto import SmsPayloadDTO, TokenDTO
 from infrastructure.redis.redis_cache import RedisCache
 from infrastructure.repositories.base import UnitOfWork
 
@@ -30,21 +31,10 @@ class VerifySmsCodeUseCase(UseCase):
             if await self._uow.users.exists(phone=data.phone):
                 user: User = await self._uow.users.get_by_phone(phone=data.phone)
             else:
-                user: User = await self._uow.users.create(
-                    User(
-                        phone=data.phone
-                    )
-                )
+                user: User = await self._uow.users.create(User(phone=data.phone))
         # Генерация токенов
-        data = UserCreateDTO(
-            user_id=user.id,
-            phone=user.phone,
-            is_admin=False
-        )
+        data = UserCreateDTO(user_id=user.id, phone=user.phone, is_admin=user.is_admin)
         access_token = self._jwt_manager.create_access_token(data)
         refresh_token = self._jwt_manager.create_refresh_token(data)
 
-        return TokenDTO(
-            access_token=access_token,
-            refresh_token=refresh_token
-        )
+        return TokenDTO(access_token=access_token, refresh_token=refresh_token)

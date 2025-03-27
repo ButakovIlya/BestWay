@@ -1,8 +1,8 @@
-from api.permissions.is_authenticated import is_authenticated
-from api.schemas import CheckHealthSchema
-
 from fastapi import Request, status
 from fastapi.routing import APIRouter
+
+from api.permissions.is_authenticated import is_authenticated
+from api.schemas import CheckHealthSchema
 
 router = APIRouter(tags=["Health"])
 

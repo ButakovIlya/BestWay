@@ -17,9 +17,6 @@ class UserRetrieveUseCase(UseCase):
             try:
                 user = await self._uow.users.get_by_id(user_id)
             except ValueError:
-                raise APIException(
-                    code=404,
-                    message=f"Пользователь с id '{user_id}' не существует"
-                )
+                raise APIException(code=404, message=f"Пользователь с id '{user_id}' не существует")
 
         return UserDTO.model_validate(user)

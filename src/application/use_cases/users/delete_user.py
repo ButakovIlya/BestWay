@@ -11,14 +11,11 @@ class UserDeleteUseCase(UseCase):
     def __init__(self, uow: UnitOfWork) -> None:
         self._uow = uow
 
-    async def execute(self, phone: str) -> bool:
+    async def execute(self, user_id: int) -> bool:
         async with self._uow(autocommit=True):
-            if await self._uow.users.exists_by_phone(phone):
-                await self._uow.users.delete_by_phone(phone)
+            if await self._uow.users.exists(user_id):
+                await self._uow.users.delete_by_id(user_id)
             else:
-                raise APIException(
-                    code=404,
-                    message=f"Пользователь с номером '{phone}' не существует"
-                )
+                raise APIException(code=404, message=f"Пользователь с id '{user_id}' не существует")
 
         return True

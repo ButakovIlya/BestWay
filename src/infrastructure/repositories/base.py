@@ -7,7 +7,6 @@ from infrastructure.repositories.interfaces.user import UserRepository
 class UnitOfWork(ABC):
     users: UserRepository
 
-
     def __call__(self, *args: Any, autocommit: bool, **kwargs: Any) -> "UnitOfWork":
         self._autocommit = autocommit
         return self

@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Text
-from sqlalchemy.orm import relationship
 from datetime import datetime
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy.orm import relationship
+
 from infrastructure.models.alchemy.base import Base
 
 
@@ -21,4 +23,3 @@ class User(Base):
     routes = relationship("Route", back_populates="author")
     likes = relationship("Like", back_populates="author")
     comments = relationship("RouteComment", back_populates="author")
-

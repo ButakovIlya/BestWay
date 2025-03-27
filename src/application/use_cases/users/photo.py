@@ -5,6 +5,7 @@ from domain.entities.user import User
 from infrastructure.managers.base import StorageManager
 from infrastructure.repositories.base import UnitOfWork
 
+
 class UserPhotoUpdateUseCase(UseCase):
     """
     Update user photo.

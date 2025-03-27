@@ -1,7 +1,9 @@
-import time
-import httpx
 import random
+import time
+
+import httpx
 from fastapi import HTTPException
+
 from application.use_cases.auth.dto import SmsPayloadDTO
 from config.settings import SmsSettings
 from domain.validators.base import PhoneNumberValidator
@@ -14,7 +16,7 @@ class SmsClient:
     SPAM_ATTEMPT_KEY_PREFIX: str = "sms_attempts:"
     SPAM_TIMESTAMP_KEY: str = "sms_last_attempt:"
     MAX_ATTEMPTS: int = 50
-    COOLDOWN_SECONDS: int = 1 # 5 минут
+    COOLDOWN_SECONDS: int = 1  # 5 минут
     BLOCK_SECONDS: int = 24 * 60 * 60  # 1 день
 
     def __init__(self, redis_cache: RedisCache, settings: SmsSettings):
@@ -47,12 +49,11 @@ class SmsClient:
 
         code = self._generate_code()
         self._redis_cache.set_code_by_phone(phone, code, self.settings.cache_timeout)
-        print(code)
         self._increment_sms_attempt(phone)
 
         return code
 
-    def _build_payload(self, payload:SmsPayloadDTO) -> tuple[dict, list[dict]]:
+    def _build_payload(self, payload: SmsPayloadDTO) -> tuple[dict, list[dict]]:
         """Формирует headers и JSON payload для запроса."""
         headers = {
             "Authorization": f"Basic {self.settings.api_key}",
@@ -83,9 +84,7 @@ class SmsClient:
     def _validate_response(response: httpx.Response):
         """Обрабатывает ошибки при отправке SMS."""
         if response.status_code != 200:
-            raise HTTPException(
-                status_code=500, detail=f"Ошибка отправки SMS: {response.text}"
-            )
+            raise HTTPException(status_code=500, detail=f"Ошибка отправки SMS: {response.text}")
 
     def _handle_response(self, response: httpx.Response) -> dict:
         """Обрабатывает HTTP-ответ и возвращает результат."""
@@ -93,7 +92,10 @@ class SmsClient:
             try:
                 data = response.json()
                 if not data.get("success"):  # Проверка бизнес-логики API
-                    raise HTTPException(status_code=400, detail=f"Ошибка отправки: {data.get('message')}")
+                    raise HTTPException(
+                        status_code=400,
+                        detail=f"Ошибка отправки: {data.get('message')}",
+                    )
                 return {"message": "SMS отправлено", "response": data}
 
             except ValueError:
@@ -114,7 +116,7 @@ class SmsClient:
         else:
             raise HTTPException(
                 status_code=response.status_code,
-                detail=f"Неизвестная ошибка: {response.text}"
+                detail=f"Неизвестная ошибка: {response.text}",
             )
 
     def _check_spam_restrictions(self, phone: str) -> None:
@@ -132,7 +134,7 @@ class SmsClient:
             if last_ts and now - int(last_ts) < self.BLOCK_SECONDS:
                 raise HTTPException(
                     status_code=429,
-                    detail="Превышен лимит отправок. Попробуйте через 24 часа."
+                    detail="Превышен лимит отправок. Попробуйте через 24 часа.",
                 )
             else:
                 self._redis_cache.set(attempts_key, "0")  # Сбросить счётчик
@@ -141,7 +143,7 @@ class SmsClient:
             if last_ts and now - int(last_ts) < self.COOLDOWN_SECONDS:
                 raise HTTPException(
                     status_code=429,
-                    detail="Слишком часто запрашиваете код. Попробуйте через 5 минут."
+                    detail="Слишком часто запрашиваете код. Попробуйте через 5 минут.",
                 )
 
     def _increment_sms_attempt(self, phone: str) -> None:

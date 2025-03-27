@@ -1,8 +1,8 @@
 from enum import Enum
 
-from domain.validators.dto import ColumnType
-
 from pydantic import BaseModel
+
+from domain.validators.dto import ColumnType
 
 
 class ColumnInfo(BaseModel):

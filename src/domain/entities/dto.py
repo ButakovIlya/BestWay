@@ -1,6 +1,6 @@
-from domain.entities.enums import ResourceErrorType
-
 from pydantic import BaseModel
+
+from domain.entities.enums import ResourceErrorType
 
 
 class ResourceDTO(BaseModel):

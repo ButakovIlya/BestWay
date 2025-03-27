@@ -1,5 +1,7 @@
 import re
+
 from pydantic import BaseModel, Field, field_validator
+
 
 class PhoneNumberValidator(BaseModel):
     phone: str = Field(..., example="+7(999)123-45-67")

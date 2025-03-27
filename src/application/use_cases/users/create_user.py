@@ -20,7 +20,7 @@ class UserCreateUseCase(UseCase):
             else:
                 raise APIException(
                     code=400,
-                    message=f"Пользователь с таким номером '{data.phone}' уже существует"
+                    message=f"Пользователь с таким номером '{data.phone}' уже существует",
                 )
 
         return UserDTO.model_validate(user)
