@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from infrastructure.repositories.alchemy import SqlAlchemyUsersRepository
+from infrastructure.repositories.alchemy import SqlAlchemyUsersRepository, SqlAlchemyPlacesRepository
 from infrastructure.uow.base import UnitOfWork
 
 
@@ -12,6 +12,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self._session = self._session_factory()
 
         self.users = SqlAlchemyUsersRepository(self._session)
+        self.places = SqlAlchemyPlacesRepository(self._session)
 
         return await super().__aenter__()
 

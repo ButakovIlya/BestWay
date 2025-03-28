@@ -1,12 +1,14 @@
+from io import BytesIO
+from typing import Optional
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, File, Response, UploadFile, status
 
 from api.permissions.is_admin import is_admin
-from application.use_cases.common import PhotoUpdateUseCase
+from application.use_cases.common.dto import ModelPhotoDTO
+from application.use_cases.places.photo import PlacePhotoUpdateUseCase
 from config.containers import Container
 from infrastructure.models.alchemy.routes import Place
 from infrastructure.orm.base import BaseViewSet
-from infrastructure.permissions.decorators import has_roles
 from infrastructure.permissions.enums import RoleEnum
 
 from .schemas import PlaceCreate, PlacePatch, PlacePut, PlaceRead
@@ -28,7 +30,13 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead]):
     @router.post("/{place_id}/avatar", status_code=status.HTTP_200_OK)
     @inject
     async def update_avatar(
+        self,
         place_id: int,
-        use_case: PhotoUpdateUseCase = Depends(Provide[Container.update_photo_use_case]),
-    ) -> Response:
-        return Response(status_code=200)
+        photo: Optional[UploadFile] = File(None),
+        use_case: PlacePhotoUpdateUseCase = Depends(Provide[Container.place_avatar_update_use_case]),
+    ) -> PlaceRead:
+        data = ModelPhotoDTO(
+            photo=BytesIO(await photo.read()) if photo else None,
+            filename=photo.filename if photo else None,
+        )
+        return await use_case.execute(place_id=place_id, data=data)

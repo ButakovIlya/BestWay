@@ -1,1 +1,2 @@
 from infrastructure.repositories.interfaces.user import UserRepository
+from infrastructure.repositories.interfaces.place import PlaceRepository
