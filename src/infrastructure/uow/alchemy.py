@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from infrastructure.repositories.alchemy import SqlAlchemyUsersRepository, SqlAlchemyPlacesRepository
+from infrastructure.repositories.alchemy import SqlAlchemyPlacesRepository, SqlAlchemyUsersRepository
 from infrastructure.uow.base import UnitOfWork
 
 

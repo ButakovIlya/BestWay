@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, Enum, ForeignKey, String
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from domain.entities.enums import PlaceCategory, PlaceType
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 from infrastructure.models.alchemy.base import Base
 from infrastructure.models.alchemy.users import User
 
@@ -12,6 +12,9 @@ class Place(Base):
     __tablename__ = "places"
 
     name: Mapped[str] = mapped_column(String, index=True)
+    city: Mapped[str] = mapped_column(
+        Enum(CityCategory, name="place_category", native_enum=False), index=True, default=CityCategory.PERM
+    )
     category: Mapped[PlaceCategory] = mapped_column(
         Enum(PlaceCategory, name="place_category", native_enum=False), nullable=False
     )
@@ -24,6 +27,8 @@ class Place(Base):
     coordinates: Mapped[str | None] = mapped_column(default=None, server_default=None)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
     map_name: Mapped[str | None] = mapped_column(default=None, server_default=None)
+
+    json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     route_places: Mapped[list["RoutePlace"]] = relationship("RoutePlace", back_populates="place")
 

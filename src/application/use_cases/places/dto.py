@@ -1,7 +1,9 @@
-from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
+from pydantic import BaseModel, ConfigDict
+
 from domain.entities.enums import PlaceCategory, PlaceType
+
 
 class PlaceDTO(BaseModel):
     id: Optional[int]

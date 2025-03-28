@@ -15,10 +15,7 @@ class UserPhotoUpdateUseCase(UseCase):
     """
 
     def __init__(
-        self,
-        uow: UnitOfWork,
-        storage_manager: StorageManager,
-        update_photo_use_case: PhotoUpdateUseCase
+        self, uow: UnitOfWork, storage_manager: StorageManager, update_photo_use_case: PhotoUpdateUseCase
     ) -> None:
         self._uow = uow
         self._storage_manager = storage_manager

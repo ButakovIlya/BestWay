@@ -13,7 +13,6 @@ class Place(Entity):
         coordinates: str | None = None,
         photo: str | None = None,
         map_name: str | None = None,
-
     ) -> None:
         super().__init__(id)
 

@@ -1,5 +1,6 @@
 from io import BytesIO
 from typing import Optional
+
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, File, Response, UploadFile, status
 

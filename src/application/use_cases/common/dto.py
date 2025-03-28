@@ -17,6 +17,7 @@ class ObjectPhotoDTO(BaseModel):
     class Config:
         arbitrary_types_allowed = True
 
+
 class ModelPhotoDTO(BaseModel):
     photo: Optional[BytesIO] = None
     filename: Optional[str] = None

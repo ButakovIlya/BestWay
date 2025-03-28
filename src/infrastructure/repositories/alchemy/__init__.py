@@ -1,2 +1,2 @@
-from infrastructure.repositories.alchemy.user import SqlAlchemyUsersRepository
 from infrastructure.repositories.alchemy.places import SqlAlchemyPlacesRepository
+from infrastructure.repositories.alchemy.user import SqlAlchemyUsersRepository

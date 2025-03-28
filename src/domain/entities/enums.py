@@ -2,6 +2,11 @@ from enum import Enum
 
 
 # Перечисления для категорий мест
+class CityCategory(Enum):
+    PERM = "Пермь"
+
+
+# Перечисления для категорий мест
 class PlaceCategory(Enum):
     RESTAURANT = "Ресторан"
     CAFE = "Кофейня"
