@@ -13,3 +13,5 @@ routers = [
     profile_router,
     place_viewset.router,
 ]
+
+print(place_viewset.router.routes)

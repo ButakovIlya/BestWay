@@ -1,8 +1,11 @@
-from application.exceptions import UserNotFound
 from application.use_cases.base import UseCase
+from application.use_cases.common.dto import ObjectPhotoDTO
+from application.use_cases.common.photo.photo import PhotoUpdateUseCase
 from application.use_cases.users.dto import UserDTO, UserPhotoDTO
+from config.exceptions import APIException
 from domain.entities.user import User
 from infrastructure.managers.base import StorageManager
+from infrastructure.managers.enum import ModelType
 from infrastructure.repositories.base import UnitOfWork
 
 
@@ -15,29 +18,27 @@ class UserPhotoUpdateUseCase(UseCase):
         self,
         uow: UnitOfWork,
         storage_manager: StorageManager,
+        update_photo_use_case: PhotoUpdateUseCase
     ) -> None:
         self._uow = uow
         self._storage_manager = storage_manager
+        self._update_photo_use_case = update_photo_use_case
 
     async def execute(self, user_id: int, data: UserPhotoDTO) -> UserDTO:
         async with self._uow(autocommit=True):
             user: User = await self._uow.users.get_by_id(user_id)
             if not user:
-                raise UserNotFound("Пользователь не найден")
+                raise APIException(code=404, message=f"Пользователь с id={user_id} не найден")
 
-            # если передан файл, то сохраняем его в хранилище
-            if data.filename:
-                user_photo = user.photo
-                filepath = self._storage_manager.save_user_photo(data.filename, data.photo)
-                user.photo = filepath
-                if user_photo:
-                    self._storage_manager.delete_resource_file_by_path(user.photo)
-            else:
-                # если файл не передан, то удаляем его из хранилища
-                if user.photo:
-                    self._storage_manager.delete_resource_file_by_path(user.photo)
-                    user.photo = None
-
+            photo_data = ObjectPhotoDTO(
+                photo=data.photo,
+                filename=data.filename,
+                filepath=user.photo,
+                photo_field="photo",
+                model_name=ModelType.USERS,
+            )
+            filepath = await self._update_photo_use_case.execute(photo_data)
+            user.photo = filepath
             await self._uow.users.update(user)
             user: User = await self._uow.users.get_by_id(user.id)
 

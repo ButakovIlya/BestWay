@@ -1,7 +1,9 @@
+import inspect
 from typing import Generic, List, Type, TypeVar
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Response, status
+from fastapi.routing import APIRoute
 from pydantic import BaseModel
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,8 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from config.containers import Container
 from config.exceptions import APIException
 from infrastructure.models.alchemy.base import Base
-from infrastructure.orm.dependencies import request_body_schema_from_self, role_required
-from infrastructure.permissions.dependencies import permission_dependency
+from infrastructure.permissions.dependencies import request_body_schema_from_self, role_required
 from infrastructure.permissions.enums import PermissionEnum, RoleEnum
 
 TRead = TypeVar("TRead", bound=BaseModel)
@@ -39,6 +40,8 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
         "delete": [PermissionEnum.ALLOW_ANY],
     }
 
+    allowed_methods: list[str] = ["list", "get", "create", "put", "patch", "delete", "options"]
+
     def __init__(self):
         self.router = APIRouter(
             prefix=self.prefix,
@@ -47,80 +50,109 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
         )
 
         # Create
-        self.router.add_api_route(
-            "/",
-            self.create,
-            response_model=self.schema_read,
-            methods=["POST"],
-            dependencies=[permission_dependency(self.permissions.get("create", []))],
-            name=f"{self.model.__name__}_create",
-            summary=f"Create {self.model.__name__}",
-            tags=self.tags,
-            openapi_extra={
-                "requestBody": {
-                    "required": True,
-                    "content": {"application/json": {"schema": self.schema_create.model_json_schema()}},
-                }
-            },
-        )
+        if "create" in self.allowed_methods:
+            self.router.add_api_route(
+                "/",
+                self.create,
+                response_model=self.schema_read,
+                methods=["POST"],
+                name=f"{self.model.__name__}_create",
+                summary=f"Create {self.model.__name__}",
+                openapi_extra={
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": self.schema_create.model_json_schema()}},
+                    }
+                },
+            )
 
-        # List
-        self.router.add_api_route(
-            "/",
-            self.list,
-            response_model=List[self.schema_read],
-            methods=["GET"],
-            name=f"{self.model.__name__}_list",
-        )
+        if "list" in self.allowed_methods:
+            self.router.add_api_route(
+                "/",
+                self.list,
+                response_model=List[self.schema_read],
+                methods=["GET"],
+                name=f"{self.model.__name__}_list",
+            )
 
-        # Retrieve
-        self.router.add_api_route(
-            "/{item_id}",
-            self.get,
-            response_model=self.schema_read,
-            methods=["GET"],
-            name=f"{self.model.__name__}_get",
-        )
+        if "get" in self.allowed_methods:
+            self.router.add_api_route(
+                "/{item_id}",
+                self.get,
+                response_model=self.schema_read,
+                methods=["GET"],
+                name=f"{self.model.__name__}_get",
+            )
 
-        # Put
-        self.router.add_api_route(
-            "/{item_id}",
-            self.put,
-            response_model=self.schema_read,
-            methods=["PUT"],
-            name=f"{self.model.__name__}_put",
-            openapi_extra={
-                "requestBody": {
-                    "required": True,
-                    "content": {"application/json": {"schema": self.schema_put.model_json_schema()}},
-                }
-            },
-        )
+        if "put" in self.allowed_methods:
+            self.router.add_api_route(
+                "/{item_id}",
+                self.put,
+                response_model=self.schema_read,
+                methods=["PUT"],
+                name=f"{self.model.__name__}_put",
+                openapi_extra={
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": self.schema_put.model_json_schema()}},
+                    }
+                },
+            )
 
-        # Patch
-        self.router.add_api_route(
-            "/{item_id}",
-            self.patch,
-            response_model=self.schema_read,
-            methods=["PATCH"],
-            name=f"{self.model.__name__}_patch",
-            openapi_extra={
-                "requestBody": {
-                    "required": True,
-                    "content": {"application/json": {"schema": self.schema_patch.model_json_schema()}},
-                }
-            },
-        )
+        if "patch" in self.allowed_methods:
+            self.router.add_api_route(
+                "/{item_id}",
+                self.patch,
+                response_model=self.schema_read,
+                methods=["PATCH"],
+                name=f"{self.model.__name__}_patch",
+                openapi_extra={
+                    "requestBody": {
+                        "required": True,
+                        "content": {"application/json": {"schema": self.schema_patch.model_json_schema()}},
+                    }
+                },
+            )
 
-        # Delete
-        self.router.add_api_route(
-            "/{item_id}",
-            self.delete,
-            status_code=status.HTTP_204_NO_CONTENT,
-            response_class=Response,
-            methods=["DELETE"],
-            name=f"{self.model.__name__}_delete",
-        )
+        if "delete" in self.allowed_methods:
+            self.router.add_api_route(
+                "/{item_id}",
+                self.delete,
+                status_code=status.HTTP_204_NO_CONTENT,
+                response_class=Response,
+                methods=["DELETE"],
+                name=f"{self.model.__name__}_delete",
+            )
+
+        # добавляем в роутинг методы класса
+        custom_router = getattr(self.__class__, "router", None)
+        if isinstance(custom_router, APIRouter):
+            for route in custom_router.routes:
+                if isinstance(route, APIRoute):
+                    # Привязываем endpoint к self, если это метод
+                    if inspect.isfunction(route.endpoint) and hasattr(route.endpoint, "__get__"):
+                        bound_endpoint = route.endpoint.__get__(self)
+                        new_route = APIRoute(
+                            path=route.path,
+                            endpoint=bound_endpoint,
+                            methods=route.methods,
+                            name=route.name,
+                            response_model=route.response_model,
+                            status_code=route.status_code,
+                            summary=route.summary,
+                            description=route.description,
+                            response_description=route.response_description,
+                            dependencies=route.dependencies,
+                            tags=route.tags or self.tags,
+                            responses=route.responses,
+                            callbacks=route.callbacks,
+                            deprecated=route.deprecated,
+                            operation_id=route.operation_id,
+                            openapi_extra=route.openapi_extra,
+                        )
+                        self.router.routes.append(new_route)
+                    else:
+                        self.router.routes.append(route)
 
     @inject
     async def list(self, session: AsyncSession = Depends(Provide[Container.db.session])) -> List[TRead]:

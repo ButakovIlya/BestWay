@@ -1,15 +1,13 @@
 from abc import ABC, abstractmethod
 from io import BytesIO
 
+from infrastructure.managers.enum import ModelType
+
 
 class StorageManager(ABC):
     @abstractmethod
-    def save_user_photo(
-        self,
-        filename: str,
-        file: BytesIO,
-    ) -> str:
-        """Сохраняет фото пользователя и возвращает относительный путь к нему"""
+    def save_photo(self, filename: str, file: BytesIO, model_name: ModelType) -> str:
+        """Сохраняет фото и возвращает относительный путь к нему"""
         pass
 
     @abstractmethod

@@ -60,6 +60,7 @@ class JwtTokenUserMiddleware(BaseHTTPMiddleware):
         self._validate_token_type(payload)
         self._validate_expiration_time(payload)
         validated = self._validate_payload(payload)
+        print(validated)
         return User(
             id=validated.id,
             phone=validated.phone,

@@ -8,6 +8,7 @@ from redis.client import AbstractRedis  # type: ignore
 from application.use_cases import UserCreateUseCase
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
+from application.use_cases.common import PhotoUpdateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
@@ -75,6 +76,15 @@ class Container(containers.DeclarativeContainer):
     #### Use cases ####
     ###################
 
+    # BASE
+
+    # photos
+    update_photo_use_case: providers.Provider[PhotoUpdateUseCase] = providers.Factory(
+        PhotoUpdateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+    )
+
     user_create_use_case: providers.Provider[UserCreateUseCase] = providers.Factory(
         UserCreateUseCase,
         uow=db.container.uow,
@@ -115,6 +125,7 @@ class Container(containers.DeclarativeContainer):
         UserPhotoUpdateUseCase,
         uow=db.container.uow,
         storage_manager=storage_manager,
+        update_photo_use_case=update_photo_use_case,
     )
 
     @classmethod

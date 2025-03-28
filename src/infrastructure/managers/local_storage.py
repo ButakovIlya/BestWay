@@ -19,15 +19,11 @@ class LocalStorageManager(StorageManager):
         self._settings = settings
         self._max_file_size_bytes = settings.storage.max_file_size_mb * 1024 * 1024
 
-    def save_user_photo(
-        self,
-        filename: str,
-        file: BytesIO,
-    ) -> str:
+    def save_photo(self, filename: str, file: BytesIO, model_name: ModelType) -> str:
         self._validate_file(filename, file)
 
-        new_filename = self._generate_filename(ModelType.USERS, filename)
-        filepath = self._get_media_filepath(ModelType.USERS, new_filename)
+        new_filename = self._generate_filename(model_name, filename)
+        filepath = self._get_media_filepath(model_name, new_filename)
         self._save_file(filepath, file)
 
         relative_path = filepath.relative_to(self._settings.storage.storage_path)

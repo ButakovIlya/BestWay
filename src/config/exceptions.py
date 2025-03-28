@@ -1,20 +1,56 @@
-from fastapi import Request
+from typing import Callable
+
+from fastapi import Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from api.permissions.exceptions import UserIsNotAdminError
+from domain.exceptions import DomainException
+
 
 class APIException(Exception):
-    def __init__(self, code: int, message: str, link: str = ""):
+    def __init__(self, code: int, message: str):
         self.code = code
         self.message = message
-        self.link = link
+
+
+def create_exception_handler(
+    status_code: int,
+) -> Callable[[Request, Exception | DomainException], Response]:
+
+    def get_exception_handler(request: Request, exc: Exception | DomainException) -> Response:
+        if isinstance(exc, DomainException):
+            return api_exception_handler(request, exc)
+        return exception_handler(request, exc)
+
+    def api_exception_handler(request: Request, exc: DomainException) -> Response:
+        code = str(exc.code)
+        message = exc.message
+
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                "error": {
+                    "code": code,
+                    "message": message,
+                },
+            },
+        )
+
+    def exception_handler(request: Request, exc: Exception) -> Response:
+        return Response(
+            status_code=500,
+            content={"error": f"An unexpected error occurred: {exc}"},
+        )
+
+    return get_exception_handler
 
 
 async def api_exception_handler(request: Request, exc: APIException):
     return JSONResponse(
         status_code=exc.code,
-        content={"code": exc.code, "message": exc.message, "link": exc.link},
+        content={"code": exc.code, "message": exc.message},
     )
 
 
@@ -48,6 +84,7 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 
 handlers = {
     APIException: api_exception_handler,
+    UserIsNotAdminError: create_exception_handler(status_code=403),
     # RequestValidationError: request_validation_exception_handler,
     # ValidationError: pydantic_validation_exception_handler,
 }
