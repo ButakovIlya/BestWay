@@ -6,13 +6,8 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
 from api.permissions.exceptions import UserIsNotAdminError
+from common.exceptions import APIException
 from domain.exceptions import DomainException
-
-
-class APIException(Exception):
-    def __init__(self, code: int, message: str):
-        self.code = code
-        self.message = message
 
 
 def create_exception_handler(
@@ -83,7 +78,7 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 
 
 handlers = {
-    APIException: api_exception_handler,
+    # APIException: api_exception_handler,
     UserIsNotAdminError: create_exception_handler(status_code=403),
     # RequestValidationError: request_validation_exception_handler,
     # ValidationError: pydantic_validation_exception_handler,

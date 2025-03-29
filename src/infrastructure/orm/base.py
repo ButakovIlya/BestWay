@@ -1,15 +1,17 @@
 import inspect
-from typing import Generic, List, Type, TypeVar
+from collections import defaultdict
+from typing import Generic, List, Optional, Type, TypeVar
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
 from sqlalchemy import select, update
+from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from common.exceptions import APIException
 from config.containers import Container
-from config.exceptions import APIException
 from infrastructure.models.alchemy.base import Base
 from infrastructure.permissions.dependencies import request_body_schema_from_self, role_required
 from infrastructure.permissions.enums import PermissionEnum, RoleEnum
@@ -18,14 +20,19 @@ TRead = TypeVar("TRead", bound=BaseModel)
 TCreate = TypeVar("TCreate", bound=BaseModel)
 TPut = TypeVar("TPut", bound=BaseModel)
 TPatch = TypeVar("TPatch", bound=BaseModel)
+TFilter = TypeVar("TFilter", bound=BaseModel)
 
 
-class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
+class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
     model: Type[Base]
     schema_read: Type[TRead]
     schema_create: Type[TCreate]
     schema_put: Type[TPut]
     schema_patch: Type[TPut]
+
+    filter_schema: Type[TFilter]
+    ilike_list: List = []
+
     prefix: str
     tags: list
 
@@ -73,6 +80,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
                 response_model=List[self.schema_read],
                 methods=["GET"],
                 name=f"{self.model.__name__}_list",
+                dependencies=[Depends(self.filter_schema)],
             )
 
         if "get" in self.allowed_methods:
@@ -154,11 +162,61 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
                     else:
                         self.router.routes.append(route)
 
+    async def get_object(
+        self,
+        item_id: int,
+        session: AsyncSession,
+    ) -> Base:
+        result = await self.get_queryset(session, item_id)
+        obj = result.scalar_one_or_none()
+        if not obj:
+            raise APIException(code=404, message="Item not found")
+        return obj
+
+    async def get_queryset(
+        self,
+        session: AsyncSession,
+        item_id: Optional[int] = None,
+        filters: Optional[dict] = None,
+    ) -> Result:
+        stmt = select(self.model)
+
+        if item_id:
+            stmt = stmt.where(self.model.id == item_id)
+
+        if filters:
+            for attr, value in filters.items():
+                if value is None:
+                    continue
+
+                # поддерка механики передачи списка элементов в параметрах
+                if attr.endswith("__list"):
+                    column_name = attr.removesuffix("__list")
+                    if hasattr(self.model, column_name):
+                        stmt = stmt.where(getattr(self.model, column_name).in_(value))
+                if attr in self.ilike_list:
+                    stmt = stmt.where(getattr(self.model, attr).ilike(f"%{value}%"))
+                elif hasattr(self.model, attr):
+                    stmt = stmt.where(getattr(self.model, attr) == value)
+        print(stmt)
+        return await session.execute(stmt)
+
+    async def paginate_queryset(self, result: Result) -> List[TRead]:
+        return result.scalars().all()
+
     @inject
-    async def list(self, session: AsyncSession = Depends(Provide[Container.db.session])) -> List[TRead]:
+    async def list(
+        self,
+        request: Request,
+        session: AsyncSession = Depends(Provide[Container.db.session]),
+    ) -> List[TRead]:
         try:
-            result = await session.execute(select(self.model))
-            return result.scalars().all()
+            # Собираем query-параметры с учётом мульти-значений (type__list=GEORGIAN&type__list=ITALIAN)
+            filter_obj = self.parse_query_filters(request)
+            filters = filter_obj.model_dump(exclude_none=True)
+            result = await self.get_queryset(session, filters=filters)
+            return await self.paginate_queryset(result)
+
         finally:
             await session.close()
 
@@ -169,11 +227,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
         session: AsyncSession = Depends(Provide[Container.db.session]),
     ) -> TRead:
         try:
-            result = await session.execute(select(self.model).where(self.model.id == item_id))
-            obj = result.scalar_one_or_none()
-            if not obj:
-                raise APIException(code=404, message="Item not found")
-            return obj
+            return await self.get_object(item_id, session)
         finally:
             await session.close()
 
@@ -271,3 +325,10 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch]):
             return Response(status_code=status.HTTP_204_NO_CONTENT)
         finally:
             await session.close()
+
+    def parse_query_filters(self, request: Request) -> TFilter:
+        raw_query = defaultdict(list)
+        for key, value in request.query_params.multi_items():
+            raw_query[key].append(value)
+        raw_filters = {k: v[0] if len(v) == 1 else v for k, v in raw_query.items()}
+        return self.filter_schema(**raw_filters)

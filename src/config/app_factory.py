@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 
 import api
-from api import routers
+from api import admin_routers, public_routers
 from api.middlewares.get_jwt_token_user import JwtTokenUserMiddleware
 from config.celery import app as celery_app  # noqa
 from config.containers import Container
@@ -46,8 +46,11 @@ def add_exception_hanlers(app: FastAPI) -> None:
 
 
 def include_routers(app: FastAPI, settings: Settings) -> None:
-    for router in routers:
-        app.include_router(router, prefix=settings.api.prefix)
+    for router in admin_routers:
+        app.include_router(router, prefix=settings.api.admin_prefix)
+
+    for router in public_routers:
+        app.include_router(router, prefix=settings.api.public_prefix)
 
 
 def add_middlewares(app: FastAPI, settings: Settings) -> None:

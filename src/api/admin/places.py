@@ -2,7 +2,7 @@ from io import BytesIO
 from typing import Optional
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, File, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status
 
 from api.permissions.is_admin import is_admin
 from application.use_cases.common.dto import ModelPhotoDTO
@@ -12,15 +12,19 @@ from infrastructure.models.alchemy.routes import Place
 from infrastructure.orm.base import BaseViewSet
 from infrastructure.permissions.enums import RoleEnum
 
-from .schemas import PlaceCreate, PlacePatch, PlacePut, PlaceRead
+from .schemas import PlaceCreate, PlaceFilter, PlacePatch, PlacePut, PlaceRead
 
 
-class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead]):
+class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, PlaceFilter]):
     model = Place
     schema_read = PlaceRead
     schema_create = PlaceCreate
     schema_put = PlacePut
     schema_patch = PlacePatch
+
+    filter_schema = PlaceFilter
+    ilike_list = ["name", "tags"]
+
     prefix = "/places"
     tags = ["Places"]
 

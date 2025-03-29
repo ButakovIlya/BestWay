@@ -4,6 +4,7 @@ from enum import Enum
 # Перечисления для категорий мест
 class CityCategory(Enum):
     PERM = "Пермь"
+    MOSCOW = "Москва"
 
 
 # Перечисления для категорий мест

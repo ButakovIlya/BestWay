@@ -2,7 +2,7 @@ from application.use_cases.base import UseCase
 from application.use_cases.common.dto import ModelPhotoDTO, ObjectPhotoDTO
 from application.use_cases.common.photo.photo import PhotoUpdateUseCase
 from application.use_cases.places.dto import PlaceDTO
-from config.exceptions import APIException
+from common.exceptions import APIException
 from domain.entities.place import Place
 from infrastructure.managers.base import StorageManager
 from infrastructure.managers.enum import ModelType

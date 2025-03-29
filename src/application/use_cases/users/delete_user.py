@@ -1,5 +1,5 @@
 from application.use_cases.base import UseCase
-from config.exceptions import APIException
+from common.exceptions import APIException
 from infrastructure.uow import UnitOfWork
 
 

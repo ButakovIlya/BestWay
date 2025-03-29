@@ -1,9 +1,13 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, relationship
 
 from infrastructure.models.alchemy.base import Base
+
+if TYPE_CHECKING:
+    from infrastructure.models.alchemy.routes import Photo
 
 
 class User(Base):
@@ -23,3 +27,4 @@ class User(Base):
     routes = relationship("Route", back_populates="author")
     likes = relationship("Like", back_populates="author")
     comments = relationship("RouteComment", back_populates="author")
+    uploaded_photos: Mapped[list["Photo"]] = relationship("Photo", back_populates="uploader")

@@ -1,8 +1,6 @@
 from application.use_cases.base import UseCase
 from application.use_cases.common.dto import ObjectPhotoDTO
-from application.use_cases.users.dto import UserDTO
 from infrastructure.managers.base import StorageManager
-from infrastructure.models.alchemy.base import Base
 from infrastructure.repositories.base import UnitOfWork
 
 

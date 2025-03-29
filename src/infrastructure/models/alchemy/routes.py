@@ -31,6 +31,9 @@ class Place(Base):
     json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     route_places: Mapped[list["RoutePlace"]] = relationship("RoutePlace", back_populates="place")
+    photos: Mapped[list["Photo"]] = relationship(
+        "Photo", back_populates="place", cascade="all, delete-orphan"
+    )
 
 
 class Route(Base):
@@ -45,6 +48,8 @@ class Route(Base):
     duration: Mapped[int | None] = mapped_column(default=None, server_default=None)
     distance: Mapped[int | None] = mapped_column(default=None, server_default=None)
 
+    json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
+
     author: Mapped["User"] = relationship("User", back_populates="routes")
     places: Mapped[list["RoutePlace"]] = relationship(
         "RoutePlace", back_populates="route", cascade="all, delete-orphan"
@@ -52,6 +57,10 @@ class Route(Base):
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="route", cascade="all, delete-orphan")
     comments: Mapped[list["RouteComment"]] = relationship(
         "RouteComment", back_populates="route", cascade="all, delete-orphan"
+    )
+
+    photos: Mapped[list["Photo"]] = relationship(
+        "Photo", back_populates="route", cascade="all, delete-orphan"
     )
 
 
@@ -99,6 +108,6 @@ class Photo(Base):
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), nullable=True)
     route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"), nullable=True)
 
-    # place: Mapped["Place"] = relationship("Place", back_populates="photos")
-    # route: Mapped["Route"] = relationship("Route", back_populates="photos")
-    # uploader: Mapped["User"] = relationship("User", back_populates="uploaded_photos")
+    place: Mapped["Place"] = relationship("Place", back_populates="photos")
+    route: Mapped["Route"] = relationship("Route", back_populates="photos")
+    uploader: Mapped["User"] = relationship("User", back_populates="uploaded_photos")

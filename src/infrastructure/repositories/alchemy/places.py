@@ -1,7 +1,3 @@
-from typing import Optional
-
-from sqlalchemy import delete, exists, select
-
 from domain.entities.place import Place
 from infrastructure.models.alchemy.routes import Place as PlaceModel
 from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository

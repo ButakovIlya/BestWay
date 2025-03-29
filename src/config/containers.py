@@ -10,6 +10,7 @@ from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
 from application.use_cases.places.photo import PlacePhotoUpdateUseCase
+from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
@@ -135,6 +136,13 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
         storage_manager=storage_manager,
         update_photo_use_case=update_photo_use_case,
+    )
+
+    # routes
+    route_create_use_case: providers.Provider[RouteCreateUseCase] = providers.Factory(
+        RouteCreateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
     )
 
     @classmethod

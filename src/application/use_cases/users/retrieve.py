@@ -1,6 +1,6 @@
 from application.use_cases.base import UseCase
 from application.use_cases.users.dto import UserDTO
-from config.exceptions import APIException
+from common.exceptions import APIException
 from infrastructure.uow import UnitOfWork
 
 

@@ -5,9 +5,9 @@ from domain.entities.user import User
 from infrastructure.uow import UnitOfWork
 
 
-class UserCreateUseCase(UseCase):
+class RouteCreateUseCase(UseCase):
     """
-    Create new user.
+    Create new route.
     """
 
     def __init__(self, uow: UnitOfWork) -> None:

@@ -1,7 +1,7 @@
 from application.exceptions import UserNotFound
 from application.use_cases.base import UseCase
 from application.use_cases.users.dto import UserDTO, UserUpdateDTO
-from config.exceptions import APIException
+from common.exceptions import APIException
 from domain.entities.user import User
 from infrastructure.managers.base import StorageManager
 from infrastructure.managers.enum import UserFileFiels

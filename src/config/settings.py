@@ -40,6 +40,9 @@ class UptraceSettings(BaseModel):
 
 class ApiSettings(BaseModel):
     prefix: str = "/api"
+    admin: str = "/admin"
+    public: str = "/public"
+
     docs_endpoint: str = "/docs"
     openapi_endpoint: str = "/openapi.json"
 
@@ -50,6 +53,14 @@ class ApiSettings(BaseModel):
     @property
     def openapi_url(self) -> str:
         return f"{self.prefix}{self.openapi_endpoint}"
+
+    @property
+    def admin_prefix(self) -> str:
+        return f"{self.prefix}{self.admin}"
+
+    @property
+    def public_prefix(self) -> str:
+        return f"{self.prefix}{self.public}"
 
 
 class JWTSettings(BaseModel):
