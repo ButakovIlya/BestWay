@@ -1,11 +1,13 @@
+from typing import Generic, List, Optional, TypeVar
+
 from pydantic import BaseModel
 
-
-class ResourceTechnicalValidationError(BaseModel):
-    field: str
-    message: str = ""
+T = TypeVar("T")
 
 
-class ResourceDuplicateValidationError(BaseModel):
-    fields: list[str]
-    indexes: list[int]
+class PaginatedResponse(BaseModel, Generic[T]):
+    data: List[T]
+    count: int
+    page: int
+    next: Optional[str] = None
+    previous: Optional[str] = None

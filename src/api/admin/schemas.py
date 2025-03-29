@@ -55,14 +55,6 @@ class PlaceRead(BaseModel):
     photo: Optional[str] = None
     map_name: Optional[str] = None
 
-    # @field_serializer("category")
-    # def serialize_category(self, value: PlaceCategory, _info):
-    #     return value.name
-
-    # @field_serializer("type")
-    # def serialize_type(self, value: Optional[PlaceType], _info):
-    #     return value.name if value else None
-
     model_config = ConfigDict(from_attributes=True, use_enum_values=False)
 
 

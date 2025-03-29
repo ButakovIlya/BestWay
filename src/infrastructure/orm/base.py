@@ -1,6 +1,7 @@
 import inspect
 from collections import defaultdict
-from typing import Generic, List, Optional, Type, TypeVar
+from typing import Any, Generic, List, Optional, Type, TypeVar
+from urllib.parse import urlencode
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request, Response, status
@@ -12,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from common.exceptions import APIException
 from config.containers import Container
+from domain.validators.dto import PaginatedResponse
 from infrastructure.models.alchemy.base import Base
 from infrastructure.permissions.dependencies import request_body_schema_from_self, role_required
 from infrastructure.permissions.enums import PermissionEnum, RoleEnum
@@ -49,6 +51,8 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
 
     allowed_methods: list[str] = ["list", "get", "create", "put", "patch", "delete", "options"]
 
+    pagination_class: Optional[Type[PaginatedResponse]] = PaginatedResponse 
+
     def __init__(self):
         self.router = APIRouter(
             prefix=self.prefix,
@@ -74,13 +78,18 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
             )
 
         if "list" in self.allowed_methods:
+            if self.pagination_class:
+                response_model = self.pagination_class[self.schema_read]
+            else:
+                response_model = List[self.schema_read]
+
             self.router.add_api_route(
                 "/",
                 self.list,
-                response_model=List[self.schema_read],
+                response_model=response_model,
                 methods=["GET"],
                 name=f"{self.model.__name__}_list",
-                dependencies=[Depends(self.filter_schema)],
+                dependencies=[],
             )
 
         if "get" in self.allowed_methods:
@@ -201,22 +210,56 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         print(stmt)
         return await session.execute(stmt)
 
-    async def paginate_queryset(self, result: Result) -> List[TRead]:
-        return result.scalars().all()
+    async def paginate_queryset(
+        self,
+        result: Result,
+        request: Request,
+        page: int = 1,
+        page_size: int = 10,
+    ) -> BaseModel:
+        items = result.scalars().all()
+        total = len(items)
+
+        start = (page - 1) * page_size
+        end = start + page_size
+        paginated = items[start:end]
+
+        base_url = str(request.url).split("?")[0]
+        query_params = dict(request.query_params)
+
+        def build_url(page_number: int) -> Optional[str]:
+            if page_number < 1 or page_number > (total + page_size - 1) // page_size:
+                return None
+            params = {**query_params, "page": page_number, "page_size": page_size}
+            return f"{base_url}?{urlencode(params)}"
+
+        return self.pagination_class(
+            data=paginated,
+            count=total,
+            page=page,
+            next=build_url(page + 1),
+            previous=build_url(page - 1),
+        )
 
     @inject
     async def list(
         self,
         request: Request,
         session: AsyncSession = Depends(Provide[Container.db.session]),
-    ) -> List[TRead]:
+    ) -> Any:
         try:
-            # Собираем query-параметры с учётом мульти-значений (type__list=GEORGIAN&type__list=ITALIAN)
             filter_obj = self.parse_query_filters(request)
             filters = filter_obj.model_dump(exclude_none=True)
             result = await self.get_queryset(session, filters=filters)
-            return await self.paginate_queryset(result)
 
+            # Пагинация включена
+            if self.pagination_class:
+                page = int(request.query_params.get("page", 1))
+                page_size = int(request.query_params.get("page_size", 10))
+                return await self.paginate_queryset(result, request, page=page, page_size=page_size)
+
+            # Без пагинации
+            return result.scalars().all()
         finally:
             await session.close()
 
