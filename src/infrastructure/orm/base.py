@@ -51,7 +51,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
 
     allowed_methods: list[str] = ["list", "get", "create", "put", "patch", "delete", "options"]
 
-    pagination_class: Optional[Type[PaginatedResponse]] = PaginatedResponse 
+    pagination_class: Optional[Type[PaginatedResponse]] = PaginatedResponse
 
     def __init__(self):
         self.router = APIRouter(
@@ -60,7 +60,6 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
             dependencies=[Depends(role_required(self.authentication_classes))],
         )
 
-        # Create
         if "create" in self.allowed_methods:
             self.router.add_api_route(
                 "/",

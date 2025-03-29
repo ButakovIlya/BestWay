@@ -13,7 +13,9 @@ class Place(Base):
 
     name: Mapped[str] = mapped_column(String, index=True)
     city: Mapped[str] = mapped_column(
-        Enum(CityCategory, name="place_category", native_enum=False), index=True, default=CityCategory.PERM
+        Enum(CityCategory, name="place_category", native_enum=False, length=16),
+        index=True,
+        default=CityCategory.PERM,
     )
     category: Mapped[PlaceCategory] = mapped_column(
         Enum(PlaceCategory, name="place_category", native_enum=False), nullable=False

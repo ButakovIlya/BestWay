@@ -9,6 +9,7 @@ from domain.filters import BaseFilter
 
 class PlaceBase(BaseModel):
     name: str
+    city: CityCategory
     category: PlaceCategory
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
@@ -20,6 +21,7 @@ class PlaceBase(BaseModel):
 class PlaceCreate(BaseModel):
     name: str
     category: PlaceCategory
+    city: Optional[CityCategory]
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
     coordinates: Optional[str] = None
@@ -30,10 +32,11 @@ class PlaceCreate(BaseModel):
 class PlacePut(BaseModel):
     name: str
     category: PlaceCategory
-    type: Optional[PlaceType] = None
-    tags: Optional[str] = None
-    coordinates: Optional[str] = None
-    map_name: Optional[str] = None
+    city: CityCategory
+    type: PlaceType = None
+    tags: str = None
+    coordinates: str = None
+    map_name: str = None
 
 
 class PlacePatch(BaseModel):
@@ -48,6 +51,7 @@ class PlacePatch(BaseModel):
 class PlaceRead(BaseModel):
     id: int
     name: str
+    city: CityCategory
     category: PlaceCategory
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
