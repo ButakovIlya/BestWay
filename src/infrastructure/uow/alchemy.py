@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from domain.entities.enums import ModelType
 from infrastructure.repositories.alchemy import SqlAlchemyPlacesRepository, SqlAlchemyUsersRepository
+from infrastructure.repositories.interfaces.base import ModelRepository
 from infrastructure.uow.base import UnitOfWork
 
 
@@ -15,6 +17,13 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.places = SqlAlchemyPlacesRepository(self._session)
 
         return await super().__aenter__()
+
+    def get_model_repository(self, resource_name: ModelType) -> ModelRepository:
+        print(resource_name)
+        print(ModelType.PLACES.value)
+        match resource_name:
+            case ModelType.PLACES.value:
+                return self.places
 
     async def rollback(self) -> None:
         await self._session.rollback()

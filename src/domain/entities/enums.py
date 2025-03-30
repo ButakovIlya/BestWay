@@ -114,3 +114,8 @@ class PlaceType(Enum):
     ZOO = "Зоопарк"
     FUN_PARK = "Фанпарк"
     FK_PLANETARIUM = "Планетарий"
+
+
+class ModelType(Enum):
+    PLACES = "places"
+    ROUTES = "routes"

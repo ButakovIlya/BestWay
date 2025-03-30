@@ -85,3 +85,19 @@ class ModelRepository(Repository, Generic[TModel]):
     async def delete_all(self, scenario_id: int) -> None:
         """Удалить все объекты, относящиеся к конкретному сценарию"""
         pass
+
+    @abstractmethod
+    async def get_field_values(
+        self,
+        name: str,
+        per_page: int | None = None,
+        page: int | None = None,
+    ) -> list[str]:
+        pass
+
+    @abstractmethod
+    async def total_rows_for_values(
+        self,
+        name: str,
+    ) -> int:
+        pass

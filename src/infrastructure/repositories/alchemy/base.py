@@ -1,8 +1,10 @@
 from typing import Type, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import and_, delete, exists, select, update
+from sqlalchemy import Select, and_, delete, distinct, exists, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.sql.sqltypes import Enum as SAEnum
 
 from domain.entities.model import Model
 from infrastructure.models.alchemy.base import Base
@@ -21,6 +23,56 @@ class SqlAlchemyRepository(Repository):
 class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
     ENTITY: Type[Model]
     LIST_DTO: Type[BaseModel]
+
+    async def get_field_values(
+        self,
+        name: str,
+        per_page: int | None = None,
+        page: int | None = None,
+    ) -> list[str]:
+        field: InstrumentedAttribute = getattr(self.MODEL, name)
+        is_enum = self.is_enum_field(field)
+
+        stmt: Select = select(distinct(field)).order_by(field)
+
+        if page and per_page:
+            stmt = stmt.limit(per_page).offset((page - 1) * per_page)
+
+        result = await self._session.scalars(stmt)
+        values = result.unique().all()
+
+        processed = []
+        for value in values:
+            if value is None:
+                processed.append(None)
+            elif is_enum:
+                processed.append(str(value.value))
+            else:
+                processed.append(str(value))
+        return processed
+
+    async def total_rows_for_values(self, name: str) -> int:
+        return await self.count_rows_with_filter(self.MODEL, name)
+
+    def is_enum_field(self, field: InstrumentedAttribute) -> bool:
+        try:
+            return isinstance(field.property.columns[0].type, SAEnum)
+        except (AttributeError, IndexError):
+            return False
+
+    def get_enum_class(self, field: InstrumentedAttribute):
+        if self.is_enum_field(field):
+            return field.property.columns[0].type.enum_class
+        return None
+
+    async def count_rows_with_filter(
+        self,
+        model: Type[Base],
+        name: str,
+    ) -> int:
+        stmt = select(func.count(getattr(self.MODEL, name).distinct())).select_from(model)
+        result = await self._session.scalar(stmt)
+        return result or 0
 
     ###############
     ### Getters ###

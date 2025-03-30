@@ -9,6 +9,7 @@ from application.use_cases import UserCreateUseCase
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
+from application.use_cases.models.field_values import ModelFieldValuesUseCase
 from application.use_cases.places.photo import PlacePhotoUpdateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
@@ -143,6 +144,12 @@ class Container(containers.DeclarativeContainer):
         RouteCreateUseCase,
         uow=db.container.uow,
         storage_manager=storage_manager,
+    )
+
+    # models
+    model_field_values_use_case: providers.Provider[ModelFieldValuesUseCase] = providers.Factory(
+        ModelFieldValuesUseCase,
+        uow=db.container.uow,
     )
 
     @classmethod

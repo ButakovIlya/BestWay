@@ -2,11 +2,15 @@ from abc import ABC, abstractmethod
 from types import TracebackType
 from typing import Any, Type
 
+from domain.entities.enums import ModelType
+from infrastructure.repositories.interfaces.base import ModelRepository
+from infrastructure.repositories.interfaces.place import PlaceRepository
 from infrastructure.repositories.interfaces.user import UserRepository
 
 
 class UnitOfWork(ABC):
     users: UserRepository
+    places: PlaceRepository
 
     def __call__(self, *args: Any, autocommit: bool, **kwargs: Any) -> "UnitOfWork":
         self._autocommit = autocommit
@@ -26,6 +30,10 @@ class UnitOfWork(ABC):
         elif self._autocommit:
             await self.commit()
         await self.shutdown()
+
+    @abstractmethod
+    def get_model_repository(self, resource_name: ModelType) -> ModelRepository:
+        pass
 
     @abstractmethod
     async def rollback(self) -> None:
