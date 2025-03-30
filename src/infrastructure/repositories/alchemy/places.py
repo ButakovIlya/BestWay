@@ -11,6 +11,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
     def convert_to_model(self, entity: Place) -> PlaceModel:
         return PlaceModel(
             id=entity.id,
+            city=entity.city,
             name=entity.name,
             category=entity.category,
             type=entity.type,
@@ -23,6 +24,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
     def convert_to_entity(self, model: PlaceModel) -> Place:
         return Place(
             id=model.id,
+            city=model.city,
             name=model.name,
             category=model.category,
             type=model.type,

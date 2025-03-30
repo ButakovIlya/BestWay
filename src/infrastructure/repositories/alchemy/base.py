@@ -1,7 +1,7 @@
 from typing import Type, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import Select, and_, delete, distinct, exists, func, select, update
+from sqlalchemy import JSON, String, and_, cast, delete, distinct, exists, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.sqltypes import Enum as SAEnum
@@ -29,11 +29,16 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         name: str,
         per_page: int | None = None,
         page: int | None = None,
-    ) -> list[str]:
+    ) -> list:
         field: InstrumentedAttribute = getattr(self.MODEL, name)
         is_enum = self.is_enum_field(field)
+        is_json_field = isinstance(field.type, JSON)
 
-        stmt: Select = select(distinct(field)).order_by(field)
+        if is_json_field:
+            casted_field = cast(field, String).label("value")
+            stmt = select(distinct(casted_field)).order_by(casted_field)
+        else:
+            stmt = select(distinct(field)).order_by(field)
 
         if page and per_page:
             stmt = stmt.limit(per_page).offset((page - 1) * per_page)
@@ -41,15 +46,7 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         result = await self._session.scalars(stmt)
         values = result.unique().all()
 
-        processed = []
-        for value in values:
-            if value is None:
-                processed.append(None)
-            elif is_enum:
-                processed.append(str(value.value))
-            else:
-                processed.append(str(value))
-        return processed
+        return values
 
     async def total_rows_for_values(self, name: str) -> int:
         return await self.count_rows_with_filter(self.MODEL, name)
@@ -70,7 +67,13 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         model: Type[Base],
         name: str,
     ) -> int:
-        stmt = select(func.count(getattr(self.MODEL, name).distinct())).select_from(model)
+        field: InstrumentedAttribute = getattr(model, name)
+        is_json_field = isinstance(field.type, JSON)
+
+        if is_json_field:
+            field = cast(field, String)
+
+        stmt = select(func.count(field.distinct())).select_from(model)
         result = await self._session.scalar(stmt)
         return result or 0
 

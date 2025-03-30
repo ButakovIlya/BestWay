@@ -1,65 +1,55 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field, field_validator
 
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 from domain.filters import BaseFilter
 
 
-class PlaceBase(BaseModel):
+class CommonPlaceBase(BaseModel):
     name: str
-    city: CityCategory
     category: PlaceCategory
+    city: Optional[CityCategory] = None
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
-    coordinates: Optional[str] = None
+    coordinates: Optional[List[float]] = None
     photo: Optional[str] = None
     map_name: Optional[str] = None
 
+    @field_validator("coordinates")
+    def validate_coordinates(cls, value):
+        if value is None:
+            return value
+        if isinstance(value, list) and len(value) == 2 and all(isinstance(x, (float, int)) for x in value):
+            return [float(x) for x in value]
+        raise ValueError("coordinates must be a list of two float values or None")
 
-class PlaceCreate(BaseModel):
+
+class PlaceCreate(CommonPlaceBase):
+    pass
+
+
+class PlacePut(CommonPlaceBase):
     name: str
     category: PlaceCategory
-    city: Optional[CityCategory]
-    type: Optional[PlaceType] = None
-    tags: Optional[str] = None
-    coordinates: Optional[str] = None
-    photo: Optional[str] = None
-    map_name: Optional[str] = None
-
-
-class PlacePut(BaseModel):
-    name: str
-    category: PlaceCategory
-    city: CityCategory
+    city: CityCategory = None
     type: PlaceType = None
     tags: str = None
-    coordinates: str = None
+    coordinates: List[float] = None
+    photo: str = None
     map_name: str = None
 
 
-class PlacePatch(BaseModel):
-    name: str
-    category: PlaceCategory
-    type: Optional[PlaceType] = None
-    tags: Optional[str] = None
-    coordinates: Optional[str] = None
-    map_name: Optional[str] = None
+class PlacePatch(CommonPlaceBase):
+    name: Optional[str] = None
+    category: Optional["PlaceCategory"] = None
 
 
-class PlaceRead(BaseModel):
+class PlaceRead(CommonPlaceBase):
     id: int
-    name: str
-    city: CityCategory
-    category: PlaceCategory
-    type: Optional[PlaceType] = None
-    tags: Optional[str] = None
-    coordinates: Optional[str] = None
-    photo: Optional[str] = None
-    map_name: Optional[str] = None
 
-    model_config = ConfigDict(from_attributes=True, use_enum_values=False)
+    model_config = {"from_attributes": True, "use_enum_values": False}
 
 
 class PlaceFilter(BaseFilter):
@@ -68,7 +58,7 @@ class PlaceFilter(BaseFilter):
     category: Optional[PlaceCategory] = None
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
-    coordinates: Optional[str] = None
+    coordinates: Optional[list] = None
     map_name: Optional[str] = None
 
     name__list: Optional[List[str]] = None
@@ -87,18 +77,6 @@ class AuthorSchema(BaseModel):
     last_name: str
 
 
-class PlaceSchema(BaseModel):
-    id: int
-    name: str
-    category: str
-    type: Optional[str]
-    city: str
-    coordinates: Optional[str]
-    map_name: Optional[str]
-    order: int
-    photos: List[PhotoSchema] = []
-
-
 class RouteSchema(BaseModel):
     id: int
     name: str
@@ -108,7 +86,7 @@ class RouteSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     photos: List[PhotoSchema] = []
-    places: List[PlaceSchema] = []
+    places: List[PlaceRead] = []
 
 
 class RoutePutSchema(BaseModel):
@@ -136,4 +114,4 @@ class RouteCreateSchema(BaseModel):
     created_at: datetime
     updated_at: datetime
     photos: List[PhotoSchema] = []
-    places: List[PlaceSchema] = []
+    places: List[PlaceRead] = []

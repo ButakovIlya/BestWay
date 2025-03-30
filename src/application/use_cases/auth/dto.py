@@ -30,6 +30,7 @@ class SmsPayloadDTO(BaseModel):
         """Использует валидатор `PhoneNumberValidator` для нормализации телефона."""
         return PhoneNumberValidator(phone=value).phone
 
+
 class ChangePhoneSmsPayloadDTO(BaseModel):
     """DTO для передачи данных SMS для смены телефона."""
 

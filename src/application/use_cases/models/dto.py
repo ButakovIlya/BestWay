@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel
 
@@ -6,7 +6,7 @@ from domain.entities.enums import ModelType
 
 
 class ModelFieldValuesData(BaseModel):
-    results: List[Optional[str]]
+    results: List[Optional[Any]]
     count: int
     next: int | None = None
     previous: int | None = None

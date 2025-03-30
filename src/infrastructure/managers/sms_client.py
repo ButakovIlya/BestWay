@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from application.use_cases.auth.dto import SmsPayloadDTO
 from config.settings import SmsSettings
 from domain.validators.base import PhoneNumberValidator
-from infrastructure.redis.redis_cache import RedisCache
+from infrastructure.redis.base import AbstractRedisCache
 
 
 class SmsClient:
@@ -19,7 +19,7 @@ class SmsClient:
     COOLDOWN_SECONDS: int = 1  # 5 минут
     BLOCK_SECONDS: int = 24 * 60 * 60  # 1 день
 
-    def __init__(self, redis_cache: RedisCache, settings: SmsSettings):
+    def __init__(self, redis_cache: AbstractRedisCache, settings: SmsSettings):
         self._redis_cache = redis_cache
         self.settings = settings
 

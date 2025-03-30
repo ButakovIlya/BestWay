@@ -1,11 +1,12 @@
 from domain.entities.entity import Entity
-from domain.entities.enums import PlaceCategory, PlaceType
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 
 
 class Place(Entity):
     def __init__(
         self,
         id: int | None = None,
+        city: CityCategory | None = None,
         name: str | None = None,
         category: PlaceCategory | None = None,
         type: PlaceType | None = None,
@@ -17,6 +18,7 @@ class Place(Entity):
         super().__init__(id)
 
         self.name = name
+        self.city = city
         self.category = category
         self.type = type
         self.tags = tags

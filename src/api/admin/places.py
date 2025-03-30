@@ -1,13 +1,14 @@
 from io import BytesIO
-from typing import Optional
+from typing import Annotated, Optional
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, Path, UploadFile, status
 
 from api.permissions.is_admin import is_admin
 from application.use_cases.common.dto import ModelPhotoDTO
 from application.use_cases.models.dto import ModelFieldValuesData, ModelFieldValuesInputDTO
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
+from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
 from application.use_cases.places.photo import PlacePhotoUpdateUseCase
 from config.containers import Container
 from domain.entities.enums import ModelType
@@ -65,3 +66,19 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
             name=field_name,
         )
         return await use_case.execute(data=data)
+
+    @router.get(
+        "/select_field_values/{field_name}",
+        description="Получить допустимые значения для поле по 'field_name'",
+    )
+    @inject
+    async def select_field_values(
+        self,
+        field_name: str,
+        use_case: SelectFieldValuesUseCase = Depends(Provide[Container.select_field_values_use_case]),
+    ) -> list[str]:
+        result = await use_case.execute(
+            ModelType.PLACES,
+            field_name,
+        )
+        return result

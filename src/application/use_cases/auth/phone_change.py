@@ -36,14 +36,10 @@ class VerifyPhoneChangeSmsCodeUseCase(UseCase):
                     await self._uow.users.update(user)
                 else:
                     raise APIException(
-                        code=403,
-                        message=f"Пользователь с телефоном '{data.new_phone}' уже существует"
+                        code=403, message=f"Пользователь с телефоном '{data.new_phone}' уже существует"
                     )
             else:
-                raise APIException(
-                    code=404,
-                    message=f"Пользователь с телефоном '{data.phone}' не найден"
-                )
+                raise APIException(code=404, message=f"Пользователь с телефоном '{data.phone}' не найден")
         # Генерация токенов
         data = UserCreateDTO(user_id=user.id, phone=user.phone, is_admin=user.is_admin)
         access_token = self._jwt_manager.create_access_token(data)

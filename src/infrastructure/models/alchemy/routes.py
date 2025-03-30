@@ -26,7 +26,7 @@ class Place(Base):
         server_default=None,
     )
     tags: Mapped[str | None] = mapped_column(default=None, server_default=None)
-    coordinates: Mapped[str | None] = mapped_column(default=None, server_default=None)
+    coordinates: Mapped[list | None] = mapped_column(JSON, default=None, server_default=None)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
     map_name: Mapped[str | None] = mapped_column(default=None, server_default=None)
 

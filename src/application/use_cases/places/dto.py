@@ -2,13 +2,14 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from domain.entities.enums import PlaceCategory, PlaceType
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 
 
 class PlaceDTO(BaseModel):
-    id: Optional[int]
-    name: Optional[str]
-    category: Optional[PlaceCategory]
+    id: int
+    city: CityCategory
+    name: str
+    category: PlaceCategory
     type: Optional[PlaceType]
     tags: Optional[str]
     coordinates: Optional[str]

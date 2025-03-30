@@ -11,6 +11,7 @@ from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseC
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
+from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
 from application.use_cases.places.photo import PlacePhotoUpdateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
@@ -89,7 +90,7 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
     )
 
-    # auth 
+    # auth
     send_code_use_case: providers.Provider[SendSmsCodeUseCase] = providers.Factory(
         SendSmsCodeUseCase, sms_client=clients.container.sms_client
     )
@@ -101,11 +102,13 @@ class Container(containers.DeclarativeContainer):
         jwt_manager=jwt_manager,
     )
 
-    change_number_sms_code_use_case: providers.Provider[VerifyPhoneChangeSmsCodeUseCase] = providers.Factory(
-        VerifyPhoneChangeSmsCodeUseCase,
-        uow=db.container.uow,
-        redis_client=clients.container.redis_cache,
-        jwt_manager=jwt_manager,
+    change_number_sms_code_use_case: providers.Provider[VerifyPhoneChangeSmsCodeUseCase] = (
+        providers.Factory(
+            VerifyPhoneChangeSmsCodeUseCase,
+            uow=db.container.uow,
+            redis_client=clients.container.redis_cache,
+            jwt_manager=jwt_manager,
+        )
     )
 
     # users
@@ -155,6 +158,9 @@ class Container(containers.DeclarativeContainer):
     model_field_values_use_case: providers.Provider[ModelFieldValuesUseCase] = providers.Factory(
         ModelFieldValuesUseCase,
         uow=db.container.uow,
+    )
+    select_field_values_use_case: providers.Provider[SelectFieldValuesUseCase] = providers.Factory(
+        SelectFieldValuesUseCase,
     )
 
     @classmethod

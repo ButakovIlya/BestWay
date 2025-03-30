@@ -3,7 +3,13 @@ from fastapi import APIRouter, Depends, Request, status
 
 from api.permissions.is_authenticated import is_authenticated
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
-from application.use_cases.auth.dto import ChangePhoneSmsPayloadDTO, PhoneDTO, SmsPayloadDTO, SmsResponseDTO, TokenDTO
+from application.use_cases.auth.dto import (
+    ChangePhoneSmsPayloadDTO,
+    PhoneDTO,
+    SmsPayloadDTO,
+    SmsResponseDTO,
+    TokenDTO,
+)
 from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from config.containers import Container
@@ -37,14 +43,11 @@ async def check_code(
 @is_authenticated
 @inject
 async def send_phone_change_code(
-    request: Request,
-    use_case: SendSmsCodeUseCase = Depends(Provide[Container.send_code_use_case])
+    request: Request, use_case: SendSmsCodeUseCase = Depends(Provide[Container.send_code_use_case])
 ) -> SmsResponseDTO:
     """Эндпоинт для запроса кода на смену телефона по SMS."""
     user: User = request.state.user
-    data = PhoneDTO(
-        phone=user.phone
-    )
+    data = PhoneDTO(phone=user.phone)
     return await use_case.execute(data=data)
 
 
@@ -54,7 +57,7 @@ async def send_phone_change_code(
 async def check_phone_change_code(
     request: Request,
     data: ChangePhoneSmsPayloadDTO,
-    use_case: VerifyPhoneChangeSmsCodeUseCase = Depends(Provide[Container.change_number_sms_code_use_case])
+    use_case: VerifyPhoneChangeSmsCodeUseCase = Depends(Provide[Container.change_number_sms_code_use_case]),
 ) -> TokenDTO:
     """Эндпоинт для проверки кода из SMS."""
     user: User = request.state.user
