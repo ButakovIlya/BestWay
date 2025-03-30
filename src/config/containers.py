@@ -7,6 +7,7 @@ from redis.client import AbstractRedis  # type: ignore
 
 from application.use_cases import UserCreateUseCase
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
+from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
@@ -88,16 +89,20 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
     )
 
-    user_create_use_case: providers.Provider[UserCreateUseCase] = providers.Factory(
-        UserCreateUseCase,
-        uow=db.container.uow,
-    )
+    # auth 
     send_code_use_case: providers.Provider[SendSmsCodeUseCase] = providers.Factory(
         SendSmsCodeUseCase, sms_client=clients.container.sms_client
     )
 
     verify_sms_code_use_case: providers.Provider[VerifySmsCodeUseCase] = providers.Factory(
         VerifySmsCodeUseCase,
+        uow=db.container.uow,
+        redis_client=clients.container.redis_cache,
+        jwt_manager=jwt_manager,
+    )
+
+    change_number_sms_code_use_case: providers.Provider[VerifyPhoneChangeSmsCodeUseCase] = providers.Factory(
+        VerifyPhoneChangeSmsCodeUseCase,
         uow=db.container.uow,
         redis_client=clients.container.redis_cache,
         jwt_manager=jwt_manager,

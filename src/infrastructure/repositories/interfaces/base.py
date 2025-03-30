@@ -61,12 +61,12 @@ class ModelRepository(Repository, Generic[TModel]):
 
     # UPDATE
     @abstractmethod
-    async def update(self, model_id: int, data: dict[str, Any]) -> TModel:
-        """Обновить объект по ID"""
+    async def update(self, data: TModel) -> None:
+        """Обновить объект по Entity"""
         pass
 
     @abstractmethod
-    async def bulk_update(self, data: list[dict[str, Any]], batch_size: int = 100000) -> list[TModel]:
+    async def bulk_update(self, entities: list[TModel]) -> None:
         """Массовое обновление объектов"""
         pass
 

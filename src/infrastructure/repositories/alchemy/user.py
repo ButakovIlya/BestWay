@@ -12,10 +12,14 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
     MODEL = UserModel
     ENTITY = User
 
-    async def get_by_phone(self, phone: str) -> Optional[UserModel]:
+    async def get_by_phone(self, phone: str) -> Optional[User]:
         stmt = select(self.MODEL).where(self.MODEL.phone == phone)
         result = await self._session.execute(stmt)
-        return result.scalar_one_or_none()
+        model = result.scalar_one_or_none()
+        if model:
+            return self.convert_to_entity(model)
+        else:
+            return None
 
     async def exists_by_phone(self, phone: str) -> bool:
         stmt = select(exists().where(self.MODEL.phone == phone))

@@ -30,6 +30,19 @@ class SmsPayloadDTO(BaseModel):
         """Использует валидатор `PhoneNumberValidator` для нормализации телефона."""
         return PhoneNumberValidator(phone=value).phone
 
+class ChangePhoneSmsPayloadDTO(BaseModel):
+    """DTO для передачи данных SMS для смены телефона."""
+
+    phone: Optional[str] = Field(example="79991234567", default=None)
+    new_phone: str = Field(..., example="79991234567")
+    code: str = Field(..., example="1234", min_length=4, max_length=4, pattern=r"^\d{4}$")
+
+    @field_validator("phone", "new_phone")
+    @classmethod
+    def validate_phone(cls, value: str) -> str:
+        """Использует валидатор `PhoneNumberValidator` для нормализации телефона."""
+        return PhoneNumberValidator(phone=value).phone
+
 
 class TokenDTO(BaseModel):
     """DTO для ответа при успешной верификации кода."""
