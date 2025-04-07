@@ -1,9 +1,11 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any, AsyncGenerator, Callable
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
+from fastapi.staticfiles import StaticFiles
 
 import api
 from api import admin_routers, public_routers
@@ -32,8 +34,8 @@ def create_app(settings: Settings) -> FastAPI:
     include_routers(app, settings)
     add_exception_hanlers(app)
 
-    # MEDIA_DIR = Path("storage/media")
-    # app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
+    MEDIA_DIR = Path("storage/media")
+    app.mount("/media", StaticFiles(directory=MEDIA_DIR), name="media")
 
     app.openapi = custom_openapi(app, settings)  # type: ignore
 

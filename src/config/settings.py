@@ -115,6 +115,26 @@ class StorageSettings(BaseModel):
         return self.storage_path / self.media_directory
 
 
+class ProxySettings(BaseSettings):
+    service_url: str = ""
+    api_key: str = ""
+    cache_timeout: int = 300  # По умолчанию 5 минут
+
+    class Config:
+        env_prefix = "SMS__"
+        env_nested_delimiter = ("__",)
+
+
+class ChatGPTSettings(BaseSettings):
+    service_url: str = ""
+    api_key: str = ""
+    cache_timeout: int = 300  # По умолчанию 5 минут
+
+    class Config:
+        env_prefix = "SMS__"
+        env_nested_delimiter = ("__",)
+
+
 class Settings(BaseSettings):
     app: AppSettings = AppSettings()
     task: TaskSettings = TaskSettings()

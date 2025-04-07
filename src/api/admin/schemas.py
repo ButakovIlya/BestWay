@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 from domain.filters import BaseFilter
+from infrastructure.models.alchemy.routes import Photo, Place
 
 
 class CommonPlaceBase(BaseModel):
@@ -14,7 +15,6 @@ class CommonPlaceBase(BaseModel):
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
     coordinates: Optional[List[float]] = None
-    photo: Optional[str] = None
     map_name: Optional[str] = None
 
     @field_validator("coordinates")
@@ -37,7 +37,6 @@ class PlacePut(CommonPlaceBase):
     type: PlaceType = None
     tags: str = None
     coordinates: List[float] = None
-    photo: str = None
     map_name: str = None
 
 
@@ -46,10 +45,44 @@ class PlacePatch(CommonPlaceBase):
     category: Optional["PlaceCategory"] = None
 
 
+class PhotoRead(BaseModel):
+    id: int
+    url: str
+
+    model_config = {"from_attributes": True}
+
+    @classmethod
+    def model_validate(cls, photo: Any) -> "PhotoRead":
+        url = getattr(photo, "url", None) or photo.get("url")
+        id_ = getattr(photo, "id", None) or photo.get("id")
+
+        return cls(
+            id=id_,
+            url=f"http://localhost:8002/{url.lstrip('/')}" if url else "",
+        )
+
+
 class PlaceRead(CommonPlaceBase):
     id: int
+    photo: Optional[str] = None
+    photos: Optional[List[PhotoRead]] = None
 
     model_config = {"from_attributes": True, "use_enum_values": False}
+
+    @classmethod
+    def model_validate(cls, place: Place) -> "PlaceRead":
+        return cls(
+            id=place.id,
+            name=place.name,
+            city=place.city,
+            category=place.category,
+            type=place.type,
+            tags=place.tags,
+            coordinates=place.coordinates,
+            photo=place.photo,
+            map_name=place.map_name,
+            photos=[PhotoRead.model_validate(photo) for photo in place.photos] if place.photos else None,
+        )
 
 
 class PlaceFilter(BaseFilter):

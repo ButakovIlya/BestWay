@@ -7,7 +7,7 @@ from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.routing import APIRoute
 from pydantic import BaseModel
-from sqlalchemy import select, update
+from sqlalchemy import Select, select, update
 from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -176,7 +176,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         session: AsyncSession,
     ) -> Base:
         result = await self.get_queryset(session, item_id)
-        obj = result.scalar_one_or_none()
+        obj = result.unique().scalar_one_or_none()
         if not obj:
             raise APIException(code=404, message="Item not found")
         return obj
@@ -187,6 +187,10 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         item_id: Optional[int] = None,
         filters: Optional[dict] = None,
     ) -> Result:
+        stmt = self.build_select_stmt(item_id=item_id, filters=filters)
+        return await session.execute(stmt)
+
+    def build_select_stmt(self, item_id: Optional[int] = None, filters: Optional[dict] = None) -> Select:
         stmt = select(self.model)
 
         if item_id:
@@ -197,17 +201,16 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
                 if value is None:
                     continue
 
-                # поддерка механики передачи списка элементов в параметрах
                 if attr.endswith("__list"):
                     column_name = attr.removesuffix("__list")
                     if hasattr(self.model, column_name):
                         stmt = stmt.where(getattr(self.model, column_name).in_(value))
-                if attr in self.ilike_list:
+                elif attr in self.ilike_list:
                     stmt = stmt.where(getattr(self.model, attr).ilike(f"%{value}%"))
                 elif hasattr(self.model, attr):
                     stmt = stmt.where(getattr(self.model, attr) == value)
-        print(stmt)
-        return await session.execute(stmt)
+
+        return stmt
 
     async def paginate_queryset(
         self,
@@ -216,7 +219,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         page: int = 1,
         page_size: int = 10,
     ) -> BaseModel:
-        items = result.scalars().all()
+        items = result.unique().scalars().all()
         total = len(items)
 
         start = (page - 1) * page_size
@@ -269,7 +272,10 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         session: AsyncSession = Depends(Provide[Container.db.session]),
     ) -> TRead:
         try:
-            return await self.get_object(item_id, session)
+            orm_obj = await self.get_object(item_id, session)
+
+            return self.schema_read.model_validate(orm_obj)
+
         finally:
             await session.close()
 

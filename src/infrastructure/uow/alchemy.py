@@ -1,7 +1,11 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from domain.entities.enums import ModelType
-from infrastructure.repositories.alchemy import SqlAlchemyPlacesRepository, SqlAlchemyUsersRepository
+from infrastructure.repositories.alchemy import (
+    SqlAlchemyPhotosRepository,
+    SqlAlchemyPlacesRepository,
+    SqlAlchemyUsersRepository,
+)
 from infrastructure.repositories.interfaces.base import ModelRepository
 from infrastructure.uow.base import UnitOfWork
 
@@ -15,6 +19,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
 
         self.users = SqlAlchemyUsersRepository(self._session)
         self.places = SqlAlchemyPlacesRepository(self._session)
+        self.photos = SqlAlchemyPhotosRepository(self._session)
 
         return await super().__aenter__()
 

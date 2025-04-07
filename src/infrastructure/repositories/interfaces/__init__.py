@@ -1,2 +1,3 @@
+from infrastructure.repositories.interfaces.photo import PhotoRepository
 from infrastructure.repositories.interfaces.place import PlaceRepository
 from infrastructure.repositories.interfaces.user import UserRepository

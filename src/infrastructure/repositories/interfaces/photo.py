@@ -1,4 +1,3 @@
-from abc import abstractmethod
 from typing import TypeVar
 
 from domain.entities.model import Model
@@ -8,7 +7,4 @@ TModel = TypeVar("TModel", bound=Model)
 
 
 class PhotoRepository(ModelRepository):
-    @abstractmethod
-    async def update_photo(self, phone: str) -> TModel:
-        """Сменить фото"""
-        pass
+    pass

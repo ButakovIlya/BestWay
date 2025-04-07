@@ -1,17 +1,23 @@
 from io import BytesIO
-from typing import Annotated, Optional
+from typing import List, Optional
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, File, Path, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
+from sqlalchemy import Select
+from sqlalchemy.orm import joinedload
 
 from api.permissions.is_admin import is_admin
 from application.use_cases.common.dto import ModelPhotoDTO
+from application.use_cases.common.photo.delete import DeletePhotoUseCase
 from application.use_cases.models.dto import ModelFieldValuesData, ModelFieldValuesInputDTO
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
 from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
-from application.use_cases.places.photo import PlacePhotoUpdateUseCase
+from application.use_cases.places.add_photos import PlacePhotosAddUseCase
+from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
+from application.use_cases.places.create import PlaceCreateUseCase
+from application.use_cases.places.dto import CreatePlaceDTO
 from config.containers import Container
-from domain.entities.enums import ModelType
+from domain.entities.enums import CityCategory, ModelType, PlaceCategory, PlaceType
 from infrastructure.models.alchemy.routes import Place
 from infrastructure.orm.base import BaseViewSet
 from infrastructure.permissions.enums import RoleEnum
@@ -32,9 +38,63 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
     prefix = "/places"
     tags = ["Places"]
 
+    allowed_methods: list[str] = ["list", "get", "create", "put", "patch", "delete", "options"]
+
     authentication_classes = [RoleEnum.ADMIN]
 
     router = APIRouter(tags=tags, prefix=prefix, dependencies=[Depends(is_admin)])
+
+    def build_select_stmt(self, item_id: Optional[int] = None, filters: Optional[dict] = None) -> Select:
+        stmt = super().build_select_stmt(item_id=item_id, filters=filters).options(joinedload(Place.photos))
+        return stmt
+
+    @router.post("/", status_code=status.HTTP_200_OK)
+    @inject
+    async def create(
+        self,
+        request: Request,
+        name: str = Form(...),
+        category: PlaceCategory = Form(...),
+        city: Optional[CityCategory] = Form(None),
+        type: Optional[PlaceType] = Form(None),
+        tags: Optional[str] = Form(None),
+        coordinates: Optional[List[str]] = Form(
+            None, description="Введите координаты в формате: 12.34,56.78 (широта,долгота)"
+        ),
+        map_name: Optional[str] = Form(None),
+        photo: Optional[UploadFile] = File(None),
+        photos: Optional[List[UploadFile]] = File(None),
+        use_case: PlaceCreateUseCase = Depends(Provide[Container.create_place_use_case]),
+    ):
+        photo_data = ModelPhotoDTO(
+            photo=BytesIO(await photo.read()) if photo else None,
+            filename=photo.filename if photo else None,
+        )
+        photos_data = (
+            [
+                ModelPhotoDTO(
+                    photo=BytesIO(await photo.read()) if photo else None,
+                    filename=photo.filename if photo else None,
+                )
+                for photo in photos
+            ]
+            if photos
+            else []
+        )
+
+        data = CreatePlaceDTO(
+            name=name,
+            city=city,
+            type=type,
+            tags=tags,
+            category=category,
+            coordinates=coordinates,
+            map_name=map_name,
+            photo=photo_data,
+            photos=photos_data,
+        )
+        user_id: int = request.state.user.id
+        return await use_case.execute(data=data, user_id=user_id)
 
     @router.post("/{place_id}/avatar", status_code=status.HTTP_200_OK)
     @inject
@@ -49,6 +109,39 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
             filename=photo.filename if photo else None,
         )
         return await use_case.execute(place_id=place_id, data=data)
+
+    @router.delete("/{place_id}/photos/{photo_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+    @inject
+    async def remove_photo(
+        self,
+        place_id: int,
+        photo_id: int,
+        use_case: DeletePhotoUseCase = Depends(Provide[Container.delete_photo_use_case]),
+    ):
+        return await use_case.execute(photo_id, place_id)
+
+    @router.post("/{place_id}/photos/add", status_code=status.HTTP_200_OK)
+    @inject
+    async def add_photos(
+        self,
+        request: Request,
+        place_id: int,
+        photos: Optional[List[UploadFile]] = File(None),
+        use_case: PlacePhotosAddUseCase = Depends(Provide[Container.place_photos_add_use_case]),
+    ):
+        photos_data = (
+            [
+                ModelPhotoDTO(
+                    photo=BytesIO(await photo.read()) if photo else None,
+                    filename=photo.filename if photo else None,
+                )
+                for photo in photos
+            ]
+            if photos
+            else []
+        )
+        user_id: int = request.state.user.id
+        return await use_case.execute(place_id=place_id, user_id=user_id, photos=photos_data)
 
     @router.get("/field_values/{field_name}", description="Получить значения для фильтров по 'field_name'")
     @inject
@@ -77,8 +170,7 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
         field_name: str,
         use_case: SelectFieldValuesUseCase = Depends(Provide[Container.select_field_values_use_case]),
     ) -> list[str]:
-        result = await use_case.execute(
+        return await use_case.execute(
             ModelType.PLACES,
             field_name,
         )
-        return result

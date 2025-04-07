@@ -29,3 +29,4 @@ RUN apt install --no-install-recommends --no-install-suggests -y gcc libc6-dev \
 RUN pip install -r requirements.txt
 
 COPY . /app
+RUN mkdir -p storage/media

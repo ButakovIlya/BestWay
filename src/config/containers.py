@@ -10,9 +10,13 @@ from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
+from application.use_cases.common.photo.delete import DeletePhotoUseCase
+from application.use_cases.common.photo.upload import UploadPhotosUseCase
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
 from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
-from application.use_cases.places.photo import PlacePhotoUpdateUseCase
+from application.use_cases.places.add_photos import PlacePhotosAddUseCase
+from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
+from application.use_cases.places.create import PlaceCreateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
@@ -90,6 +94,18 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
     )
 
+    delete_photo_use_case: providers.Provider[DeletePhotoUseCase] = providers.Factory(
+        DeletePhotoUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+    )
+
+    upload_photos_use_case: providers.Provider[UploadPhotosUseCase] = providers.Factory(
+        UploadPhotosUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+    )
+
     # auth
     send_code_use_case: providers.Provider[SendSmsCodeUseCase] = providers.Factory(
         SendSmsCodeUseCase, sms_client=clients.container.sms_client
@@ -140,11 +156,26 @@ class Container(containers.DeclarativeContainer):
     )
 
     # places
+    create_place_use_case: providers.Provider[PlaceCreateUseCase] = providers.Factory(
+        PlaceCreateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+        update_photo_use_case=update_photo_use_case,
+        upload_photos_use_case=upload_photos_use_case,
+    )
+
     place_avatar_update_use_case: providers.Provider[PlacePhotoUpdateUseCase] = providers.Factory(
         PlacePhotoUpdateUseCase,
         uow=db.container.uow,
         storage_manager=storage_manager,
         update_photo_use_case=update_photo_use_case,
+    )
+
+    place_photos_add_use_case: providers.Provider[PlacePhotosAddUseCase] = providers.Factory(
+        PlacePhotosAddUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+        upload_photos_use_case=upload_photos_use_case,
     )
 
     # routes

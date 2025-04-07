@@ -4,6 +4,7 @@ from typing import Any, Type
 
 from domain.entities.enums import ModelType
 from infrastructure.repositories.interfaces.base import ModelRepository
+from infrastructure.repositories.interfaces.photo import PhotoRepository
 from infrastructure.repositories.interfaces.place import PlaceRepository
 from infrastructure.repositories.interfaces.user import UserRepository
 
@@ -11,6 +12,7 @@ from infrastructure.repositories.interfaces.user import UserRepository
 class UnitOfWork(ABC):
     users: UserRepository
     places: PlaceRepository
+    photos: PhotoRepository
 
     def __call__(self, *args: Any, autocommit: bool, **kwargs: Any) -> "UnitOfWork":
         self._autocommit = autocommit

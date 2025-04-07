@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.sqltypes import Enum as SAEnum
 
+from common.exceptions import APIException
 from domain.entities.model import Model
 from infrastructure.models.alchemy.base import Base
 from infrastructure.repositories.interfaces.base import ModelRepository, Repository
@@ -31,7 +32,6 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         page: int | None = None,
     ) -> list:
         field: InstrumentedAttribute = getattr(self.MODEL, name)
-        is_enum = self.is_enum_field(field)
         is_json_field = isinstance(field.type, JSON)
 
         if is_json_field:
@@ -84,7 +84,9 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
     async def get_by_id(self, model_id: int) -> TModel:
         model = await self._session.get(self.MODEL, model_id)
         if not model:
-            raise ValueError("Model not found")
+            raise APIException(
+                code=404, message=f"Объект модели `{self.MODEL.__tablename__}` c id={model_id} не найден"
+            )
         return self.convert_to_entity(model)
 
     async def get_list(
@@ -158,7 +160,9 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
     async def delete_by_id(self, model_id: int) -> None:
         model = await self._session.get(self.MODEL, model_id)
         if not model:
-            raise ValueError("Model not found")
+            raise APIException(
+                code=404, message=f"Объект модели `{self.MODEL.__tablename__}` c id={model_id} не найден"
+            )
         await self._session.delete(model)
         await self._session.flush()
 

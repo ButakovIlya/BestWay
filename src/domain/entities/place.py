@@ -1,3 +1,5 @@
+from typing import List
+
 from domain.entities.entity import Entity
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
 
@@ -11,7 +13,7 @@ class Place(Entity):
         category: PlaceCategory | None = None,
         type: PlaceType | None = None,
         tags: str | None = None,
-        coordinates: str | None = None,
+        coordinates: List[float] | None = None,
         photo: str | None = None,
         map_name: str | None = None,
     ) -> None:

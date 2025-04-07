@@ -24,3 +24,13 @@ class ModelPhotoDTO(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
+
+
+class UploadPhotosDTO(BaseModel):
+    photo: Optional[BytesIO] = None
+    filename: Optional[str] = None
+    filepath: Optional[str] = None
+    model_name: ModelType
+
+    class Config:
+        arbitrary_types_allowed = True
