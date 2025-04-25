@@ -116,6 +116,15 @@ class PlaceType(Enum):
     FK_PLANETARIUM = "Планетарий"
 
 
+class RouteType(Enum):
+    WALKING = "Пешком"
+    CAR = "На автомобиле"
+    BUS = "На автобусе"
+    SCOOTER_BIKE = "На самокате/велосипеде"
+    VEHICLE = "На машине"
+    MIXED = "Смешанный"
+
+
 class ModelType(Enum):
     PLACES = "places"
     ROUTES = "routes"

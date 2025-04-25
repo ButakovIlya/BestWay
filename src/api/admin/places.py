@@ -59,7 +59,8 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
         type: Optional[PlaceType] = Form(None),
         tags: Optional[str] = Form(None),
         coordinates: Optional[List[str]] = Form(
-            None, description="Введите координаты в формате: 12.34,56.78 (широта,долгота)"
+            None,
+            description="Введите координаты в формате: 15.5,14.6",
         ),
         map_name: Optional[str] = Form(None),
         photo: Optional[UploadFile] = File(None),

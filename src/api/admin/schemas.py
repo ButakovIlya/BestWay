@@ -3,9 +3,10 @@ from typing import Any, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
-from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
+from application.utils import get_settings
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
 from domain.filters import BaseFilter
-from infrastructure.models.alchemy.routes import Photo, Place
+from infrastructure.models.alchemy.routes import Place, Route
 
 
 class CommonPlaceBase(BaseModel):
@@ -42,7 +43,7 @@ class PlacePut(CommonPlaceBase):
 
 class PlacePatch(CommonPlaceBase):
     name: Optional[str] = None
-    category: Optional["PlaceCategory"] = None
+    category: Optional[PlaceCategory] = None
 
 
 class PhotoRead(BaseModel):
@@ -58,7 +59,7 @@ class PhotoRead(BaseModel):
 
         return cls(
             id=id_,
-            url=f"http://localhost:8002/{url.lstrip('/')}" if url else "",
+            url=f"{get_settings().app.base_url}{url.lstrip('/')}" if url else "",
         )
 
 
@@ -79,7 +80,7 @@ class PlaceRead(CommonPlaceBase):
             type=place.type,
             tags=place.tags,
             coordinates=place.coordinates,
-            photo=place.photo,
+            photo=f"{get_settings().app.base_url}{place.photo.lstrip('/')}" if place.photo else None,
             map_name=place.map_name,
             photos=[PhotoRead.model_validate(photo) for photo in place.photos] if place.photos else None,
         )
@@ -110,41 +111,136 @@ class AuthorSchema(BaseModel):
     last_name: str
 
 
-class RouteSchema(BaseModel):
-    id: int
+class CommonRouteBase(BaseModel):
     name: str
-    author: AuthorSchema
+    city: Optional[CityCategory] = None
+    type: Optional[RouteType] = None
+
+
+class RouteSchema(CommonRouteBase):
+    id: int
+    author_id: int
     duration: Optional[int]
     distance: Optional[int]
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     photos: List[PhotoSchema] = []
     places: List[PlaceRead] = []
 
 
-class RoutePutSchema(BaseModel):
+class RoutePutSchema(CommonRouteBase):
     id: int
-    name: str
     author: int
     duration: int
     distance: int
 
 
-class RoutePatchSchema(BaseModel):
+class RoutePatchSchema(CommonRouteBase):
     id: int
-    name: str | None = None
-    author: int | None = None
+    author: Optional[int] = None
     duration: Optional[int] = None
     distance: Optional[int] = None
 
 
-class RouteCreateSchema(BaseModel):
+class RouteCreateSchema(CommonRouteBase):
     id: int
-    name: str
-    author: AuthorSchema
+    author: Optional[int] = None
     duration: Optional[int]
     distance: Optional[int]
-    created_at: datetime
-    updated_at: datetime
-    photos: List[PhotoSchema] = []
+    places: Optional[List[int]]
+
+
+class RouteReadSchema(CommonRouteBase):
+    id: int
+    author_id: int
+    duration: Optional[int]
+    distance: Optional[int]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     places: List[PlaceRead] = []
+
+
+# class PhotoRead(BaseModel):
+#     url: str
+#     uploaded_at: datetime
+
+#     model_config = {"from_attributes": True}
+
+
+class PlaceRead(BaseModel):
+    name: str
+    city: str
+    category: str
+    type: Optional[str]
+    tags: Optional[str]
+    coordinates: Optional[list]
+    photo: Optional[str]
+    map_name: Optional[str]
+    photos: list[PhotoRead] = []
+
+    model_config = {"from_attributes": True}
+
+
+class RoutePlaceRead(BaseModel):
+    order: int
+    place: PlaceRead
+
+    model_config = {"from_attributes": True}
+
+
+class UserRead(BaseModel):
+    id: int
+    phone: str
+    first_name: str | None = None
+    last_name: str | None = None
+    middle_name: str | None = None
+    registration_date: datetime | None = None
+    is_banned: bool = False
+    is_admin: bool = False
+    photo: str | None = None
+    description: str | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class RouteRead(CommonRouteBase):
+    id: int
+    author_id: int
+    photo: Optional[str]
+    duration: Optional[int]
+    distance: Optional[int]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    author: Optional[UserRead] = None
+    photos: Optional[List[PhotoRead]]
+    places: list[RoutePlaceRead]
+
+    model_config = {"from_attributes": True}
+
+    @classmethod
+    def model_validate(cls, route: Route) -> "RouteRead":
+        return cls(
+            id=route.id,
+            name=route.name,
+            city=route.city,
+            type=route.type,
+            photo=route.photo,
+            author_id=route.author_id,
+            duration=route.duration,
+            distance=route.distance,
+            created_at=route.created_at,
+            updated_at=route.updated_at,
+            author=UserRead.model_validate(route.author),
+            photos=[PhotoRead.model_validate(p) for p in route.photos],
+            places=[RoutePlaceRead.model_validate(place) for place in route.places],
+        )
+
+
+class RouteFilter(BaseFilter):
+    name: Optional[str] = Field(None, description="Partial match for name")
+    city: Optional[CityCategory] = None
+    type: Optional[RouteType] = None
+
+    name__list: Optional[List[str]] = None
+    city__list: Optional[List[CityCategory]] = None
+    type__list: Optional[List[PlaceType]] = None

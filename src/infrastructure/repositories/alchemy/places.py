@@ -7,6 +7,7 @@ from infrastructure.repositories.interfaces import PlaceRepository
 class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceRepository):
     MODEL = PlaceModel
     ENTITY = Place
+    LIST_DTO: Place
 
     def convert_to_model(self, entity: Place) -> PlaceModel:
         return PlaceModel(

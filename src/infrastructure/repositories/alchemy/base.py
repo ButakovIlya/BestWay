@@ -91,28 +91,32 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
 
     async def get_list(
         self,
-        scenario_id: int,
         per_page: int | None = None,
         page: int | None = None,
-        ordering: str | None = None,
-        filters: dict | None = None,
-        show_errors: bool | None = None,
     ) -> list:
-        stmt = select(self.MODEL).filter_by(scenario_id=scenario_id)
+        stmt = select(self.MODEL)
 
         if page and per_page:
             stmt = stmt.limit(per_page).offset((page - 1) * per_page)
 
-        stmt = self.apply_ordering(self.MODEL, ordering, stmt)
-        stmt = self.apply_filters(self.MODEL, filters, stmt)
-
-        if show_errors:
-            result = await self.get_show_error_result(scenario_id, per_page, page)
-        else:
-            result = await self._session.scalars(stmt.order_by(getattr(self.MODEL, "id").desc()))
+        result = await self._session.scalars(stmt.order_by(getattr(self.MODEL, "id").desc()))
 
         objects = result.all()
         return [self.LIST_DTO(**vars(obj)) for obj in objects]
+
+    async def get_list_by_ids(
+        self,
+        id_list: list[int],
+    ) -> list:
+        if not id_list:
+            return []
+
+        stmt = select(self.MODEL).where(self.MODEL.id.in_(id_list))
+
+        result = await self._session.scalars(stmt)
+        objects = result.all()
+
+        return [self.convert_to_entity(model) for model in objects]
 
     async def filter_by_id_list(self, id_list: list[int]) -> list[TModel]:
         stmt = select(self.MODEL).filter(getattr(self.MODEL, "id").in_(id_list))
@@ -183,6 +187,15 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
 
         result = await self._session.execute(stmt)
         return result.scalar()
+
+    async def all_exist_by_id_list(self, id_lst: list) -> bool:
+        """Проверяет, существуют ли все объекты из списка id"""
+        if not id_lst:
+            return False
+
+        stmt = select(func.count(self.MODEL.id)).where(self.MODEL.id.in_(id_lst))
+        result = await self._session.scalar(stmt)
+        return result == len(id_lst)
 
     async def check_is_exists_by_name(self, name: str) -> bool:
         pass

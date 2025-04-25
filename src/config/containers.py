@@ -31,7 +31,13 @@ from infrastructure.redis import init_redis_pool
 from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.redis.redis_cache import RedisCache
 from infrastructure.repositories.alchemy.db import Database
+from infrastructure.tasks import Task
+from infrastructure.tasks.routes import chatgpt_process_route_task
 from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
+from src.application.use_cases.routes.add_photos import RoutePhotosAddUseCase
+from src.application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
+from src.application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
+from src.application.use_cases.users.list import UsersListUseCase
 
 
 class ClientsContainer(containers.DeclarativeContainer):
@@ -65,6 +71,12 @@ class DBContainer(containers.DeclarativeContainer):
     session = providers.Factory(lambda db: db.session_factory(), db)
 
 
+class TasksContainer(containers.DeclarativeContainer):
+    chatgpt_process_route: providers.Provider[Task] = providers.Singleton(
+        lambda: chatgpt_process_route_task
+    )
+
+
 class Container(containers.DeclarativeContainer):
     settings: providers.Provider[Settings] = providers.Singleton(Settings)
 
@@ -80,6 +92,8 @@ class Container(containers.DeclarativeContainer):
         LocalStorageManager,
         settings=settings,
     )
+
+    tasks = providers.Container(TasksContainer)
 
     ###################
     #### Use cases ####
@@ -137,6 +151,11 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
     )
 
+    users_list_use_case: providers.Provider[UsersListUseCase] = providers.Factory(
+        UsersListUseCase,
+        uow=db.container.uow,
+    )
+
     user_retrieve_use_case: providers.Provider[UserRetrieveUseCase] = providers.Factory(
         UserRetrieveUseCase,
         uow=db.container.uow,
@@ -182,7 +201,26 @@ class Container(containers.DeclarativeContainer):
     route_create_use_case: providers.Provider[RouteCreateUseCase] = providers.Factory(
         RouteCreateUseCase,
         uow=db.container.uow,
+    )
+
+    route_chatgpt_create_use_case: providers.Provider[ChatGPTRouteCreateUseCase] = providers.Factory(
+        ChatGPTRouteCreateUseCase,
+        uow=db.container.uow,
+        chatgpt_process_route_task=tasks.container.chatgpt_process_route,
+    )
+
+    route_avatar_update_use_case: providers.Provider[RoutePhotoUpdateUseCase] = providers.Factory(
+        RoutePhotoUpdateUseCase,
+        uow=db.container.uow,
         storage_manager=storage_manager,
+        update_photo_use_case=update_photo_use_case,
+    )
+
+    route_photos_add_use_case: providers.Provider[RoutePhotosAddUseCase] = providers.Factory(
+        RoutePhotosAddUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+        upload_photos_use_case=upload_photos_use_case,
     )
 
     # models

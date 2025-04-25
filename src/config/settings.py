@@ -29,8 +29,8 @@ class AppSettings(BaseModel):
     title: str = "BestWay"
     debug: bool = False
     version: str = "0.1.0"
-    cross_validation_tasks_count: int = 5
-    reset_validation_field_tasks_count: int = 5
+
+    base_url: str = "https://localhost:8002/"
 
 
 class UptraceSettings(BaseModel):
@@ -81,14 +81,18 @@ class CentrifugoSettings(BaseModel):
 
 
 class RedisSettings(BaseModel):
-    host: str = "redis://localhost:6379/2"
+    # host: str = "redis://localhost:6379/2"
+    host: str = "redis://redis:6379/2"
     password: str = ""
 
 
 class TaskSettings(BaseModel):
     app_name: str = "bestway"
-    broker_url: str = "redis://localhost:6379/0"
-    result_url: str = "redis://localhost:6379/1"
+    # broker_url: str = "redis://localhost:6379/0"
+    # result_url: str = "redis://localhost:6379/1"
+
+    broker_url: str = "redis://redis:6379/0"
+    result_url: str = "redis://redis:6379/1"
 
 
 class SmsSettings(BaseSettings):
@@ -116,23 +120,20 @@ class StorageSettings(BaseModel):
 
 
 class ProxySettings(BaseSettings):
-    service_url: str = ""
-    api_key: str = ""
-    cache_timeout: int = 300  # По умолчанию 5 минут
-
-    class Config:
-        env_prefix = "SMS__"
-        env_nested_delimiter = ("__",)
+    host: str = "127.0.0.1"
+    http_port: int = 62566
+    socks5_port: int = 62567
+    username: str = "username"
+    password: str = "password"
 
 
 class ChatGPTSettings(BaseSettings):
-    service_url: str = ""
-    api_key: str = ""
-    cache_timeout: int = 300  # По умолчанию 5 минут
-
-    class Config:
-        env_prefix = "SMS__"
-        env_nested_delimiter = ("__",)
+    service_url: str = "https://api.openai.com/v1/chat/completions"
+    api_key: str = "secret"
+    model: str = "gpt-4o-mini"
+    max_responses_per_day: int = 100
+    request_delay: int = 1  # в секундах
+    max_request_retries: int = 3
 
 
 class Settings(BaseSettings):
@@ -144,6 +145,9 @@ class Settings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     api: ApiSettings = ApiSettings()
     jwt: JWTSettings = JWTSettings()
+
+    chatgpt: ChatGPTSettings = ChatGPTSettings()
+    proxy: ProxySettings = ProxySettings()
 
     sms: SmsSettings = SmsSettings()
 

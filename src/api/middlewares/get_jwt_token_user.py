@@ -12,6 +12,8 @@ from api.middlewares.exceptions import AuthenticationError, TokenExpiredError
 from api.schemas import UserDTO
 from config.settings import Settings
 from domain.entities.user import User
+from infrastructure.models.alchemy.users import User as UserModel
+from infrastructure.repositories.alchemy.db import Database
 
 
 class JwtTokenUserMiddleware(BaseHTTPMiddleware):
@@ -23,6 +25,9 @@ class JwtTokenUserMiddleware(BaseHTTPMiddleware):
     ) -> None:
         super().__init__(*args, **kwargs)
         self.jwt_settings = settings.jwt
+
+        self.db = Database(settings.db)
+        self.session_factory = self.db.session_factory
 
     async def dispatch(
         self, request: Request, call_next: Callable[[Request], Awaitable[Response]]
@@ -61,10 +66,14 @@ class JwtTokenUserMiddleware(BaseHTTPMiddleware):
         self._validate_expiration_time(payload)
         validated = self._validate_payload(payload)
         print(validated)
+        async with self.session_factory() as session:
+            user_from_db: UserModel = await session.get(UserModel, validated.id)
+            if not user_from_db:
+                raise AuthenticationError(detail="User not found in DB.")
         return User(
             id=validated.id,
             phone=validated.phone,
-            is_admin=validated.is_admin,
+            is_admin=user_from_db.is_admin,
             role=validated.role,
         )
 

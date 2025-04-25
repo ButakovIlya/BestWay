@@ -1,3 +1,5 @@
+from typing import List
+
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Request, Response, status
 
@@ -8,6 +10,7 @@ from application.use_cases.users.dto import FullUserUpdateDTO, UserCreateDTO, Us
 from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
+from src.application.use_cases.users.list import UsersListUseCase
 
 router = APIRouter(tags=["Users"], prefix="/users", dependencies=[Depends(is_admin)])
 
@@ -20,6 +23,15 @@ async def retrieve_user(
 ) -> UserDTO:
     """Получить данные профиля"""
     return await use_case.execute(user_id=user_id)
+
+
+@router.get("/", status_code=status.HTTP_200_OK)
+@inject
+async def list_users(
+    use_case: UsersListUseCase = Depends(Provide[Container.users_list_use_case]),
+) -> List[UserDTO]:
+    """Получить данные профиля"""
+    return await use_case.execute()
 
 
 @router.post("", status_code=status.HTTP_200_OK)

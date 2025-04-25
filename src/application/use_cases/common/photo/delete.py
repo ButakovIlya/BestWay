@@ -1,5 +1,4 @@
 from application.use_cases.base import UseCase
-from common.exceptions import APIException
 from domain.entities.photo import Photo
 from infrastructure.managers.base import StorageManager
 from infrastructure.repositories.base import UnitOfWork
@@ -18,13 +17,12 @@ class DeletePhotoUseCase(UseCase):
         self._uow = uow
         self._storage_manager = storage_manager
 
-    async def execute(self, photo_id: int, place_id: int) -> None:
+    async def execute(
+        self, photo_id: int, place_id: int | None = None, route_id: int | None = None
+    ) -> None:
         async with self._uow(autocommit=True):
             photo: Photo = await self._uow.photos.get_by_id(model_id=photo_id)
             await self._uow.photos.delete_by_id(model_id=photo_id)
-
-        if not photo.place_id == place_id:
-            raise APIException(code=404, message="Фото не найдено")
 
         filepath = photo.url
         if filepath:

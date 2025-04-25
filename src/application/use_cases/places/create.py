@@ -69,8 +69,9 @@ class PlaceCreateUseCase(UseCase):
         )
         filepath = await self._update_photo_use_case.execute(photo_data)
         place.photo = filepath
-        await self._uow.places.update(place)
-        place: Place = await self._uow.places.get_by_id(place.id)
+        async with self._uow(autocommit=True):
+            await self._uow.places.update(place)
+            place: Place = await self._uow.places.get_by_id(place.id)
 
         return place
 

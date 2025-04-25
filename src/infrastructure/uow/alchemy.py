@@ -8,6 +8,8 @@ from infrastructure.repositories.alchemy import (
 )
 from infrastructure.repositories.interfaces.base import ModelRepository
 from infrastructure.uow.base import UnitOfWork
+from src.infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
+from src.infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
 
 
 class SqlAlchemyUnitOfWork(UnitOfWork):
@@ -19,13 +21,13 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
 
         self.users = SqlAlchemyUsersRepository(self._session)
         self.places = SqlAlchemyPlacesRepository(self._session)
+        self.routes = SqlAlchemyRoutesRepository(self._session)
+        self.route_places = SqlAlchemyRoutePlacesRepository(self._session)
         self.photos = SqlAlchemyPhotosRepository(self._session)
 
         return await super().__aenter__()
 
     def get_model_repository(self, resource_name: ModelType) -> ModelRepository:
-        print(resource_name)
-        print(ModelType.PLACES.value)
         match resource_name:
             case ModelType.PLACES.value:
                 return self.places

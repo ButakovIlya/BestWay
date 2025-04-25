@@ -11,9 +11,15 @@ RUN poetry self add poetry-plugin-export
 RUN poetry export -f requirements.txt --output requirements.txt --without-hashes --with=dev
 
 FROM python:3.12
-ENV PYTHONPATH=/app/src
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE 1
+
+# Устанавливаем переменные окружения
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app/src \
+    PATH="/root/.local/bin:$PATH" \
+    CELERY_APP_NAME=minecraft \
+    CELERY_BROKER_URL=redis://redis:6379/0 \
+    CELERY_RESULT_BACKEND=redis://redis:6379/1
 
 WORKDIR /app
 
@@ -28,5 +34,6 @@ RUN apt install --no-install-recommends --no-install-suggests -y gcc libc6-dev \
 
 RUN pip install -r requirements.txt
 
-COPY . /app
 RUN mkdir -p storage/media
+
+COPY . /app

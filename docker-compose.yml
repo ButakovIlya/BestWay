@@ -58,35 +58,35 @@ services:
     volumes:
       - postgres-data-local:/var/lib/postgresql/data/
 
-  # celery-default:
-  #   container_name: celery-default-bestway-local
-  #   build:
-  #     context: .
-  #   command: celery -A src.worker:app worker --loglevel=info --hostname=bestway
-  #   volumes:
-  #     - ./:/app
-  #   env_file:
-  #     - ./.env
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - bestway-local
+  celery-default:
+    container_name: celery-default-bestway-local
+    build:
+      context: .
+    command: celery -A src.worker:app worker --loglevel=info --hostname=bestway
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - web
+    networks:
+      - bestway-local
 
-  # flower:
-  #   container_name: flower-bestway-local
-  #   build:
-  #     context: .
-  #   command: celery -A src.worker:app flower
-  #   ports:
-  #     - 5555:5555
-  #   volumes:
-  #     - ./:/app
-  #   env_file:
-  #     - ./.env
-  #   depends_on:
-  #     - redis
-  #   networks:
-  #     - bestway-local
+  flower:
+    container_name: flower-bestway-local
+    build:
+      context: .
+    command: celery -A src.worker:app flower
+    ports:
+      - 5555:5555
+    volumes:
+      - ./:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - redis
+    networks:
+      - bestway-local
 
 volumes:
   redis-data-local:

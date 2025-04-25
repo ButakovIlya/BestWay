@@ -226,6 +226,8 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         end = start + page_size
         paginated = items[start:end]
 
+        paginated_data = [self.schema_read.model_validate(obj) for obj in paginated]
+
         base_url = str(request.url).split("?")[0]
         query_params = dict(request.query_params)
 
@@ -236,7 +238,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
             return f"{base_url}?{urlencode(params)}"
 
         return self.pagination_class(
-            data=paginated,
+            data=paginated_data,
             count=total,
             page=page,
             next=build_url(page + 1),
@@ -260,8 +262,9 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
                 page_size = int(request.query_params.get("page_size", 10))
                 return await self.paginate_queryset(result, request, page=page, page_size=page_size)
 
-            # Без пагинации
-            return result.scalars().all()
+            # Без пагинации — сериализация в схемы
+            items = result.unique().scalars().all()
+            return [self.schema_read.model_validate(obj) for obj in items]
         finally:
             await session.close()
 

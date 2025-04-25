@@ -7,6 +7,7 @@ from pydantic import ValidationError
 
 from common.exceptions import APIException
 from domain.exceptions import DomainException
+from src.api.permissions.exceptions import UserIsNotAdminError, UserIsNotAuthenticatedError
 
 
 def create_exception_handler(
@@ -78,8 +79,8 @@ async def pydantic_validation_exception_handler(request: Request, exc: Validatio
 
 handlers = {
     APIException: api_exception_handler,
-    # UserIsNotAdminError: create_exception_handler(status_code=403),
-    # UserIsNotAuthenticatedError: create_exception_handler(status_code=403),
+    UserIsNotAdminError: create_exception_handler(status_code=403),
+    UserIsNotAuthenticatedError: create_exception_handler(status_code=403),
     # RequestValidationError: request_validation_exception_handler,
-    ValidationError: pydantic_validation_exception_handler,
+    # ValidationError: pydantic_validation_exception_handler,
 }

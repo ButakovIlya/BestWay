@@ -55,9 +55,21 @@ class ModelRepository(Repository, Generic[TModel]):
         pass
 
     @abstractmethod
+    async def get_list_by_ids(
+        self,
+        id_list: list[int],
+    ) -> list[TModel]:
+        """Получить список объектов по списку id"""
+        pass
+
+    @abstractmethod
     async def exists(self, **filters) -> bool:
         """Проверяет, существует ли объект с заданными параметрами"""
         pass
+
+    @abstractmethod
+    async def all_exist_by_id_list(self, id_lst: list) -> bool:
+        """Проверяет, существуют ли все объекты из списка id"""
 
     # UPDATE
     @abstractmethod

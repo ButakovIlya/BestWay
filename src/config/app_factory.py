@@ -23,6 +23,7 @@ def create_app(settings: Settings) -> FastAPI:
     app = FastAPI(
         title=settings.app.title,
         debug=settings.app.debug,
+        # debug=True,
         version=settings.app.version,
         lifespan=lifespan,
         docs_url=settings.api.docs_url,
@@ -31,6 +32,7 @@ def create_app(settings: Settings) -> FastAPI:
     config_loggers()
     config_uptrace(app)
     add_middlewares(app, settings)
+
     include_routers(app, settings)
     add_exception_hanlers(app)
 
@@ -64,6 +66,10 @@ def add_middlewares(app: FastAPI, settings: Settings) -> None:
         allow_headers=["*"],
     )
     app.add_middleware(JwtTokenUserMiddleware, settings=settings)
+    # app.add_middleware(
+    #     DebugToolbarMiddleware,
+    #     panels=["debug_toolbar.panels.sqlalchemy.SQLAlchemyPanel"],
+    # )
 
 
 @asynccontextmanager

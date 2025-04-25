@@ -20,11 +20,17 @@ class UploadPhotosUseCase(UseCase):
         self._uow = uow
         self._storage_manager = storage_manager
 
-    async def execute(self, photos: List[UploadPhotosDTO], place_id: int, user_id: int) -> str | None:
+    async def execute(
+        self,
+        photos: List[UploadPhotosDTO],
+        user_id: int,
+        place_id: int | None = None,
+        route_id: int | None = None,
+    ) -> str | None:
 
         photos_to_create: List[Photo] = []
         for photo in photos:
-            photo_data = Photo(place_id=place_id, uploaded_by=user_id)
+            photo_data = Photo(place_id=place_id, route_id=route_id, uploaded_by=user_id)
             filepath = None
             if photo.filename:
                 filepath = self._storage_manager.save_photo(photo.filename, photo.photo, photo.model_name)

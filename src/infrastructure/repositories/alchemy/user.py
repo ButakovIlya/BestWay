@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from sqlalchemy import delete, exists, select
 
@@ -20,6 +20,12 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
             return self.convert_to_entity(model)
         else:
             return None
+
+    async def get_list(self) -> List[User]:
+        stmt = select(self.MODEL)
+        result = await self._session.execute(stmt)
+        models = result.scalars().all()
+        return [self.convert_to_entity(model) for model in models]
 
     async def exists_by_phone(self, phone: str) -> bool:
         stmt = select(exists().where(self.MODEL.phone == phone))

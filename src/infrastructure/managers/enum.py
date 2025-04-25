@@ -8,3 +8,4 @@ class UserFileFiels(Enum):
 class ModelType(str, Enum):
     USERS = "users"
     PLACES = "places"
+    ROUTES = "routes"

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from domain.entities.enums import CityCategory, PlaceCategory, PlaceType
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
 from infrastructure.models.alchemy.base import Base
 from infrastructure.models.alchemy.users import User
 
@@ -42,14 +42,27 @@ class Route(Base):
     __tablename__ = "routes"
 
     name: Mapped[str] = mapped_column(String, index=True)
+    type: Mapped[RouteType] = mapped_column(
+        Enum(RouteType, name="route_type", native_enum=False),
+        default=RouteType.MIXED,
+    )
+    city: Mapped[str] = mapped_column(
+        Enum(CityCategory, name="route_city", native_enum=False, length=16),
+        index=True,
+        default=CityCategory.PERM,
+    )
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
+
+    duration: Mapped[int | None] = mapped_column(default=None, server_default=None)
+    distance: Mapped[int | None] = mapped_column(default=None, server_default=None)
+    is_custom: Mapped[bool] = mapped_column(default=False, server_default="false")
+
+    photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
+
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, server_default="now()")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, server_default="now()"
     )
-    duration: Mapped[int | None] = mapped_column(default=None, server_default=None)
-    distance: Mapped[int | None] = mapped_column(default=None, server_default=None)
-
     json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="routes")
@@ -71,7 +84,7 @@ class RoutePlace(Base):
 
     route_id: Mapped[int] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
     place_id: Mapped[int] = mapped_column(ForeignKey("places.id"))
-    order: Mapped[int]
+    order: Mapped[int] = mapped_column(default=0)
 
     route: Mapped["Route"] = relationship("Route", back_populates="places")
     place: Mapped["Place"] = relationship("Place", back_populates="route_places")
