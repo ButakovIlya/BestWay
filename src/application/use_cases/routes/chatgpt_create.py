@@ -20,5 +20,5 @@ class ChatGPTRouteCreateUseCase(UseCase):
     async def execute(self) -> Any:
         logger.info("Start upload file use case")
 
-        task_result = self._chatgpt_process_route_task.delay()
+        self._chatgpt_process_route_task.delay()
         logger.info("End upload file use case")

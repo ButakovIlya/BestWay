@@ -7,8 +7,9 @@ from infrastructure.repositories.interfaces.base import ModelRepository
 from infrastructure.repositories.interfaces.photo import PhotoRepository
 from infrastructure.repositories.interfaces.place import PlaceRepository
 from infrastructure.repositories.interfaces.route import RouteRepository
+from infrastructure.repositories.interfaces.route_places import RoutePlacesRepository
+from infrastructure.repositories.interfaces.survey import SurveyRepository
 from infrastructure.repositories.interfaces.user import UserRepository
-from src.infrastructure.repositories.interfaces.route_places import RoutePlacesRepository
 
 
 class UnitOfWork(ABC):
@@ -16,6 +17,7 @@ class UnitOfWork(ABC):
     places: PlaceRepository
     route_places: RoutePlacesRepository
     routes: RouteRepository
+    surveys: SurveyRepository
     photos: PhotoRepository
 
     def __call__(self, *args: Any, autocommit: bool, **kwargs: Any) -> "UnitOfWork":

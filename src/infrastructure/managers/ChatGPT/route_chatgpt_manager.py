@@ -14,7 +14,9 @@ class ChatClassificationManager(BaseClassificationManager):
     используя ChatGPT.
     """
 
-    MAX_RESPONSES_PER_DAY = Settings().max_text_responses_per_day or 300
+    settings = Settings()
+
+    MAX_RESPONSES_PER_DAY = settings.chatgpt.max_responses_per_day or 300
 
     def __init__(self, serializer=None):
         super().__init__()

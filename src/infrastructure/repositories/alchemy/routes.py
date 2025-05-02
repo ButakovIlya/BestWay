@@ -19,7 +19,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             updated_at=entity.updated_at,
             duration=entity.duration,
             distance=entity.distance,
-            json=entity.json,
+            json_data=entity.json_data,
         )
 
     def convert_to_entity(self, model: RouteModel) -> Route:
@@ -33,7 +33,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             updated_at=model.updated_at,
             duration=model.duration,
             distance=model.distance,
-            json_data=model.json,
+            json_data=model.json_data,
             # place_ids=[place.place_id for place in model.places] if model.places else [],
             # photo_ids=[photo.id for photo in model.photos] if model.photos else [],
             # like_ids=[like.id for like in model.likes] if model.likes else [],

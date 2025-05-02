@@ -134,6 +134,7 @@ class ChatGPTSettings(BaseSettings):
     max_responses_per_day: int = 100
     request_delay: int = 1  # в секундах
     max_request_retries: int = 3
+    chatgpt_request_timeout: int = 60
 
 
 class Settings(BaseSettings):

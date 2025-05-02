@@ -4,10 +4,7 @@ from time import sleep
 
 import httpx
 
-from config.settings import get_settings
-
 logger = logging.getLogger(__name__)
-REQUEST_TEXTS_COUNT = get_settings().request_texts_count or 5
 
 
 def retry_on_status_code(code: int, max_retries=3, delay=5):

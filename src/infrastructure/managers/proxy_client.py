@@ -2,14 +2,16 @@ import logging
 
 import httpx
 
-from config.settings import get_settings
+from config.settings import Settings
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 class ProxyClient:
-    CHATGPT_REQUEST_TIMEOUT = get_settings().chatgpt_request_timeout
+    settings = Settings()
+
+    CHATGPT_REQUEST_TIMEOUT = settings.chatgpt.chatgpt_request_timeout
 
     def __init__(
         self,
@@ -28,8 +30,8 @@ class ProxyClient:
             "https://": f"http://{self.proxy_username}:{self.proxy_password}@{self.proxy_host}:{self.proxy_http_port}",
         }
 
-        # self.client = httpx.Client(proxies=self.proxies)
-        self.client = httpx.Client()
+        self.client = httpx.Client(proxies=self.proxies)
+        # self.client = httpx.Client()
 
     def post(self, url: str, json: dict, headers: dict):
         response = self.client.post(url, json=json, headers=headers, timeout=self.CHATGPT_REQUEST_TIMEOUT)

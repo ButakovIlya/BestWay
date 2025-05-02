@@ -7,18 +7,18 @@ from sqlalchemy import Select
 from sqlalchemy.orm import joinedload
 
 from api.permissions.is_admin import is_admin
+from application.use_cases.common.dto import ModelPhotoDTO
+from application.use_cases.common.photo.delete import DeletePhotoUseCase
+from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
+from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
+from application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
+from application.use_cases.routes.create import RouteCreateUseCase
+from application.use_cases.routes.dto import RouteCreateDTO
 from config.containers import Container
+from domain.entities.enums import CityCategory, RouteType
 from infrastructure.models.alchemy.routes import Place, Route, RoutePlace
 from infrastructure.orm.base import BaseViewSet
 from infrastructure.permissions.enums import RoleEnum
-from src.application.use_cases.common.dto import ModelPhotoDTO
-from src.application.use_cases.common.photo.delete import DeletePhotoUseCase
-from src.application.use_cases.routes.add_photos import RoutePhotosAddUseCase
-from src.application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
-from src.application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
-from src.application.use_cases.routes.create import RouteCreateUseCase
-from src.application.use_cases.routes.dto import RouteCreateDTO
-from src.domain.entities.enums import CityCategory, RouteType
 
 from .schemas import RouteCreateSchema, RouteFilter, RoutePatchSchema, RoutePutSchema, RouteRead
 

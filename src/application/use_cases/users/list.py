@@ -1,20 +1,25 @@
-from typing import List
+from fastapi import Request
 
 from application.use_cases.base import UseCase
 from application.use_cases.users.dto import UserDTO
+from domain.validators.dto import PaginatedResponse
+from infrastructure.managers.paginator import Paginator
 from infrastructure.uow import UnitOfWork
-from src.domain.entities.user import User
 
 
 class UsersListUseCase(UseCase):
     """
-    List users.
+    List users with pagination.
     """
 
     def __init__(self, uow: UnitOfWork) -> None:
         self._uow = uow
+        self.paginator = Paginator(schema_read=UserDTO)
 
-    async def execute(self) -> List[UserDTO]:
+    async def execute(
+        self, request: Request, page: int = 1, page_size: int = 10
+    ) -> PaginatedResponse[UserDTO]:
         async with self._uow(autocommit=True):
-            users: List[User] = await self._uow.users.get_list()
-        return list(UserDTO.model_validate(user) for user in users)
+            result = await self._uow.users.get_list()
+
+        return await self.paginator.paginate(result, request, page, page_size)

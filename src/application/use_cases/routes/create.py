@@ -1,11 +1,11 @@
 from typing import List
 
 from application.use_cases.base import UseCase
+from application.use_cases.routes.dto import RouteCreateDTO, RouteDTO
 from common.exceptions import APIException
+from domain.entities.route import Route
+from domain.entities.route_places import RoutePlaces
 from infrastructure.uow import UnitOfWork
-from src.application.use_cases.routes.dto import RouteCreateDTO, RouteDTO
-from src.domain.entities.route import Route
-from src.domain.entities.route_places import RoutePlaces
 
 
 class RouteCreateUseCase(UseCase):

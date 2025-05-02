@@ -4,8 +4,8 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from src.common.exceptions import APIException
-from src.domain.entities.enums import CityCategory, RouteType
+from common.exceptions import APIException
+from domain.entities.enums import CityCategory, RouteType
 
 
 class RouteCreateDTO(BaseModel):
@@ -71,6 +71,7 @@ class RouteDTO(BaseModel):
     duration: Optional[int] = None
     distance: Optional[int] = None
     photos: List[Optional[BytesIO]] = None
+    photo: Optional[BytesIO] = None
     places: List[int] = []
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)

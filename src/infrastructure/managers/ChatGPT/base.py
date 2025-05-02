@@ -5,10 +5,10 @@ from time import sleep
 
 from fastapi.encoders import jsonable_encoder
 from openai import OpenAI
-from utils import retry_on_status_code
 
 from common.exceptions import ResponsesLimitExceededException
 from config.settings import Settings
+from infrastructure.managers.ChatGPT.utils import retry_on_status_code
 from infrastructure.managers.proxy_client import ProxyClient
 
 logger = logging.getLogger(__name__)
@@ -34,13 +34,13 @@ class BaseClassificationManager:
     def __init__(self):
 
         self.proxy_client = ProxyClient(
-            proxy_host=self.settings.proxy.proxy_host,
-            proxy_http_port=self.settings.proxy.proxy_http_port,
-            proxy_username=self.settings.proxy.proxy_username,
-            proxy_password=self.settings.proxy.proxy_password,
+            proxy_host=self.settings.proxy.host,
+            proxy_http_port=self.settings.proxy.http_port,
+            proxy_username=self.settings.proxy.username,
+            proxy_password=self.settings.proxy.password,
         )
         self.proxy_openai_client = OpenAI(
-            api_key=self.settings.chatgpt.openai_key, http_client=self.proxy_client.client
+            api_key=self.settings.chatgpt.api_key, http_client=self.proxy_client.client
         )
 
         self.responses_count = 0

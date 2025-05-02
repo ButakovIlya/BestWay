@@ -23,9 +23,7 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
 
     async def get_list(self) -> List[User]:
         stmt = select(self.MODEL)
-        result = await self._session.execute(stmt)
-        models = result.scalars().all()
-        return [self.convert_to_entity(model) for model in models]
+        return await self._session.execute(stmt)
 
     async def exists_by_phone(self, phone: str) -> bool:
         stmt = select(exists().where(self.MODEL.phone == phone))
@@ -50,6 +48,8 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
             is_admin=entity.is_admin,
             photo=entity.photo,
             description=entity.description,
+            gender=entity.gender,
+            birth_date=entity.birth_date,
         )
 
     def convert_to_entity(self, model: UserModel) -> User:
@@ -64,4 +64,6 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
             is_admin=model.is_admin,
             photo=model.photo,
             description=model.description,
+            gender=model.gender,
+            birth_date=model.birth_date,
         )

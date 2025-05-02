@@ -17,13 +17,23 @@ from application.use_cases.models.select_field_values import SelectFieldValuesUs
 from application.use_cases.places.add_photos import PlacePhotosAddUseCase
 from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
 from application.use_cases.places.create import PlaceCreateUseCase
+from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
+from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
+from application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
+from application.use_cases.surveys.create import SurveyCreateUseCase
+from application.use_cases.surveys.delete import SurveyDeleteUseCase
+from application.use_cases.surveys.list import SurveysListUseCase
+from application.use_cases.surveys.retrieve import SurveyRetrieveUseCase
+from application.use_cases.surveys.update import SurveyUpdateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
+from application.use_cases.users.list import UsersListUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.settings import Settings
 from infrastructure.managers.base import StorageManager
+from infrastructure.managers.ChatGPT.route_chatgpt_manager import ChatClassificationManager
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
@@ -34,10 +44,6 @@ from infrastructure.repositories.alchemy.db import Database
 from infrastructure.tasks import Task
 from infrastructure.tasks.routes import chatgpt_process_route_task
 from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
-from src.application.use_cases.routes.add_photos import RoutePhotosAddUseCase
-from src.application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
-from src.application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
-from src.application.use_cases.users.list import UsersListUseCase
 
 
 class ClientsContainer(containers.DeclarativeContainer):
@@ -56,6 +62,10 @@ class ClientsContainer(containers.DeclarativeContainer):
 
     sms_client: providers.Provider[SmsClient] = providers.Resource(
         SmsClient, redis_cache=redis_cache, settings=settings.provided.sms
+    )
+
+    chat_classification_manager: providers.Provider[ChatClassificationManager] = providers.Singleton(
+        ChatClassificationManager,
     )
 
 
@@ -230,6 +240,31 @@ class Container(containers.DeclarativeContainer):
     )
     select_field_values_use_case: providers.Provider[SelectFieldValuesUseCase] = providers.Factory(
         SelectFieldValuesUseCase,
+    )
+
+    # surveys
+    user_survey_create_use_case: providers.Provider[SurveyCreateUseCase] = providers.Factory(
+        SurveyCreateUseCase,
+        uow=db.container.uow,
+    )
+    user_survey_delete_use_case: providers.Provider[SurveyDeleteUseCase] = providers.Factory(
+        SurveyDeleteUseCase,
+        uow=db.container.uow,
+    )
+
+    users_survey_list_use_case: providers.Provider[SurveysListUseCase] = providers.Factory(
+        SurveysListUseCase,
+        uow=db.container.uow,
+    )
+
+    user_survey_retrieve_use_case: providers.Provider[SurveyRetrieveUseCase] = providers.Factory(
+        SurveyRetrieveUseCase,
+        uow=db.container.uow,
+    )
+
+    user_survey_update_use_case: providers.Provider[SurveyUpdateUseCase] = providers.Factory(
+        SurveyUpdateUseCase,
+        uow=db.container.uow,
     )
 
     @classmethod

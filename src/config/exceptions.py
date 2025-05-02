@@ -5,9 +5,9 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from api.permissions.exceptions import UserIsNotAdminError, UserIsNotAuthenticatedError
 from common.exceptions import APIException
 from domain.exceptions import DomainException
-from src.api.permissions.exceptions import UserIsNotAdminError, UserIsNotAuthenticatedError
 
 
 def create_exception_handler(

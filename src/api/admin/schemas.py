@@ -4,7 +4,7 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 from application.utils import get_settings
-from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 from domain.filters import BaseFilter
 from infrastructure.models.alchemy.routes import Place, Route
 
@@ -160,27 +160,6 @@ class RouteReadSchema(CommonRouteBase):
     places: List[PlaceRead] = []
 
 
-# class PhotoRead(BaseModel):
-#     url: str
-#     uploaded_at: datetime
-
-#     model_config = {"from_attributes": True}
-
-
-class PlaceRead(BaseModel):
-    name: str
-    city: str
-    category: str
-    type: Optional[str]
-    tags: Optional[str]
-    coordinates: Optional[list]
-    photo: Optional[str]
-    map_name: Optional[str]
-    photos: list[PhotoRead] = []
-
-    model_config = {"from_attributes": True}
-
-
 class RoutePlaceRead(BaseModel):
     order: int
     place: PlaceRead
@@ -244,3 +223,56 @@ class RouteFilter(BaseFilter):
     name__list: Optional[List[str]] = None
     city__list: Optional[List[CityCategory]] = None
     type__list: Optional[List[PlaceType]] = None
+
+
+class CommonSurveyBase(BaseModel):
+    name: str
+    status: Optional[SurveyStatus] = SurveyStatus.DRAFT
+    data: Optional[dict] = None
+
+
+class SurveyCreate(CommonSurveyBase):
+    author_id: int
+
+
+class SurveyPut(CommonSurveyBase):
+    name: str
+    status: SurveyStatus
+    data: dict
+
+
+class SurveyPatch(CommonSurveyBase):
+    name: Optional[str] = None
+    status: Optional[SurveyStatus] = None
+    data: Optional[dict] = None
+
+
+class SurveyRead(CommonSurveyBase):
+    id: int
+    author_id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+    @classmethod
+    def model_validate(cls, survey: Any) -> "SurveyRead":
+        return cls(
+            id=survey.id,
+            name=survey.name,
+            status=survey.status,
+            data=survey.data,
+            author_id=survey.author_id,
+            created_at=survey.created_at,
+            updated_at=survey.updated_at,
+        )
+
+
+class SurveyFilter(BaseModel):
+    name: Optional[str] = Field(None, description="Partial match for survey name")
+    status: Optional[SurveyStatus] = None
+    created_at_from: Optional[datetime] = None
+    created_at_to: Optional[datetime] = None
+    updated_at_from: Optional[datetime] = None
+    updated_at_to: Optional[datetime] = None

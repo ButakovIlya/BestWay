@@ -21,6 +21,7 @@ def create_app() -> Celery:
             "api.public.profile",
             "api.public.auth",
             "api.admin.users",
+            "api.public.surveys",
         ]
     )
     container.wire(packages=["infrastructure"])

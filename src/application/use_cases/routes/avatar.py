@@ -36,9 +36,6 @@ class RoutePhotoUpdateUseCase(UseCase):
             )
             filepath = await self._update_photo_use_case.execute(photo_data)
             route.photo = filepath
-            print(filepath)
-            print(route.photo)
-            print(route)
             await self._uow.routes.update(route)
             route: Route = await self._uow.routes.get_by_id(route.id)
 

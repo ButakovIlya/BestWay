@@ -6,10 +6,11 @@ from infrastructure.repositories.alchemy import (
     SqlAlchemyPlacesRepository,
     SqlAlchemyUsersRepository,
 )
+from infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
+from infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
+from infrastructure.repositories.alchemy.survey import SqlAlchemySurveysRepository
 from infrastructure.repositories.interfaces.base import ModelRepository
 from infrastructure.uow.base import UnitOfWork
-from src.infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
-from src.infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
 
 
 class SqlAlchemyUnitOfWork(UnitOfWork):
@@ -23,6 +24,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.places = SqlAlchemyPlacesRepository(self._session)
         self.routes = SqlAlchemyRoutesRepository(self._session)
         self.route_places = SqlAlchemyRoutePlacesRepository(self._session)
+        self.surveys = SqlAlchemySurveysRepository(self._session)
         self.photos = SqlAlchemyPhotosRepository(self._session)
 
         return await super().__aenter__()

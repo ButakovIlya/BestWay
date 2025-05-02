@@ -1,11 +1,14 @@
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
 from infrastructure.models.alchemy.base import Base
-from infrastructure.models.alchemy.users import User
+
+if TYPE_CHECKING:
+    from infrastructure.models.alchemy.users import User
 
 
 class Place(Base):
@@ -29,12 +32,13 @@ class Place(Base):
     coordinates: Mapped[list | None] = mapped_column(JSON, default=None, server_default=None)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
     map_name: Mapped[str | None] = mapped_column(default=None, server_default=None)
+    json_data: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
-    json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
-
-    route_places: Mapped[list["RoutePlace"]] = relationship("RoutePlace", back_populates="place")
+    route_places: Mapped[list["RoutePlace"]] = relationship(
+        "RoutePlace", back_populates="place", lazy="select"
+    )
     photos: Mapped[list["Photo"]] = relationship(
-        "Photo", back_populates="place", cascade="all, delete-orphan", lazy="selectin"
+        "Photo", back_populates="place", cascade="all, delete-orphan", lazy="select"
     )
 
 
@@ -63,7 +67,7 @@ class Route(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, onupdate=datetime.now, server_default="now()"
     )
-    json: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
+    json_data: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="routes")
     places: Mapped[list["RoutePlace"]] = relationship(
@@ -73,7 +77,6 @@ class Route(Base):
     comments: Mapped[list["RouteComment"]] = relationship(
         "RouteComment", back_populates="route", cascade="all, delete-orphan"
     )
-
     photos: Mapped[list["Photo"]] = relationship(
         "Photo", back_populates="route", cascade="all, delete-orphan"
     )
@@ -86,8 +89,8 @@ class RoutePlace(Base):
     place_id: Mapped[int] = mapped_column(ForeignKey("places.id"))
     order: Mapped[int] = mapped_column(default=0)
 
-    route: Mapped["Route"] = relationship("Route", back_populates="places")
-    place: Mapped["Place"] = relationship("Place", back_populates="route_places")
+    route: Mapped["Route"] = relationship("Route", back_populates="places", lazy="select")
+    place: Mapped["Place"] = relationship("Place", back_populates="route_places", lazy="select")
 
 
 class Like(Base):
@@ -97,8 +100,8 @@ class Like(Base):
     route_id: Mapped[int] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
-    author: Mapped["User"] = relationship("User", back_populates="likes")
-    route: Mapped["Route"] = relationship("Route", back_populates="likes")
+    author: Mapped["User"] = relationship("User", back_populates="likes", lazy="select")
+    route: Mapped["Route"] = relationship("Route", back_populates="likes", lazy="select")
 
 
 class RouteComment(Base):
@@ -110,8 +113,8 @@ class RouteComment(Base):
     comment: Mapped[str | None] = mapped_column(default=None, server_default=None)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
 
-    author: Mapped["User"] = relationship("User", back_populates="comments")
-    route: Mapped["Route"] = relationship("Route", back_populates="comments")
+    author: Mapped["User"] = relationship("User", back_populates="comments", lazy="select")
+    route: Mapped["Route"] = relationship("Route", back_populates="comments", lazy="select")
 
 
 class Photo(Base):
@@ -123,6 +126,6 @@ class Photo(Base):
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"), nullable=True)
     route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"), nullable=True)
 
-    place: Mapped["Place"] = relationship("Place", back_populates="photos")
-    route: Mapped["Route"] = relationship("Route", back_populates="photos")
-    uploader: Mapped["User"] = relationship("User", back_populates="uploaded_photos")
+    place: Mapped["Place"] = relationship("Place", back_populates="photos", lazy="select")
+    route: Mapped["Route"] = relationship("Route", back_populates="photos", lazy="select")
+    uploader: Mapped["User"] = relationship("User", back_populates="uploaded_photos", lazy="select")

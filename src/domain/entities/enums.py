@@ -1,6 +1,11 @@
 from enum import Enum
 
 
+class Gender(Enum):
+    MALE = "Мужчина"
+    FEMALE = "Женщина"
+
+
 # Перечисления для категорий мест
 class CityCategory(Enum):
     PERM = "Пермь"
@@ -128,3 +133,8 @@ class RouteType(Enum):
 class ModelType(Enum):
     PLACES = "places"
     ROUTES = "routes"
+
+
+class SurveyStatus(Enum):
+    DRAFT = "Черновик"
+    FILLED = "Заполнена"

@@ -1,16 +1,15 @@
-from typing import List
-
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Request, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 
 from api.permissions.is_admin import is_admin
 from application.use_cases.users.create_user import UserCreateUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.dto import FullUserUpdateDTO, UserCreateDTO, UserDTO
+from application.use_cases.users.list import UsersListUseCase
 from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
-from src.application.use_cases.users.list import UsersListUseCase
+from domain.validators.dto import PaginatedResponse
 
 router = APIRouter(tags=["Users"], prefix="/users", dependencies=[Depends(is_admin)])
 
@@ -25,13 +24,16 @@ async def retrieve_user(
     return await use_case.execute(user_id=user_id)
 
 
-@router.get("/", status_code=status.HTTP_200_OK)
+@router.get("/", response_model=PaginatedResponse[UserDTO], status_code=status.HTTP_200_OK)
 @inject
 async def list_users(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
     use_case: UsersListUseCase = Depends(Provide[Container.users_list_use_case]),
-) -> List[UserDTO]:
-    """Получить данные профиля"""
-    return await use_case.execute()
+) -> PaginatedResponse[UserDTO]:
+    """Получить список пользователей с пагинацией"""
+    return await use_case.execute(request=request, page=page, page_size=page_size)
 
 
 @router.post("", status_code=status.HTTP_200_OK)

@@ -37,7 +37,7 @@ class Route(Entity):
         self.duration = duration
         self.distance = distance
         self.is_custom = is_custom
-        self.json = json_data
+        self.json_data = json_data
 
         self.places = places or []
         self.photo_ids = photo_ids or []
