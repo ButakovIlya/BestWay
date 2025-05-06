@@ -15,7 +15,12 @@ from common.exceptions import APIException
 from config.containers import Container
 from domain.validators.dto import PaginatedResponse
 from infrastructure.models.alchemy.base import Base
-from infrastructure.permissions.dependencies import request_body_schema_from_self, role_required
+from infrastructure.permissions.dependencies import (
+    request_body_schema_from_self,
+    request_patch_schema_from_self,
+    request_put_schema_from_self,
+    role_required,
+)
 from infrastructure.permissions.enums import PermissionEnum, RoleEnum
 
 TRead = TypeVar("TRead", bound=BaseModel)
@@ -301,7 +306,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
     async def put(
         self,
         item_id: int,
-        item_data: TPut = Depends(request_body_schema_from_self),
+        item_data: TPut = Depends(request_put_schema_from_self),
         session: AsyncSession = Depends(Provide[Container.db.session]),
     ) -> TRead:
         try:
@@ -330,7 +335,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
     async def patch(
         self,
         item_id: int,
-        item_data: TPatch = Depends(request_body_schema_from_self),
+        item_data: TPatch = Depends(request_patch_schema_from_self),
         session: AsyncSession = Depends(Provide[Container.db.session]),
     ) -> TRead:
         try:

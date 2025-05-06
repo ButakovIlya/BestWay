@@ -13,6 +13,18 @@ async def request_body_schema_from_self(request: Request, body: dict = Body(...)
     return schema(**body)
 
 
+async def request_patch_schema_from_self(request: Request, body: dict = Body(...)) -> BaseModel:
+    self_instance = request.scope["route"].endpoint.__self__
+    schema: Type[BaseModel] = self_instance.schema_patch
+    return schema(**body)
+
+
+async def request_put_schema_from_self(request: Request, body: dict = Body(...)) -> BaseModel:
+    self_instance = request.scope["route"].endpoint.__self__
+    schema: Type[BaseModel] = self_instance.schema_put
+    return schema(**body)
+
+
 def role_required(min_roles: List[RoleEnum]):
     async def dependency(request: Request):
         role_str = getattr(getattr(request.state, "user", None), "role", None)

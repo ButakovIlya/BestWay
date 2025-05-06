@@ -3,8 +3,9 @@ from typing import List, Optional
 
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
-from sqlalchemy import Select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import Select, select, update
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from api.permissions.is_admin import is_admin
 from application.use_cases.common.dto import ModelPhotoDTO
@@ -21,6 +22,7 @@ from domain.entities.enums import CityCategory, ModelType, PlaceCategory, PlaceT
 from infrastructure.models.alchemy.routes import Place
 from infrastructure.orm.base import BaseViewSet
 from infrastructure.permissions.enums import RoleEnum
+from src.common.exceptions import APIException
 
 from .schemas import PlaceCreate, PlaceFilter, PlacePatch, PlacePut, PlaceRead
 
@@ -45,7 +47,9 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
     router = APIRouter(tags=tags, prefix=prefix, dependencies=[Depends(is_admin)])
 
     def build_select_stmt(self, item_id: Optional[int] = None, filters: Optional[dict] = None) -> Select:
-        stmt = super().build_select_stmt(item_id=item_id, filters=filters).options(joinedload(Place.photos))
+        stmt = (
+            super().build_select_stmt(item_id=item_id, filters=filters).options(selectinload(Place.photos))
+        )
         return stmt
 
     @router.post("/", status_code=status.HTTP_200_OK)
@@ -96,6 +100,73 @@ class PlaceViewSet(BaseViewSet[PlaceCreate, PlacePut, PlacePatch, PlaceRead, Pla
         )
         user_id: int = request.state.user.id
         return await use_case.execute(data=data, user_id=user_id)
+
+    @router.patch("/{item_id}", response_model=PlaceRead)
+    @inject
+    async def patch(
+        self,
+        item_id: int,
+        item_data: PlacePatch,
+        session: AsyncSession = Depends(Provide[Container.db.session]),
+    ) -> PlaceRead:
+        try:
+            values = item_data.model_dump(exclude_unset=True)
+            if not values:
+                raise APIException(code=400, message="Нет данных для обновления")
+
+            stmt = (
+                update(self.model)
+                .where(self.model.id == item_id)
+                .values(**values)
+                .execution_options(synchronize_session="fetch")
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+            result = await session.execute(
+                select(self.model).where(self.model.id == item_id).options(selectinload(Place.photos))
+            )
+            db_obj = result.scalar_one_or_none()
+
+            if not db_obj:
+                raise APIException(code=404, message="Item not found")
+
+            return db_obj
+        finally:
+            await session.close()
+
+    @router.put("/{item_id}", response_model=PlaceRead)
+    @inject
+    async def put(
+        self,
+        item_id: int,
+        item_data: PlacePut,
+        session: AsyncSession = Depends(Provide[Container.db.session]),
+    ) -> PlaceRead:
+        try:
+            validated = PlacePut(**item_data.model_dump(exclude_unset=False))
+            stmt = (
+                update(self.model)
+                .where(self.model.id == item_id)
+                .values(**validated.model_dump(exclude_unset=False))
+                .execution_options(synchronize_session="fetch")
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+            result = await session.execute(
+                select(self.model)
+                .where(self.model.id == item_id)
+                .options(selectinload(Place.photos))
+            )
+            db_obj = result.scalar_one_or_none()
+
+            if not db_obj:
+                raise APIException(code=404, message="Item not found")
+
+            return db_obj
+        finally:
+            await session.close()
 
     @router.post("/{place_id}/avatar", status_code=status.HTTP_200_OK)
     @inject
