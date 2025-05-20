@@ -129,14 +129,18 @@ class RouteSchema(CommonRouteBase):
 
 
 class RoutePutSchema(CommonRouteBase):
-    id: int
+    name: str
+    city: Optional[CityCategory]
+    type: Optional[RouteType]
     author: int
     duration: int
     distance: int
 
 
-class RoutePatchSchema(CommonRouteBase):
-    id: int
+class RoutePatchSchema(BaseModel):
+    name: Optional[str] = None
+    city: Optional[CityCategory] = None
+    type: Optional[RouteType] = None
     author: Optional[int] = None
     duration: Optional[int] = None
     distance: Optional[int] = None
