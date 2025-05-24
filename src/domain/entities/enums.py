@@ -31,6 +31,7 @@ class PlaceCategory(Enum):
     WALK = "Прогуляться"
     EVENTS = "События"
     FOR_KIDS = "Детям"
+    CIRCUS = "Цирк"
 
 
 # Перечисления для типов мест
@@ -137,4 +138,6 @@ class ModelType(Enum):
 
 class SurveyStatus(Enum):
     DRAFT = "Черновик"
-    FILLED = "Заполнена"
+    GENERATING = "Генерация в процессе"
+    GENERATED_SUCCESS = "Генерация завершена успешно"
+    GENERATED_ERROR = "Генерация завершена с ошибкой"

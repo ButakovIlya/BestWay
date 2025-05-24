@@ -19,7 +19,8 @@ def retry_on_status_code(code: int, max_retries=3, delay=5):
                 except httpx.HTTPStatusError as ex:
                     if ex.response.status_code == code:
                         logger.warning(
-                            f"Received {code} response. Retrying {retries + 1}/{max_retries} in {delay} seconds..."
+                            f"Received {code} response."
+                            f"Retrying {retries + 1}/{max_retries} in {delay} seconds..."
                         )
                         retries += 1
                         sleep(delay)

@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Request, status
 from api.permissions.is_authenticated import is_authenticated
 from application.use_cases.surveys.create import SurveyCreateUseCase
 from application.use_cases.surveys.delete import SurveyDeleteUseCase
-from application.use_cases.surveys.dto import SurveyCreateDTO, SurveyDataUpdateDTO, SurveyDTO
+from application.use_cases.surveys.dto import SurveyCreateDTO, SurveyDTO, SurveyUpdateDTO
 from application.use_cases.surveys.list import SurveysListUseCase
 from application.use_cases.surveys.retrieve import SurveyRetrieveUseCase
 from application.use_cases.surveys.update import SurveyUpdateUseCase
@@ -66,13 +66,13 @@ async def delete_survey(
     await use_case.execute(survey_id=survey_id, user_id=user.id)
 
 
-@router.patch("/{survey_id}", status_code=status.HTTP_200_OK)
+@router.put("/{survey_id}", status_code=status.HTTP_200_OK)
 @is_authenticated
 @inject
 async def update_survey_data(
     request: Request,
     survey_id: int,
-    data: SurveyDataUpdateDTO,
+    data: SurveyUpdateDTO,
     use_case: SurveyUpdateUseCase = Depends(Provide[Container.user_survey_update_use_case]),
 ) -> SurveyDTO:
     """Эндпоинт для редактирования анкеты пользователя."""

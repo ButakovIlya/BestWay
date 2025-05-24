@@ -19,7 +19,7 @@ from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
 from application.use_cases.places.create import PlaceCreateUseCase
 from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
 from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
-from application.use_cases.routes.chatgpt_create import ChatGPTRouteCreateUseCase
+from application.use_cases.routes.chatgpt_create import ChatGPTRouteGenerateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.surveys.create import SurveyCreateUseCase
 from application.use_cases.surveys.delete import SurveyDeleteUseCase
@@ -33,7 +33,7 @@ from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.settings import Settings
 from infrastructure.managers.base import StorageManager
-from infrastructure.managers.ChatGPT.route_chatgpt_manager import ChatClassificationManager
+from infrastructure.managers.ChatGPT.route_chatgpt_manager import ChatGPTRouteGenerationManager
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
@@ -42,8 +42,9 @@ from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.redis.redis_cache import RedisCache
 from infrastructure.repositories.alchemy.db import Database
 from infrastructure.tasks import Task
-from infrastructure.tasks.routes import chatgpt_process_route_task
+from infrastructure.tasks.routes import route_generate_gpt_task
 from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
+from src.application.use_cases.tasks.route_generate import StartChatGPTRouteGenerateTaskUseCase
 
 
 class ClientsContainer(containers.DeclarativeContainer):
@@ -64,8 +65,8 @@ class ClientsContainer(containers.DeclarativeContainer):
         SmsClient, redis_cache=redis_cache, settings=settings.provided.sms
     )
 
-    chat_classification_manager: providers.Provider[ChatClassificationManager] = providers.Singleton(
-        ChatClassificationManager,
+    route_generate_gpt_manager: providers.Provider[ChatGPTRouteGenerationManager] = providers.Singleton(
+        ChatGPTRouteGenerationManager,
     )
 
 
@@ -82,9 +83,7 @@ class DBContainer(containers.DeclarativeContainer):
 
 
 class TasksContainer(containers.DeclarativeContainer):
-    chatgpt_process_route: providers.Provider[Task] = providers.Singleton(
-        lambda: chatgpt_process_route_task
-    )
+    chatgpt_process_route: providers.Provider[Task] = providers.Singleton(lambda: route_generate_gpt_task)
 
 
 class Container(containers.DeclarativeContainer):
@@ -213,10 +212,18 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
     )
 
-    route_chatgpt_create_use_case: providers.Provider[ChatGPTRouteCreateUseCase] = providers.Factory(
-        ChatGPTRouteCreateUseCase,
+    start_route_chatgpt_generate_task: providers.Provider[StartChatGPTRouteGenerateTaskUseCase] = (
+        providers.Factory(
+            StartChatGPTRouteGenerateTaskUseCase,
+            uow=db.container.uow,
+            route_generate_gpt_task=tasks.container.chatgpt_process_route,
+        )
+    )
+
+    route_chatgpt_generate_use_case: providers.Provider[ChatGPTRouteGenerateUseCase] = providers.Factory(
+        ChatGPTRouteGenerateUseCase,
         uow=db.container.uow,
-        chatgpt_process_route_task=tasks.container.chatgpt_process_route,
+        route_generate_gpt_manager=clients.container.route_generate_gpt_manager,
     )
 
     route_avatar_update_use_case: providers.Provider[RoutePhotoUpdateUseCase] = providers.Factory(

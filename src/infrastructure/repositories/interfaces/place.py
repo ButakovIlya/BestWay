@@ -1,5 +1,14 @@
+from abc import abstractmethod
+from typing import List, TypeVar
+
+from domain.entities.model import Model
 from infrastructure.repositories.interfaces.base import ModelRepository
+
+TModel = TypeVar("TModel", bound=Model)
 
 
 class PlaceRepository(ModelRepository):
-    pass
+    @abstractmethod
+    async def get_list_by_route_id(self, route_id: int) -> List[TModel]:
+        """Получить места у маршрута"""
+        pass

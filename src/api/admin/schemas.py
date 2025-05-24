@@ -117,6 +117,15 @@ class CommonRouteBase(BaseModel):
     type: Optional[RouteType] = None
 
 
+class MiniRouteSchema(CommonRouteBase):
+    id: int
+    author_id: int
+    duration: Optional[int]
+    distance: Optional[int]
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+
 class RouteSchema(CommonRouteBase):
     id: int
     author_id: int
@@ -170,6 +179,13 @@ class RoutePlaceRead(BaseModel):
 
     model_config = {"from_attributes": True}
 
+    @classmethod
+    def model_validate(cls, data: Any) -> "RoutePlaceRead":
+        return cls(
+            order=getattr(data, "order", 0),
+            place=PlaceRead.model_validate(data.place),
+        )
+
 
 class UserRead(BaseModel):
     id: int
@@ -184,6 +200,21 @@ class UserRead(BaseModel):
     description: str | None = None
 
     model_config = {"from_attributes": True}
+
+    @classmethod
+    def model_validate(cls, user: Any) -> "UserRead":
+        return cls(
+            id=user.id,
+            phone=user.phone,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            middle_name=user.middle_name,
+            registration_date=user.registration_date,
+            is_banned=user.is_banned,
+            is_admin=user.is_admin,
+            photo=f"{get_settings().app.base_url}{user.photo.lstrip('/')}" if user.photo else None,
+            description=user.description,
+        )
 
 
 class RouteRead(CommonRouteBase):
@@ -231,8 +262,10 @@ class RouteFilter(BaseFilter):
 
 class CommonSurveyBase(BaseModel):
     name: str
+    city: Optional[CityCategory] = CityCategory.PERM
     status: Optional[SurveyStatus] = SurveyStatus.DRAFT
     data: Optional[dict] = None
+    places: Optional[dict] = None
 
 
 class SurveyCreate(CommonSurveyBase):
@@ -243,12 +276,14 @@ class SurveyPut(CommonSurveyBase):
     name: str
     status: SurveyStatus
     data: dict
+    places: dict
 
 
 class SurveyPatch(CommonSurveyBase):
     name: Optional[str] = None
     status: Optional[SurveyStatus] = None
     data: Optional[dict] = None
+    places: Optional[dict] = None
 
 
 class SurveyRead(CommonSurveyBase):
@@ -265,8 +300,10 @@ class SurveyRead(CommonSurveyBase):
         return cls(
             id=survey.id,
             name=survey.name,
+            city=survey.city,
             status=survey.status,
             data=survey.data,
+            places=survey.places,
             author_id=survey.author_id,
             created_at=survey.created_at,
             updated_at=survey.updated_at,

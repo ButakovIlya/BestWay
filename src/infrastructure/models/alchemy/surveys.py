@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from domain.entities.enums import SurveyStatus
+from domain.entities.enums import CityCategory, SurveyStatus
 from infrastructure.models.alchemy.base import Base
 
 if TYPE_CHECKING:
@@ -27,7 +27,13 @@ class Survey(Base):
         nullable=False,
         default=SurveyStatus.DRAFT,
     )
+    city: Mapped[str] = mapped_column(
+        Enum(CityCategory, name="route_city", native_enum=False, length=16),
+        index=True,
+        default=CityCategory.PERM,
+    )
 
     data: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
+    places: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="surveys")

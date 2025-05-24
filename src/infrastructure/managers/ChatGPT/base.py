@@ -3,18 +3,19 @@ import json
 import logging
 from time import sleep
 
-from fastapi.encoders import jsonable_encoder
 from openai import OpenAI
 
-from common.exceptions import ResponsesLimitExceededException
+from common.exceptions import APIException, ResponsesLimitExceededException
 from config.settings import Settings
+from infrastructure.managers.ChatGPT.dto import ChatGPTContentData
 from infrastructure.managers.ChatGPT.utils import retry_on_status_code
 from infrastructure.managers.proxy_client import ProxyClient
+from infrastructure.repositories.interfaces.ChatGPT.base import ClassificationManager
 
 logger = logging.getLogger(__name__)
 
 
-class BaseClassificationManager:
+class BaseClassificationManager(ClassificationManager):
     """
     Базовый класс, содержащий общую логику:
       - Повторные попытки при статусе 429
@@ -83,7 +84,7 @@ class BaseClassificationManager:
             )
             raise ResponsesLimitExceededException()
 
-    def _create_request_payload(self, user_text: str, system_prompt: str) -> dict:
+    def _create_request_payload(self, content: ChatGPTContentData, system_prompt: str) -> dict:
         """
         Формирует JSON-параметры (payload), которые будем отправлять в ChatGPT.
         """
@@ -91,7 +92,7 @@ class BaseClassificationManager:
             "model": self.CHATGPT_MODEL,
             "messages": [
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": str(user_text)},
+                {"role": "user", "content": content.model_dump_json()},
             ],
             "temperature": 0,
             "max_tokens": 2000,
@@ -100,7 +101,8 @@ class BaseClassificationManager:
             "presence_penalty": 0,
         }
 
-    def _parse_chatgpt_response(self, response: dict):
+    # TODO переделать валидацию
+    def _parse_chatgpt_response(self, response: dict) -> dict:
         """
         Разбирает ответ от ChatGPT, пытается сначала интерпретировать
         как JSON, при неудаче – вернуть список объектов (или пустой).
@@ -114,32 +116,21 @@ class BaseClassificationManager:
             return json.loads(response_content)
         except Exception:
             logger.info("ChatGPT responded with non-JSON content")
-
-        results = []
-        if isinstance(response_content, list):
-            for text in response_content:
-                try:
-                    results.append(jsonable_encoder(text) if text else {})
-                except Exception:
-                    logger.info(f"Failed to parse text: {text}")
-                    results.append({})
-        else:
-            logger.info("ChatGPT responded with non-list-of-dicts content")
-        return results
+            raise APIException(message=f"ChatGPT responded with non-JSON content: {str(response_content)}")
 
     @retry_on_status_code(code=429, max_retries=CHATGPT_MAX_REQUEST_RETRIES, delay=CHATGPT_REQUEST_DELAY)
-    def _send_request(self, user_text: str, system_prompt: str):
+    def _send_request(self, content: ChatGPTContentData, system_prompt: str) -> dict:
         try:
             self._check_response_availability()
 
             sleep(self.CHATGPT_REQUEST_DELAY)
 
-            payload = self._create_request_payload(user_text, system_prompt)
+            payload = self._create_request_payload(content, system_prompt)
 
             response = self.proxy_client.post(
                 "https://api.openai.com/v1/chat/completions",
                 json=payload,
-                headers={"Authorization": f"Bearer {self.settings.openai_key}"},
+                headers={"Authorization": f"Bearer {self.settings.chatgpt.api_key}"},
             )
 
             parsed_content = self._parse_chatgpt_response(response)

@@ -38,21 +38,24 @@ class SqlAlchemySurveysRepository(SqlAlchemyModelRepository[Survey], SurveyRepos
         return SurveyModel(
             id=entity.id,
             name=entity.name,
+            city=entity.city,
             author_id=entity.author_id,
             status=entity.status,
             data=entity.data,
+            places=entity.places,
             created_at=entity.created_at or datetime.now(),
             updated_at=entity.updated_at or datetime.now(),
         )
 
     def convert_to_entity(self, model: SurveyModel) -> Survey:
-        print(model)
         return Survey(
             id=model.id,
             name=model.name,
+            city=model.city,
             author_id=model.author_id,
             status=model.status,
             data=model.data,
+            places=model.places,
             created_at=model.created_at,
             updated_at=model.updated_at,
         )

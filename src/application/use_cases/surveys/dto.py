@@ -1,23 +1,28 @@
+import json
 from datetime import datetime
 from typing import Dict, Optional
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from application.constants import MIN_PLACES_COUNT
-from domain.entities.enums import RouteType, SurveyStatus
+from application.constants import MAX_FIELD_SIZE, MAX_PLACES_COUNT, MIN_PLACES_COUNT
+from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 
 
 class CommonSurveyDTO(BaseModel):
     name: Optional[str]
+    city: Optional[CityCategory]
     data: Optional[Dict]
+    places: Optional[Dict]
     status: Optional[SurveyStatus]
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class SurveyCreateDTO(CommonSurveyDTO):
-    name: str = Field(..., example="Опрос по благоустройству")
-    status: Optional[SurveyStatus] = Field(default=SurveyStatus.DRAFT)
+class SurveyCreateDTO(BaseModel):
+    name: str = Field(..., example="Опрос по предпочтениям")
+    city: Optional[CityCategory] = CityCategory.PERM
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SurveyPutDTO(CommonSurveyDTO):
@@ -36,41 +41,72 @@ class SurveyDTO(CommonSurveyDTO):
     updated_at: datetime
 
 
+class PlaceInfo(BaseModel):
+    place_id: Optional[int] = Field(default=None, description="ID места из БД")
+    category: Optional[PlaceCategory] = Field(default=None, description="Категория места")
+    type: Optional[PlaceType] = Field(default=None, description="Тип места")
+    description: Optional[str] = Field(max_length=50, default=None, description="Краткое описание")
+
+    @model_validator(mode="after")
+    def at_least_one_field_must_be_filled(self):
+        if not any([self.place_id, self.category, self.type, self.description]):
+            raise ValueError("At least one of place_id, category, type, or description must be provided.")
+        return self
+
+    model_config = {"from_attributes": True, "use_enum_values": True}
+
+
 class SurveyDataUpdateDTO(BaseModel):
-    experience: Optional[str]
-    answers: Optional[Dict[str, str]]  # произвольные пары "вопрос: ответ"
-    # locations: Optional[List[int]]
-    order_matters: Optional[bool] = False  # "важен ли порядок"
-    preferred_transport: Optional[RouteType]
-    route_preferences: Optional[str]
+    experience: Optional[str] = Field(default=None, description="Опыт пользователя")
+    questions: Optional[Dict[str, str]] = Field(default=None, description="Ответы на вопросы, до 2048 байт")
+    preferences: Optional[str] = Field(default=None, description="Предпочтения пользователя")
+    preferred_transport: Optional[RouteType] = Field(
+        default=RouteType.MIXED.value, description="Предпочтительный транспорт"
+    )
+    places_count: Optional[int] = Field(default=MIN_PLACES_COUNT, description="Количество мест")
+    order_matters: Optional[bool] = Field(
+        default=False, description="Учитывается ли порядок посещения мест"
+    )
 
-    places_count: Optional[int] = MIN_PLACES_COUNT
+    @field_validator("questions")
+    def validate_questions_size(cls, v):
+        if v is not None:
+            byte_size = len(json.dumps(v, ensure_ascii=False).encode("utf-8"))
+            if byte_size > MAX_FIELD_SIZE:
+                raise ValueError(f"Поле 'questions' не может превышать {MAX_FIELD_SIZE} байт")
+        return v
 
-    @field_validator("experience", "route_preferences")
+    @field_validator("experience", "preferences")
     def validate_length(cls, v, field):
         if v is not None and len(v) > 250:
             raise ValueError(f"{field.name} не может содержать больше 250 символов")
         return v
 
     @field_validator("places_count")
-    def validate_length(cls, v, field):
+    def validate_length_places_count(cls, v, field):
         if v is not None and v < MIN_PLACES_COUNT:
             raise ValueError(f"{field.name} не может быть меньше {MIN_PLACES_COUNT}")
         return v
 
-    # @field_validator("locations", each_item=True)
-    # def validate_location_item(cls, loc_dict):
-    #     if not isinstance(loc_dict, dict):
-    #         raise ValueError("Каждая локация должна быть словарём")
-    #     for name, coords in loc_dict.items():
-    #         if not isinstance(name, str) or not isinstance(coords, str):
-    #             raise ValueError("Ключ и значение должны быть строками")
-    #         parts = coords.split(",")
-    #         if len(parts) != 2:
-    #             raise ValueError(f"Координаты должны быть в формате 'широта,долгота', а не '{coords}'")
-    #         try:
-    #             float(parts[0].strip())
-    #             float(parts[1].strip())
-    #         except ValueError:
-    #             raise ValueError(f"Координаты '{coords}' содержат нечисловые значения")
-    #     return loc_dict
+    model_config = {"from_attributes": True, "use_enum_values": True}
+
+
+class SurveyUpdateDTO(BaseModel):
+    name: Optional[str] = "Анкета маршрута"
+    city: Optional[CityCategory] = CityCategory.PERM.value
+    data: Optional[SurveyDataUpdateDTO] = None
+    places: Optional[Dict[int, PlaceInfo]] = None
+
+    @model_validator(mode="after")
+    def validate_places_keys(self):
+        if self.places:
+            keys = sorted(self.places.keys())
+            if keys[0] != 1:
+                raise ValueError("Нумерация мест должна начинаться с 1.")
+            if keys != list(range(1, len(keys) + 1)):
+                raise ValueError("Номера мест должны быть последовательными: 1, 2, 3, ...")
+            if len(keys) > MAX_PLACES_COUNT:
+                raise ValueError(f"Нельзя выбрать больше {MAX_PLACES_COUNT} мест.")
+        return self
+
+    model_config = ConfigDict(from_attributes=True)

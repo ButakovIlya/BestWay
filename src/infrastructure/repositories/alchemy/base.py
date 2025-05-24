@@ -102,7 +102,7 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         result = await self._session.scalars(stmt.order_by(getattr(self.MODEL, "id").desc()))
 
         objects = result.all()
-        return [self.LIST_DTO(**vars(obj)) for obj in objects]
+        return [self.LIST_DTO.model_validate(obj) for obj in objects]
 
     async def get_list_by_ids(
         self,
