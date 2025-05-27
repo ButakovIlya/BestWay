@@ -30,7 +30,7 @@ class AppSettings(BaseModel):
     debug: bool = False
     version: str = "0.1.0"
 
-    base_url: str = "https://localhost:8002/"
+    base_url: str = "http://localhost:8002/"
 
 
 class UptraceSettings(BaseModel):
@@ -71,8 +71,8 @@ class JWTSettings(BaseModel):
 
 
 class CentrifugoSettings(BaseModel):
-    host: str = "http://localhost:8000"
-    api_key: str = "key"
+    host: str = "http://localhost:8001"
+    api_key: str = "secret"
     publish_endpoint: str = "/api/publish"
 
     @property
@@ -81,18 +81,18 @@ class CentrifugoSettings(BaseModel):
 
 
 class RedisSettings(BaseModel):
-    # host: str = "redis://localhost:6379/2"
-    host: str = "redis://redis:6379/2"
+    host: str = "redis://localhost:6379/2"
+    # host: str = "redis://redis:6379/2"
     password: str = ""
 
 
 class TaskSettings(BaseModel):
     app_name: str = "bestway"
-    # broker_url: str = "redis://localhost:6379/0"
-    # result_url: str = "redis://localhost:6379/1"
+    broker_url: str = "redis://localhost:6379/0"
+    result_url: str = "redis://localhost:6379/1"
 
-    broker_url: str = "redis://redis:6379/0"
-    result_url: str = "redis://redis:6379/1"
+    # broker_url: str = "redis://redis:6379/0"
+    # result_url: str = "redis://redis:6379/1"
 
 
 class SmsSettings(BaseSettings):
@@ -146,6 +146,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     api: ApiSettings = ApiSettings()
     jwt: JWTSettings = JWTSettings()
+    centrifugo: CentrifugoSettings = CentrifugoSettings()
 
     chatgpt: ChatGPTSettings = ChatGPTSettings()
     proxy: ProxySettings = ProxySettings()

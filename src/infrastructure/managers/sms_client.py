@@ -28,8 +28,9 @@ class SmsClient:
         self._validate_phone(payload.phone)
         headers, json_payload = self._build_payload(payload)
 
-        async with httpx.AsyncClient() as _:
+        async with httpx.AsyncClient() as client:
             try:
+                pass
                 # response = await client.post(
                 #     self.settings.service_url,
                 #     json=json_payload,
@@ -37,7 +38,6 @@ class SmsClient:
                 #     timeout=10  # Ограничение по времени запроса
                 # )
                 # return self._handle_response(response)
-                return 1337
 
             except httpx.RequestError as exc:
                 raise HTTPException(status_code=500, detail=f"Ошибка сети: {str(exc)}")

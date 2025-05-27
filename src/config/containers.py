@@ -26,6 +26,7 @@ from application.use_cases.surveys.delete import SurveyDeleteUseCase
 from application.use_cases.surveys.list import SurveysListUseCase
 from application.use_cases.surveys.retrieve import SurveyRetrieveUseCase
 from application.use_cases.surveys.update import SurveyUpdateUseCase
+from application.use_cases.tasks.route_generate import StartChatGPTRouteGenerateTaskUseCase
 from application.use_cases.users.delete_user import UserDeleteUseCase
 from application.use_cases.users.list import UsersListUseCase
 from application.use_cases.users.photo import UserPhotoUpdateUseCase
@@ -37,6 +38,7 @@ from infrastructure.managers.ChatGPT.route_chatgpt_manager import ChatGPTRouteGe
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
+from infrastructure.notifications.notifier import CentrifugoNotifier
 from infrastructure.redis import init_redis_pool
 from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.redis.redis_cache import RedisCache
@@ -44,7 +46,6 @@ from infrastructure.repositories.alchemy.db import Database
 from infrastructure.tasks import Task
 from infrastructure.tasks.routes import route_generate_gpt_task
 from infrastructure.uow import SqlAlchemyUnitOfWork, UnitOfWork
-from src.application.use_cases.tasks.route_generate import StartChatGPTRouteGenerateTaskUseCase
 
 
 class ClientsContainer(containers.DeclarativeContainer):
@@ -59,6 +60,12 @@ class ClientsContainer(containers.DeclarativeContainer):
     redis_cache: providers.Provider[AbstractRedisCache] = providers.Resource(
         RedisCache,
         cache_connection=redis_pool,
+    )
+
+    notifier: providers.Provider[CentrifugoNotifier] = providers.Resource(
+        CentrifugoNotifier,
+        api_url=settings.provided.centrifugo.host,
+        api_key=settings.provided.centrifugo.api_key,
     )
 
     sms_client: providers.Provider[SmsClient] = providers.Resource(
@@ -223,6 +230,7 @@ class Container(containers.DeclarativeContainer):
     route_chatgpt_generate_use_case: providers.Provider[ChatGPTRouteGenerateUseCase] = providers.Factory(
         ChatGPTRouteGenerateUseCase,
         uow=db.container.uow,
+        notifier=clients.container.notifier,
         route_generate_gpt_manager=clients.container.route_generate_gpt_manager,
     )
 

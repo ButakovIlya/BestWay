@@ -3,6 +3,7 @@ from typing import List
 
 from pydantic import ValidationError
 
+from application.events import EventType
 from application.use_cases.base import UseCase
 from application.use_cases.routes.enums import RouteGenerationMode as Mode
 from common.exceptions import APIException
@@ -18,6 +19,7 @@ from infrastructure.managers.ChatGPT.dto import (
     ChatGPTSurveyData,
     ChatGPTUserData,
 )
+from infrastructure.notifications.notifier import CentrifugoNotifier
 from infrastructure.repositories.interfaces.ChatGPT.base import ClassificationManager
 from infrastructure.uow import UnitOfWork
 
@@ -28,15 +30,19 @@ class ChatGPTRouteGenerateUseCase(UseCase):
     def __init__(
         self,
         uow: UnitOfWork,
+        notifier: CentrifugoNotifier,
         route_generate_gpt_manager: ClassificationManager,
     ) -> None:
         self._uow = uow
+        self._notifier = notifier
         self._route_generate_gpt_manager = route_generate_gpt_manager
 
     async def execute(self, user_id: int, survey_id: int, mode: str = Mode.FULL.name) -> Route:
         logger.info(
             f"Start route gpt generate use case for user: {user_id} with survey: {survey_id} in {mode} mode"
         )
+        # await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_STARTED)
+        # await self._notifier.notify_general(EventType.ROUTE_GENERATION_STARTED)
         data = await self._create_content(user_id, survey_id)
         logger.info(f"Content data: {data}")
         # route_data = self._route_generate_gpt_manager.generate_route(data, Mode(mode))
@@ -49,6 +55,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
         print(f"validated_route_data: {validated_route_data}")
         route = await self._create_route(validated_route_data, survey_id)
         logger.info("End route chatgpt generate use case")
+        # await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_SUCCEDED)
         return route
 
     async def _create_content(self, user_id: int, survey_id: int) -> ChatGPTContentData:
@@ -97,16 +104,39 @@ class ChatGPTRouteGenerateUseCase(UseCase):
             )
 
     async def _create_route(self, validated_route_data: ChatGPTRouteData, survey_id: int) -> Route:
-        async with self._uow(autocommit=True):
-            survey: Survey = await self._uow.surveys.get_by_id(survey_id)
-            route: Route = await self._uow.routes.create(
-                Route(**validated_route_data.model_dump(), city=survey.city)
-            )
-            route_places: List[RoutePlaces] = await self._uow.route_places.bulk_create(
-                RoutePlaces(route_id=route.id, place_id=place_id, order=index)
-                for index, place_id in enumerate(validated_route_data.places, start=1)
-            )
-            logger.info(f"Created route: {route}")
-            logger.info(f"Created route_places: {route_places}")
+        async with self._uow(autocommit=False):
+            try:
+                await self._validate_places_data(places=validated_route_data.places)
 
-            return route
+                survey: Survey = await self._uow.surveys.get_by_id(survey_id)
+
+                route: Route = await self._uow.routes.create(
+                    Route(**validated_route_data.model_dump(), city=survey.city)
+                )
+
+                route_places: List[RoutePlaces] = await self._uow.route_places.bulk_create(
+                    RoutePlaces(route_id=route.id, place_id=place_id, order=index)
+                    for index, place_id in enumerate(validated_route_data.places, start=1)
+                )
+
+                await self._uow.commit()
+
+                logger.info(f"Created route: {route}")
+                logger.info(f"Created route_places: {route_places}")
+
+                return route
+
+            except APIException as message:
+                await self._uow.rollback()
+                logger.error(f"Error occurred during route validation: {message}", exc_info=True)
+                raise Exception(f"Произошла ошибка валидации сгенерированного маршрута: {message}")
+
+            except Exception as e:
+                await self._uow.rollback()
+                logger.error(f"Error occurred during route creation: {e}", exc_info=True)
+                raise Exception("Не удалось создать маршрут. Попробуйте позже.")
+
+    async def _validate_places_data(self, places: List[int]) -> None:
+        if not await self._uow.places.all_exist_by_id_list(places):
+            logger.error(f"Some place IDs are invalid or missing in DB. Given: {places}", exc_info=True)
+            raise APIException(code=500, message="Некоторые места не невалидны или не существуют.")

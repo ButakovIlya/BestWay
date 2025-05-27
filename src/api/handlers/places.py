@@ -17,10 +17,10 @@ from application.use_cases.places.add_photos import PlacePhotosAddUseCase
 from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
 from application.use_cases.places.create import PlaceCreateUseCase
 from application.use_cases.places.dto import CreatePlaceDTO
+from common.exceptions import APIException
 from config.containers import Container
 from domain.entities.enums import CityCategory, ModelType, PlaceCategory, PlaceType
 from infrastructure.models.alchemy.routes import Place
-from src.common.exceptions import APIException
 
 router = APIRouter()
 

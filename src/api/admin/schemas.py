@@ -317,3 +317,95 @@ class SurveyFilter(BaseModel):
     created_at_to: Optional[datetime] = None
     updated_at_from: Optional[datetime] = None
     updated_at_to: Optional[datetime] = None
+
+
+class LikeBase(BaseModel):
+    author_id: int
+    route_id: int
+    place_id: int
+    timestamp: Optional[datetime] = None
+
+
+class LikeCreate(LikeBase):
+    pass
+
+
+class LikePut(LikeBase):
+    author_id: int
+    route_id: int
+    place_id: int
+    timestamp: Optional[datetime] = None
+
+
+class LikePatch(BaseModel):
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+    timestamp: Optional[datetime] = None
+
+
+class LikeRead(LikeBase):
+    id: int
+
+    model_config = {"from_attributes": True}
+
+
+class LikeFilter(BaseModel):
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+    timestamp: Optional[datetime] = None
+
+    author_id__list: Optional[List[int]] = None
+    route_id__list: Optional[List[int]] = None
+    place_id__list: Optional[List[int]] = None
+
+
+class CommentBase(BaseModel):
+    author_id: int
+    route_id: int
+    place_id: int
+    timestamp: Optional[datetime] = None
+    comment: Optional[str] = None
+    photo: Optional[str] = None
+
+
+class CommentCreate(CommentBase):
+    pass
+
+
+class CommentPut(CommentBase):
+    author_id: int
+    route_id: int
+    place_id: int
+    timestamp: Optional[datetime] = None
+    comment: Optional[str] = None
+    photo: Optional[str] = None
+
+
+class CommentPatch(BaseModel):
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+    timestamp: Optional[datetime] = None
+    comment: Optional[str] = None
+    photo: Optional[str] = None
+
+
+class CommentRead(CommentBase):
+    id: int
+
+    model_config = {"from_attributes": True}
+
+
+class CommentFilter(BaseModel):
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+    timestamp: Optional[datetime] = None
+    comment: Optional[str] = None
+    photo: Optional[str] = None
+
+    author_id__list: Optional[List[int]] = None
+    route_id__list: Optional[List[int]] = None
+    place_id__list: Optional[List[int]] = None

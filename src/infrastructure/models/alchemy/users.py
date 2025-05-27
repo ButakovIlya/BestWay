@@ -8,7 +8,7 @@ from domain.entities.enums import Gender
 from infrastructure.models.alchemy.base import Base
 
 if TYPE_CHECKING:
-    from infrastructure.models.alchemy.routes import Like, Photo, Route, RouteComment
+    from infrastructure.models.alchemy.routes import Comment, Like, Photo, Route
     from infrastructure.models.alchemy.surveys import Survey
 
 
@@ -35,8 +35,8 @@ class User(Base):
 
     routes: Mapped[list["Route"]] = relationship("Route", back_populates="author")
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="author")
-    comments: Mapped[list["RouteComment"]] = relationship("RouteComment", back_populates="author")
+    comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="author")
     uploaded_photos: Mapped[list["Photo"]] = relationship("Photo", back_populates="uploader")
     surveys: Mapped[list["Survey"]] = relationship(
-        "Survey", back_populates="author", cascade="all, delete-orphan", lazy="select"
+        "Survey", back_populates="author", cascade="all, delete-orphan", lazy="selectin"
     )
