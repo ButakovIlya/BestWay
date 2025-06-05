@@ -4,7 +4,7 @@ from application.use_cases.base import UseCase
 from application.use_cases.common.dto import UploadPhotosDTO
 from domain.entities.photo import Photo
 from infrastructure.managers.base import StorageManager
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class UploadPhotosUseCase(UseCase):

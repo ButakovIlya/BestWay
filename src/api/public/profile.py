@@ -11,7 +11,7 @@ from application.use_cases.users.retrieve import UserRetrieveUseCase
 from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
 
-router = APIRouter(tags=["Profile"], prefix="/profile")
+router = APIRouter(tags=["Public Profile"], prefix="/profile")
 
 
 @router.get("", status_code=status.HTTP_200_OK)

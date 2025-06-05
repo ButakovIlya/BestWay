@@ -5,8 +5,11 @@ from pydantic import BaseModel, Field, field_validator
 
 from application.utils import get_settings
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
+from domain.entities.place import Place
+from domain.entities.route import Route
 from domain.filters import BaseFilter
-from infrastructure.models.alchemy.routes import Place, Route
+
+# from infrastructure.models.alchemy.routes import Place, Route
 
 
 class CommonPlaceBase(BaseModel):
@@ -59,7 +62,7 @@ class PhotoRead(BaseModel):
 
         return cls(
             id=id_,
-            url=f"{get_settings().app.base_url}{url.lstrip('/')}" if url else "",
+            url=f"{get_settings().app.base_url}/{url.lstrip('/')}" if url else "",
         )
 
 
@@ -80,7 +83,7 @@ class PlaceRead(CommonPlaceBase):
             type=place.type,
             tags=place.tags,
             coordinates=place.coordinates,
-            photo=f"{get_settings().app.base_url}{place.photo.lstrip('/')}" if place.photo else None,
+            photo=f"{get_settings().app.base_url}/{place.photo.lstrip('/')}" if place.photo else None,
             map_name=place.map_name,
             photos=[PhotoRead.model_validate(photo) for photo in place.photos] if place.photos else None,
         )
@@ -203,6 +206,8 @@ class UserRead(BaseModel):
 
     @classmethod
     def model_validate(cls, user: Any) -> "UserRead":
+        if not user:
+            return None
         return cls(
             id=user.id,
             phone=user.phone,
@@ -212,7 +217,7 @@ class UserRead(BaseModel):
             registration_date=user.registration_date,
             is_banned=user.is_banned,
             is_admin=user.is_admin,
-            photo=f"{get_settings().app.base_url}{user.photo.lstrip('/')}" if user.photo else None,
+            photo=f"{get_settings().app.base_url}/{user.photo.lstrip('/')}" if user.photo else None,
             description=user.description,
         )
 
@@ -245,7 +250,7 @@ class RouteRead(CommonRouteBase):
             created_at=route.created_at,
             updated_at=route.updated_at,
             author=UserRead.model_validate(route.author),
-            photos=[PhotoRead.model_validate(p) for p in route.photos],
+            photos=[PhotoRead.model_validate(p) for p in route.photos] if route.photos else [],
             places=[RoutePlaceRead.model_validate(place) for place in route.places],
         )
 
@@ -320,32 +325,20 @@ class SurveyFilter(BaseModel):
 
 
 class LikeBase(BaseModel):
-    author_id: int
-    route_id: int
-    place_id: int
-    timestamp: Optional[datetime] = None
-
-
-class LikeCreate(LikeBase):
-    pass
-
-
-class LikePut(LikeBase):
-    author_id: int
-    route_id: int
-    place_id: int
-    timestamp: Optional[datetime] = None
-
-
-class LikePatch(BaseModel):
     author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
-    timestamp: Optional[datetime] = None
+
+
+class LikeCreate(BaseModel):
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
 
 
 class LikeRead(LikeBase):
     id: int
+    timestamp: Optional[datetime] = None
 
     model_config = {"from_attributes": True}
 
@@ -363,33 +356,31 @@ class LikeFilter(BaseModel):
 
 class CommentBase(BaseModel):
     author_id: int
-    route_id: int
-    place_id: int
-    timestamp: Optional[datetime] = None
-    comment: Optional[str] = None
-    photo: Optional[str] = None
-
-
-class CommentCreate(CommentBase):
-    pass
-
-
-class CommentPut(CommentBase):
-    author_id: int
-    route_id: int
-    place_id: int
-    timestamp: Optional[datetime] = None
-    comment: Optional[str] = None
-    photo: Optional[str] = None
-
-
-class CommentPatch(BaseModel):
-    author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
     timestamp: Optional[datetime] = None
     comment: Optional[str] = None
     photo: Optional[str] = None
+
+
+class CommentCreateDTO(BaseModel):
+    comment: str
+    author_id: Optional[int] = None
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+
+
+class CommentPutDTO(CommentBase):
+    author_id: int
+    route_id: int
+    place_id: int
+    comment: Optional[str]
+
+
+class CommentUpdateDTO(BaseModel):
+    route_id: Optional[int] = None
+    place_id: Optional[int] = None
+    comment: Optional[str] = None
 
 
 class CommentRead(CommentBase):

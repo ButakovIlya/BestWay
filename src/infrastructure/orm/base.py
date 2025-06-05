@@ -62,7 +62,7 @@ class BaseViewSet(Generic[TRead, TCreate, TPut, TPatch, TFilter]):
         self.router = APIRouter(
             prefix=self.prefix,
             tags=self.tags,
-            dependencies=[Depends(role_required(self.authentication_classes))],
+            # dependencies=[Depends(role_required(self.authentication_classes))],
         )
 
         if "create" in self.allowed_methods:

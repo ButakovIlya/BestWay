@@ -10,8 +10,14 @@ from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
 from application.use_cases.common import PhotoUpdateUseCase
+from application.use_cases.common.create import ModelObjectCreateUseCase
+from application.use_cases.common.delete import ModelObjectDeleteUseCase
+from application.use_cases.common.list import ModelObjectListUseCase
+from application.use_cases.common.partial_update import ModelObjectPartialUpdateUseCase
 from application.use_cases.common.photo.delete import DeletePhotoUseCase
 from application.use_cases.common.photo.upload import UploadPhotosUseCase
+from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
+from application.use_cases.common.update import ModelObjectUpdateUseCase
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
 from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
 from application.use_cases.places.add_photos import PlacePhotosAddUseCase
@@ -21,6 +27,11 @@ from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
 from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
 from application.use_cases.routes.chatgpt_create import ChatGPTRouteGenerateUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
+from application.use_cases.routes.feed.list import RouteFeedListUseCase
+from application.use_cases.routes.feed.retrieve import RouteFeedRetrieveUseCase
+from application.use_cases.routes.places.add import RoutePlaceAddUseCase
+from application.use_cases.routes.places.remove import RoutePlaceRemoveUseCase
+from application.use_cases.routes.places.update_order import RoutePlaceUpdateOrderUseCase
 from application.use_cases.surveys.create import SurveyCreateUseCase
 from application.use_cases.surveys.delete import SurveyDeleteUseCase
 from application.use_cases.surveys.list import SurveysListUseCase
@@ -162,6 +173,7 @@ class Container(containers.DeclarativeContainer):
         UserCreateUseCase,
         uow=db.container.uow,
     )
+
     user_delete_use_case: providers.Provider[UserDeleteUseCase] = providers.Factory(
         UserDeleteUseCase,
         uow=db.container.uow,
@@ -216,6 +228,21 @@ class Container(containers.DeclarativeContainer):
     # routes
     route_create_use_case: providers.Provider[RouteCreateUseCase] = providers.Factory(
         RouteCreateUseCase,
+        uow=db.container.uow,
+    )
+
+    route_place_add_use_case: providers.Provider[RoutePlaceAddUseCase] = providers.Factory(
+        RoutePlaceAddUseCase,
+        uow=db.container.uow,
+    )
+
+    route_place_remove_use_case: providers.Provider[RoutePlaceRemoveUseCase] = providers.Factory(
+        RoutePlaceRemoveUseCase,
+        uow=db.container.uow,
+    )
+
+    route_place_update_order_use_case: providers.Provider[RoutePlaceUpdateOrderUseCase] = providers.Factory(
+        RoutePlaceUpdateOrderUseCase,
         uow=db.container.uow,
     )
 
@@ -279,6 +306,48 @@ class Container(containers.DeclarativeContainer):
 
     user_survey_update_use_case: providers.Provider[SurveyUpdateUseCase] = providers.Factory(
         SurveyUpdateUseCase,
+        uow=db.container.uow,
+    )
+
+    # public
+    # routes
+    route_feed_use_case: providers.Provider[RouteFeedListUseCase] = providers.Factory(
+        RouteFeedListUseCase,
+        uow=db.container.uow,
+    )
+    route_feed_retrieve_use_case: providers.Provider[RouteFeedRetrieveUseCase] = providers.Factory(
+        RouteFeedRetrieveUseCase,
+        uow=db.container.uow,
+    )
+
+    # COMMON CRUD USE_CASES
+    object_create_use_case: providers.Provider[ModelObjectCreateUseCase] = providers.Factory(
+        ModelObjectCreateUseCase,
+        uow=db.container.uow,
+    )
+
+    object_retrieve_use_case: providers.Provider[ModelObjectRetrieveUseCase] = providers.Factory(
+        ModelObjectRetrieveUseCase,
+        uow=db.container.uow,
+    )
+
+    object_list_use_case: providers.Provider[ModelObjectListUseCase] = providers.Factory(
+        ModelObjectListUseCase,
+        uow=db.container.uow,
+    )
+
+    object_update_use_case: providers.Provider[ModelObjectUpdateUseCase] = providers.Factory(
+        ModelObjectUpdateUseCase,
+        uow=db.container.uow,
+    )
+
+    object_partial_update_use_case: providers.Provider[ModelObjectPartialUpdateUseCase] = providers.Factory(
+        ModelObjectPartialUpdateUseCase,
+        uow=db.container.uow,
+    )
+
+    object_delete_use_case: providers.Provider[ModelObjectDeleteUseCase] = providers.Factory(
+        ModelObjectDeleteUseCase,
         uow=db.container.uow,
     )
 

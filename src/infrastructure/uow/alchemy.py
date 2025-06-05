@@ -6,6 +6,8 @@ from infrastructure.repositories.alchemy import (
     SqlAlchemyPlacesRepository,
     SqlAlchemyUsersRepository,
 )
+from infrastructure.repositories.alchemy.comments import SqlAlchemyCommentsRepository
+from infrastructure.repositories.alchemy.likes import SqlAlchemyLikesRepository
 from infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
 from infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
 from infrastructure.repositories.alchemy.survey import SqlAlchemySurveysRepository
@@ -27,12 +29,27 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.surveys = SqlAlchemySurveysRepository(self._session)
         self.photos = SqlAlchemyPhotosRepository(self._session)
 
+        self.comments = SqlAlchemyCommentsRepository(self._session)
+        self.likes = SqlAlchemyLikesRepository(self._session)
+
         return await super().__aenter__()
 
-    def get_model_repository(self, resource_name: ModelType) -> ModelRepository:
-        match resource_name:
-            case ModelType.PLACES.value:
+    def get_model_repository(self, model_name: ModelType) -> ModelRepository:
+        match model_name:
+            case ModelType.PLACES:
                 return self.places
+            case ModelType.USERS:
+                return self.users
+            case ModelType.ROUTES:
+                return self.routes
+            case ModelType.COMMENTS:
+                return self.comments
+            case ModelType.LIKES:
+                return self.likes
+            case ModelType.SURVEYS:
+                return self.surveys
+            case _:
+                raise ValueError(f"Repository not found: {model_name}")
 
     async def rollback(self) -> None:
         await self._session.rollback()

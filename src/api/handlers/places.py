@@ -28,7 +28,6 @@ router = APIRouter()
 @router.post("/", status_code=status.HTTP_200_OK)
 @inject
 async def create(
-    self,
     request: Request,
     name: str = Form(...),
     category: PlaceCategory = Form(...),
@@ -78,7 +77,6 @@ async def create(
 @router.patch("/{item_id}", response_model=PlaceRead)
 @inject
 async def patch(
-    self,
     item_id: int,
     item_data: PlacePatch,
     session: AsyncSession = Depends(Provide[Container.db.session]),
@@ -89,8 +87,8 @@ async def patch(
             raise APIException(code=400, message="Нет данных для обновления")
 
         stmt = (
-            update(self.model)
-            .where(self.model.id == item_id)
+            update(Place)
+            .where(Place.id == item_id)
             .values(**values)
             .execution_options(synchronize_session="fetch")
         )
@@ -98,7 +96,7 @@ async def patch(
         await session.commit()
 
         result = await session.execute(
-            select(self.model).where(self.model.id == item_id).options(selectinload(Place.photos))
+            select(Place).where(Place.id == item_id).options(selectinload(Place.photos))
         )
         db_obj = result.scalar_one_or_none()
 
@@ -113,7 +111,6 @@ async def patch(
 @router.put("/{item_id}", response_model=PlaceRead)
 @inject
 async def put(
-    self,
     item_id: int,
     item_data: PlacePut,
     session: AsyncSession = Depends(Provide[Container.db.session]),
@@ -121,8 +118,8 @@ async def put(
     try:
         validated = PlacePut(**item_data.model_dump(exclude_unset=False))
         stmt = (
-            update(self.model)
-            .where(self.model.id == item_id)
+            update(Place)
+            .where(Place.id == item_id)
             .values(**validated.model_dump(exclude_unset=False))
             .execution_options(synchronize_session="fetch")
         )
@@ -130,7 +127,7 @@ async def put(
         await session.commit()
 
         result = await session.execute(
-            select(self.model).where(self.model.id == item_id).options(selectinload(Place.photos))
+            select(Place).where(Place.id == item_id).options(selectinload(Place.photos))
         )
         db_obj = result.scalar_one_or_none()
 
@@ -145,7 +142,6 @@ async def put(
 @router.post("/{place_id}/avatar", status_code=status.HTTP_200_OK)
 @inject
 async def update_avatar(
-    self,
     place_id: int,
     photo: Optional[UploadFile] = File(None),
     use_case: PlacePhotoUpdateUseCase = Depends(Provide[Container.place_avatar_update_use_case]),
@@ -160,7 +156,6 @@ async def update_avatar(
 @router.delete("/{place_id}/photos/{photo_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
 @inject
 async def remove_photo(
-    self,
     place_id: int,
     photo_id: int,
     use_case: DeletePhotoUseCase = Depends(Provide[Container.delete_photo_use_case]),
@@ -171,7 +166,6 @@ async def remove_photo(
 @router.post("/{place_id}/photos/add", status_code=status.HTTP_200_OK)
 @inject
 async def add_photos(
-    self,
     request: Request,
     place_id: int,
     photos: Optional[List[UploadFile]] = File(None),
@@ -195,7 +189,6 @@ async def add_photos(
 @router.get("/field_values/{field_name}", description="Получить значения для фильтров по 'field_name'")
 @inject
 async def get_field_values(
-    self,
     field_name: str,
     per_page: int = 10,
     page: int = 1,
@@ -216,7 +209,6 @@ async def get_field_values(
 )
 @inject
 async def select_field_values(
-    self,
     field_name: str,
     use_case: SelectFieldValuesUseCase = Depends(Provide[Container.select_field_values_use_case]),
 ) -> list[str]:

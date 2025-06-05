@@ -20,6 +20,6 @@ class UsersListUseCase(UseCase):
         self, request: Request, page: int = 1, page_size: int = 10
     ) -> PaginatedResponse[UserDTO]:
         async with self._uow(autocommit=True):
-            result = await self._uow.users.get_list()
+            result = await self._uow.users.get_list_models()
 
         return await self.paginator.paginate(result, request, page, page_size)

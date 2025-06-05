@@ -6,7 +6,7 @@ from common.exceptions import APIException
 from domain.entities.route import Route
 from infrastructure.managers.base import StorageManager
 from infrastructure.managers.enum import ModelType
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class RoutePhotoUpdateUseCase(UseCase):

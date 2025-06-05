@@ -1,9 +1,15 @@
 from abc import ABC, abstractmethod
 from types import TracebackType
-from typing import Any, Type
+from typing import Any, Type, Union
 
 from domain.entities.enums import ModelType
-from infrastructure.repositories.interfaces.base import ModelRepository
+from infrastructure.repositories.alchemy.comments import SqlAlchemyCommentsRepository
+from infrastructure.repositories.alchemy.likes import SqlAlchemyLikesRepository
+from infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
+from infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
+from infrastructure.repositories.alchemy.survey import SqlAlchemySurveysRepository
+from infrastructure.repositories.interfaces.comment import CommentRepository
+from infrastructure.repositories.interfaces.like import LikeRepository
 from infrastructure.repositories.interfaces.photo import PhotoRepository
 from infrastructure.repositories.interfaces.place import PlaceRepository
 from infrastructure.repositories.interfaces.route import RouteRepository
@@ -19,6 +25,9 @@ class UnitOfWork(ABC):
     routes: RouteRepository
     surveys: SurveyRepository
     photos: PhotoRepository
+
+    comments: CommentRepository
+    likes: LikeRepository
 
     def __call__(self, *args: Any, autocommit: bool, **kwargs: Any) -> "UnitOfWork":
         self._autocommit = autocommit
@@ -40,7 +49,13 @@ class UnitOfWork(ABC):
         await self.shutdown()
 
     @abstractmethod
-    def get_model_repository(self, resource_name: ModelType) -> ModelRepository:
+    def get_model_repository(self, model_name: ModelType) -> Union[
+        SqlAlchemyCommentsRepository,
+        SqlAlchemyLikesRepository,
+        SqlAlchemyRoutePlacesRepository,
+        SqlAlchemyRoutesRepository,
+        SqlAlchemySurveysRepository,
+    ]:
         pass
 
     @abstractmethod

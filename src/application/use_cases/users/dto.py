@@ -4,8 +4,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from domain.entities.enums import Gender
 from application.utils import get_settings
+from domain.entities.enums import Gender
 
 
 class CommonUserDTO(BaseModel):
@@ -65,10 +65,9 @@ class UserDTO(CommonUserDTO):
             registration_date=user.registration_date,
             is_banned=user.is_banned,
             is_admin=user.is_admin,
-            photo=f"{get_settings().app.base_url}{user.photo.lstrip('/')}" if user.photo else None,
+            photo=f"{get_settings().app.base_url}/{user.photo.lstrip('/')}" if user.photo else None,
             description=user.description,
         )
-
 
 
 class UserCreateDTO(CommonUserDTO):

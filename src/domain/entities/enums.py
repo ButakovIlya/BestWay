@@ -134,6 +134,10 @@ class RouteType(Enum):
 class ModelType(Enum):
     PLACES = "places"
     ROUTES = "routes"
+    USERS = "users"
+    COMMENTS = "comments"
+    LIKES = "liks"
+    SURVEYS = "surveys"
 
 
 class SurveyStatus(Enum):

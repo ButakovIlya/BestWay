@@ -1,45 +1,30 @@
-from api.admin.comments import CommentViewSet
-from api.admin.likes import LikeViewSet
-from api.admin.places import PlaceViewSet
-from api.admin.routes import RouteViewSet
-from api.admin.surveys import SurveyViewSet
+from api.admin.comments import router as comment_router
+from api.admin.likes import router as like_router
+from api.admin.places import router as place_router
+from api.admin.routes import router as route_router
+from api.admin.surveys import router as survey_router
 from api.admin.users import router as user_router
 from api.public.auth import router as auth_router
-from api.public.comments import PublicCommentViewSet
 from api.public.health import router as health_router
-from api.public.likes import PublicLikeViewSet
-from api.public.places import PublicPlaceViewSet
+from api.public.places import router as public_place_router
 from api.public.profile import router as profile_router
-from api.public.routes import PublicRouteViewSet
-from api.public.surveys import router as survey_router
+from api.public.routes import router as public_route_router
+from api.public.surveys import router as public_survey_router
 
-place_viewset = PlaceViewSet()
-route_viewset = RouteViewSet()
-survey_viewset = SurveyViewSet()
-comment_viewset = CommentViewSet()
-like_viewset = LikeViewSet()
-
-
-public_place_viewset = PublicPlaceViewSet()
-public_route_viewset = PublicRouteViewSet()
-public_comment_viewset = PublicCommentViewSet()
-public_like_viewset = PublicLikeViewSet()
 admin_routers = [
     user_router,
-    place_viewset.router,
-    route_viewset.router,
-    survey_viewset.router,
-    comment_viewset.router,
-    like_viewset.router,
+    comment_router,
+    like_router,
+    place_router,
+    route_router,
+    survey_router,
 ]
 
 public_routers = [
     health_router,
     auth_router,
     profile_router,
-    survey_router,
-    public_place_viewset.router,
-    public_route_viewset.router,
-    public_comment_viewset.router,
-    public_like_viewset.router,
+    public_place_router,
+    public_route_router,
+    public_survey_router,
 ]

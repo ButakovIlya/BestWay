@@ -11,7 +11,8 @@ from application.use_cases.users.update_user import UserUpdateUseCase
 from config.containers import Container
 from domain.validators.dto import PaginatedResponse
 
-router = APIRouter(tags=["Users"], prefix="/users", dependencies=[Depends(is_admin)])
+# router = APIRouter(tags=["Users"], prefix="/users", dependencies=[Depends(is_admin)])
+router = APIRouter(tags=["Users"], prefix="/users")
 
 
 @router.get("/{user_id}", status_code=status.HTTP_200_OK)

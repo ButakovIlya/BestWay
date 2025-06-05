@@ -1,6 +1,8 @@
 from functools import wraps
 from typing import Any, Callable
 
+from fastapi import Request
+
 from api.permissions.exceptions import UserIsNotAuthenticatedError
 
 
@@ -13,3 +15,9 @@ def is_authenticated(func: Callable) -> Callable:
         raise UserIsNotAuthenticatedError()
 
     return wrapper
+
+
+async def is_user(request: Request):
+    user = getattr(request.state, "user", None)
+    if not user:
+        raise UserIsNotAuthenticatedError

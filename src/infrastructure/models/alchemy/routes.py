@@ -73,16 +73,16 @@ class Route(Base):
     )
     json_data: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
-    author: Mapped["User"] = relationship("User", back_populates="routes")
+    author: Mapped["User"] = relationship("User", back_populates="routes", lazy="selectin")
     places: Mapped[list["RoutePlace"]] = relationship(
-        "RoutePlace", back_populates="route", cascade="all, delete-orphan"
+        "RoutePlace", back_populates="route", cascade="all, delete-orphan", lazy="selectin"
     )
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="route", cascade="all, delete-orphan")
     comments: Mapped[list["Comment"]] = relationship(
         "Comment", back_populates="route", cascade="all, delete-orphan"
     )
     photos: Mapped[list["Photo"]] = relationship(
-        "Photo", back_populates="route", cascade="all, delete-orphan"
+        "Photo", back_populates="route", cascade="all, delete-orphan", lazy="selectin"
     )
 
 
@@ -101,8 +101,8 @@ class Like(Base):
     __tablename__ = "likes"
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    route_id: Mapped[int] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
-    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
+    place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     author: Mapped["User"] = relationship("User", back_populates="likes", lazy="selectin")
@@ -111,13 +111,13 @@ class Like(Base):
 
 
 class Comment(Base):
-    __tablename__ = "route_comments"
+    __tablename__ = "comments"
 
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
-    route_id: Mapped[int] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
-    place_id: Mapped[int] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
+    place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
-    comment: Mapped[str | None] = mapped_column(default=None, server_default=None)
+    comment: Mapped[str] = mapped_column(String)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="comments", lazy="selectin")

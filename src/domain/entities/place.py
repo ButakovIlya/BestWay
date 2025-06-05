@@ -15,6 +15,7 @@ class Place(Entity):
         tags: str | None = None,
         coordinates: List[float] | None = None,
         photo: str | None = None,
+        photos: List[str] | None = None,
         map_name: str | None = None,
     ) -> None:
         super().__init__(id)
@@ -26,4 +27,5 @@ class Place(Entity):
         self.tags = tags
         self.coordinates = coordinates
         self.photo = photo
+        self.photos = photos
         self.map_name = map_name

@@ -34,7 +34,6 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
             place_id=entity.place_id,
             timestamp=entity.timestamp,
             comment=entity.comment,
-            photo=entity.photo,
         )
 
     def convert_to_entity(self, model: CommentModel) -> Comment:
@@ -45,5 +44,4 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
             place_id=model.place_id,
             timestamp=model.timestamp,
             comment=model.comment,
-            photo=model.photo,
         )

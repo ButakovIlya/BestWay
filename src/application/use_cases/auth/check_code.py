@@ -6,7 +6,7 @@ from domain.entities.user import User
 from infrastructure.managers.dto import UserCreateDTO
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.redis.redis_cache import RedisCache
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class VerifySmsCodeUseCase(UseCase):

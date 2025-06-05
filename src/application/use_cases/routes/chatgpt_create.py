@@ -52,7 +52,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
             "places": [89, 92, 93],
         }
         validated_route_data = await self._validate_generated_route(route_data, user_id)
-        print(f"validated_route_data: {validated_route_data}")
+        logger.info(f"validated_route_data: {validated_route_data}")
         route = await self._create_route(validated_route_data, survey_id)
         logger.info("End route chatgpt generate use case")
         # await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_SUCCEDED)

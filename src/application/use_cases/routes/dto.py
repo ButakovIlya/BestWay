@@ -27,25 +27,12 @@ class RouteCreateDTO(BaseModel):
         author_id: int,
         city: Optional[CityCategory],
         type: Optional[RouteType],
-        duration: Optional[str],
-        distance: Optional[str],
-        json: Optional[str],
-        places: Optional[str],
     ):
-        try:
-            places_list = [int(p.strip()) for p in places.split(",") if p.strip()]
-        except ValueError:
-            raise APIException(code=400, message="Places must be a list of integers")
-
         return cls(
             name=name,
             author_id=author_id,
             city=city,
             type=type,
-            json=json,
-            duration=duration,
-            distance=distance,
-            places=places_list,
         )
 
 
@@ -75,3 +62,37 @@ class RouteDTO(BaseModel):
     places: List[int] = []
 
     model_config = ConfigDict(from_attributes=True, arbitrary_types_allowed=True)
+
+
+class RouteFeedFiltersDTO(BaseModel):
+    name: Optional[str] = Field(default=None, description="Поиск маршрута по имени (частичное совпадение)")
+    city: Optional[CityCategory] = Field(
+        default=CityCategory.PERM, description="Фильтрация по городу. По умолчанию — Пермь"
+    )
+    type: Optional[RouteType] = Field(default=None, description="Тип маршрута")
+    places_count: Optional[int] = Field(
+        default=None, description="Фильтрация по ТОЧНОМУ количеству мест в маршруте"
+    )
+    places_gte: Optional[int] = Field(
+        default=None, description="Количество мест в маршруте должно быть БОЛЬШЕ ИЛИ РАВНО этому значению"
+    )
+    places_lte: Optional[int] = Field(
+        default=None, description="Количество мест в маршруте должно быть МЕНЬШЕ ИЛИ РАВНО этому значению"
+    )
+    has_avatar: Optional[bool] = Field(
+        default=None, description="Если True — возвращать только маршруты с аватаркой"
+    )
+    has_photos: Optional[bool] = Field(
+        default=None, description="Если True — возвращать только маршруты с фото"
+    )
+    is_custom: Optional[bool] = Field(
+        default=None, description="Фильтрация по пользовательским маршрутам (True/False)"
+    )
+
+
+class PublicRouteCreateDTO(BaseModel):
+    name: str
+    city: Optional[CityCategory] = None
+    type: Optional[RouteType] = None
+
+    model_config = ConfigDict(from_attributes=True)

@@ -13,7 +13,9 @@ class Route(Entity):
         city: CityCategory = CityCategory.PERM,
         type: RouteType = RouteType.MIXED,
         photo: str | None = None,
+        photos: List[str] | None = None,
         author_id: Optional[int] = None,
+        author: Optional[dict] = None,
         created_at: Optional[datetime] = None,
         updated_at: Optional[datetime] = None,
         duration: Optional[int] = None,
@@ -30,7 +32,9 @@ class Route(Entity):
         self.name = name
         self.city = city
         self.author_id = author_id
+        self.author = author
         self.photo = photo
+        self.photos = photos
         self.type = type
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()

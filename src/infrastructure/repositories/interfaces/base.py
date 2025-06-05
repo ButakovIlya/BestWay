@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Any, Generic, Type, TypeVar
 
+from sqlalchemy import Result, ScalarResult
+
 from domain.entities.model import Model
 
 TModel = TypeVar("TModel", bound=Model)
@@ -52,6 +54,11 @@ class ModelRepository(Repository, Generic[TModel]):
         offset: int | None = None,
     ) -> list[TModel]:
         """Получить список объектов с возможностью фильтрации и пагинации"""
+        pass
+
+    @abstractmethod
+    async def get_list_models(self, **filters) -> Result:
+        """Получить список моделей объектов"""
         pass
 
     @abstractmethod

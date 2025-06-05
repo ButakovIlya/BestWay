@@ -4,7 +4,7 @@ from application.use_cases.base import UseCase
 from application.use_cases.surveys.dto import SurveyDTO, SurveyUpdateDTO
 from common.exceptions import APIException
 from domain.entities.survey import Survey
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class SurveyUpdateUseCase(UseCase):

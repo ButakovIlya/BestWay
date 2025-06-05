@@ -40,6 +40,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
             tags=entity.tags,
             coordinates=entity.coordinates,
             photo=entity.photo,
+            photos=entity.photos,
             map_name=entity.map_name,
         )
 
@@ -53,5 +54,6 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
             tags=model.tags,
             coordinates=model.coordinates,
             photo=model.photo,
+            photos=model.photos,
             map_name=model.map_name,
         )

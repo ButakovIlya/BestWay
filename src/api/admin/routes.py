@@ -1,45 +1,67 @@
-from typing import Optional
-
-from fastapi import APIRouter, Depends
-from sqlalchemy import Select
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from sqlalchemy.orm import joinedload
 
 from api.handlers.routes import router as additional_router
 from api.permissions.is_admin import is_admin
-from infrastructure.models.alchemy.routes import Place, Route, RoutePlace
-from infrastructure.orm.base import BaseViewSet
-from infrastructure.permissions.enums import RoleEnum
+from application.use_cases.common.delete import ModelObjectDeleteUseCase
+from application.use_cases.common.list import ModelObjectListUseCase
+from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
+from config.containers import Container
+from domain.entities.enums import ModelType
 
-from .schemas import RouteCreateSchema, RouteFilter, RoutePatchSchema, RoutePutSchema, RouteRead
+# from domain.entities.route import Route
+from domain.validators.dto import PaginatedResponse
+from infrastructure.models.alchemy.routes import Route
+
+from .schemas import RouteRead
+
+# router = APIRouter(tags=["Routes"], prefix="/routes", dependencies=[Depends(is_admin)])
+router = APIRouter(tags=["Routes"], prefix="/routes")
+router.include_router(additional_router)
 
 
-class RouteViewSet(
-    BaseViewSet[RouteCreateSchema, RoutePutSchema, RoutePatchSchema, RouteRead, RouteFilter]
-):
-    model = Route
-    schema_read = RouteRead
-    schema_create = RouteCreateSchema
-    schema_put = RoutePutSchema
-    schema_patch = RoutePatchSchema
-    prefix = "/routes"
-    tags = ["Routes"]
-    authentication_classes = [RoleEnum.ADMIN]
+@router.get("/", response_model=PaginatedResponse[RouteRead], status_code=status.HTTP_200_OK)
+@inject
+async def list_routes(
+    request: Request,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    use_case: ModelObjectListUseCase = Depends(Provide[Container.object_list_use_case]),
+) -> PaginatedResponse[RouteRead]:
+    """Получить список маршрутов"""
+    return await use_case.execute(
+        request=request,
+        model_type=ModelType.ROUTES,
+        page=page,
+        page_size=page_size,
+        ObjectDTO=RouteRead,
+    )
 
-    allowed_methods: list[str] = ["list", "get", "put", "patch", "delete", "options"]
 
-    filter_schema = RouteFilter
+@router.get("/{route_id}", response_model=RouteRead, status_code=status.HTTP_200_OK)
+@inject
+async def retrieve_route(
+    route_id: int,
+    use_case: ModelObjectRetrieveUseCase = Depends(Provide[Container.object_retrieve_use_case]),
+) -> RouteRead:
+    """Получить маршрут по ID"""
+    return await use_case.execute(
+        obj_id=route_id,
+        model_type=ModelType.ROUTES,
+        ObjectDTO=RouteRead,
+    )
 
-    router = APIRouter(tags=tags, prefix=prefix, dependencies=[Depends(is_admin)])
-    router.include_router(additional_router)
 
-    def build_select_stmt(self, item_id: Optional[int] = None, filters: Optional[dict] = None) -> Select:
-        stmt = (
-            super()
-            .build_select_stmt(item_id=item_id, filters=filters)
-            .options(
-                joinedload(Route.author),
-                joinedload(Route.photos),
-                joinedload(Route.places).joinedload(RoutePlace.place).joinedload(Place.photos),
-            )
-        )
-        return stmt
+@router.delete("/{route_id}", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def delete_route(
+    route_id: int,
+    use_case: ModelObjectDeleteUseCase = Depends(Provide[Container.object_delete_use_case]),
+) -> Response:
+    """Удалить маршрут"""
+    await use_case.execute(
+        obj_id=route_id,
+        model_type=ModelType.ROUTES,
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

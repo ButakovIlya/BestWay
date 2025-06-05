@@ -13,13 +13,13 @@ from application.use_cases.surveys.update import SurveyUpdateUseCase
 from config.containers import Container
 from domain.entities.user import User
 
-router = APIRouter(tags=["Surveys"], prefix="/surveys")
+router = APIRouter(tags=["Public Surveys"], prefix="/surveys")
 
 
 @router.get("", status_code=status.HTTP_200_OK)
 @is_authenticated
 @inject
-async def get_surveys_list(
+async def list_surveys(
     request: Request, use_case: SurveysListUseCase = Depends(Provide[Container.users_survey_list_use_case])
 ) -> List[SurveyDTO]:
     """Эндпоинт для получения анкет пользователя."""
@@ -30,7 +30,7 @@ async def get_surveys_list(
 @router.get("/{survey_id}", status_code=status.HTTP_200_OK)
 @is_authenticated
 @inject
-async def get_survey(
+async def retrieve_survey(
     request: Request,
     survey_id: int,
     use_case: SurveyRetrieveUseCase = Depends(Provide[Container.user_survey_retrieve_use_case]),

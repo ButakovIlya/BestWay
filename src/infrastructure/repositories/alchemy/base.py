@@ -1,7 +1,20 @@
-from typing import Type, TypeVar
+from typing import Any, Type, TypeVar
 
 from pydantic import BaseModel
-from sqlalchemy import JSON, String, and_, cast, delete, distinct, exists, func, select, update
+from sqlalchemy import (
+    JSON,
+    Result,
+    ScalarResult,
+    String,
+    and_,
+    cast,
+    delete,
+    distinct,
+    exists,
+    func,
+    select,
+    update,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.sql.sqltypes import Enum as SAEnum
@@ -81,8 +94,10 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
     ### Getters ###
     ###############
 
-    async def get_by_id(self, model_id: int) -> TModel:
-        model = await self._session.get(self.MODEL, model_id)
+    async def get_by_id(self, model_id: int, **filters: Any) -> TModel:
+        stmt = select(self.MODEL).filter_by(id=model_id).filter_by(**filters)
+        result = await self._session.execute(stmt)
+        model = result.unique().scalar_one_or_none()
         if not model:
             raise APIException(
                 code=404, message=f"Объект модели `{self.MODEL.__tablename__}` c id={model_id} не найден"
@@ -103,6 +118,11 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
 
         objects = result.all()
         return [self.LIST_DTO.model_validate(obj) for obj in objects]
+
+    async def get_list_models(self, **filters: Any) -> Result:
+        stmt = select(self.MODEL).filter_by(**filters)
+        result = await self._session.execute(stmt)
+        return result
 
     async def get_list_by_ids(
         self,

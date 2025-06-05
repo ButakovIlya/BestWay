@@ -6,7 +6,7 @@ from common.exceptions import APIException
 from domain.entities.user import User
 from infrastructure.managers.base import StorageManager
 from infrastructure.managers.enum import ModelType
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class UserPhotoUpdateUseCase(UseCase):

@@ -1,7 +1,7 @@
 from application.use_cases.base import UseCase
 from application.use_cases.common.dto import ObjectPhotoDTO
 from infrastructure.managers.base import StorageManager
-from infrastructure.repositories.base import UnitOfWork
+from infrastructure.uow.base import UnitOfWork
 
 
 class PhotoUpdateUseCase(UseCase):

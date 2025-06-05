@@ -30,7 +30,7 @@ class AppSettings(BaseModel):
     debug: bool = False
     version: str = "0.1.0"
 
-    base_url: str = "http://localhost:8002/"
+    base_url: str = "http://localhost:8002"
 
 
 class UptraceSettings(BaseModel):
