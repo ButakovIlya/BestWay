@@ -119,7 +119,6 @@ class Comment(Base):
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     comment: Mapped[str] = mapped_column(String)
-    photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="comments", lazy="selectin")
     route: Mapped["Route"] = relationship("Route", back_populates="comments", lazy="selectin")

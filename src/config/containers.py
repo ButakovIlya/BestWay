@@ -18,6 +18,8 @@ from application.use_cases.common.photo.delete import DeletePhotoUseCase
 from application.use_cases.common.photo.upload import UploadPhotosUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
 from application.use_cases.common.update import ModelObjectUpdateUseCase
+from application.use_cases.likes.create import LikeCreateUseCase
+from application.use_cases.likes.remove import LikeRemoveUseCase
 from application.use_cases.models.field_values import ModelFieldValuesUseCase
 from application.use_cases.models.select_field_values import SelectFieldValuesUseCase
 from application.use_cases.places.add_photos import PlacePhotosAddUseCase
@@ -128,7 +130,7 @@ class Container(containers.DeclarativeContainer):
 
     # BASE
 
-    # photos
+    # PHOTOS
     update_photo_use_case: providers.Provider[PhotoUpdateUseCase] = providers.Factory(
         PhotoUpdateUseCase,
         uow=db.container.uow,
@@ -147,7 +149,7 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
     )
 
-    # auth
+    # AUTH
     send_code_use_case: providers.Provider[SendSmsCodeUseCase] = providers.Factory(
         SendSmsCodeUseCase, sms_client=clients.container.sms_client
     )
@@ -168,7 +170,7 @@ class Container(containers.DeclarativeContainer):
         )
     )
 
-    # users
+    # USERS
     user_create_use_case: providers.Provider[UserCreateUseCase] = providers.Factory(
         UserCreateUseCase,
         uow=db.container.uow,
@@ -202,7 +204,7 @@ class Container(containers.DeclarativeContainer):
         update_photo_use_case=update_photo_use_case,
     )
 
-    # places
+    # PLACES
     create_place_use_case: providers.Provider[PlaceCreateUseCase] = providers.Factory(
         PlaceCreateUseCase,
         uow=db.container.uow,
@@ -225,7 +227,7 @@ class Container(containers.DeclarativeContainer):
         upload_photos_use_case=upload_photos_use_case,
     )
 
-    # routes
+    # ROUTES
     route_create_use_case: providers.Provider[RouteCreateUseCase] = providers.Factory(
         RouteCreateUseCase,
         uow=db.container.uow,
@@ -275,7 +277,7 @@ class Container(containers.DeclarativeContainer):
         upload_photos_use_case=upload_photos_use_case,
     )
 
-    # models
+    # MODELS
     model_field_values_use_case: providers.Provider[ModelFieldValuesUseCase] = providers.Factory(
         ModelFieldValuesUseCase,
         uow=db.container.uow,
@@ -284,7 +286,7 @@ class Container(containers.DeclarativeContainer):
         SelectFieldValuesUseCase,
     )
 
-    # surveys
+    # SURVEYS
     user_survey_create_use_case: providers.Provider[SurveyCreateUseCase] = providers.Factory(
         SurveyCreateUseCase,
         uow=db.container.uow,
@@ -309,14 +311,34 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
     )
 
-    # public
-    # routes
+    # PUBLIC
+    # ROUTES
     route_feed_use_case: providers.Provider[RouteFeedListUseCase] = providers.Factory(
         RouteFeedListUseCase,
         uow=db.container.uow,
     )
     route_feed_retrieve_use_case: providers.Provider[RouteFeedRetrieveUseCase] = providers.Factory(
         RouteFeedRetrieveUseCase,
+        uow=db.container.uow,
+    )
+
+    # LIKES
+    like_create_use_case: providers.Provider[LikeCreateUseCase] = providers.Factory(
+        LikeCreateUseCase,
+        uow=db.container.uow,
+    )
+    remove_like_use_case: providers.Provider[LikeRemoveUseCase] = providers.Factory(
+        LikeRemoveUseCase,
+        uow=db.container.uow,
+    )
+
+    # LIKES
+    comment_create_use_case: providers.Provider[LikeCreateUseCase] = providers.Factory(
+        LikeCreateUseCase,
+        uow=db.container.uow,
+    )
+    remove_comment_use_case: providers.Provider[LikeRemoveUseCase] = providers.Factory(
+        LikeRemoveUseCase,
         uow=db.container.uow,
     )
 

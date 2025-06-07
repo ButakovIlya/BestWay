@@ -129,6 +129,4 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             json_data=model.json_data,
             places=[place for place in model.places] if model.places else [],
             photos=[photo for photo in model.photos] if model.photos else [],
-            # like_ids=[like.id for like in model.likes] if model.likes else [],
-            # comment_ids=[comment.id for comment in model.comments] if model.comments else [],
         )

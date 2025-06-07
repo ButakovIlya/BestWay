@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import and_, select
 
 from application.use_cases.likes.dto import LikeDTO
 from domain.entities.like import Like
@@ -25,6 +25,17 @@ class SqlAlchemyLikesRepository(SqlAlchemyModelRepository[Like], LikeRepository)
     async def get_list_by_user_id(self, user_id: int) -> List[Like]:
         result = await self._session.execute(select(LikeModel).where(LikeModel.author_id == user_id))
         return [self.convert_to_entity(row) for row in result.scalars().all()]
+
+    async def check_if_user_has_like(self, data: LikeDTO) -> bool:
+        stmt = select(LikeModel).where(
+            and_(
+                LikeModel.route_id == data.route_id,
+                LikeModel.place_id == data.place_id,
+                LikeModel.author_id == data.author_id,
+            )
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one_or_none() is not None
 
     def convert_to_model(self, entity: Like) -> LikeModel:
         return LikeModel(
