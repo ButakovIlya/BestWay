@@ -64,6 +64,7 @@ class Route(Base):
     duration: Mapped[int | None] = mapped_column(default=None, server_default=None)
     distance: Mapped[int | None] = mapped_column(default=None, server_default=None)
     is_custom: Mapped[bool] = mapped_column(default=False, server_default="false")
+    is_publicated: Mapped[bool] = mapped_column(default=False, server_default="false")
 
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
 

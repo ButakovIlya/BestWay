@@ -1,6 +1,6 @@
 from fastapi import Request
+from pydantic import BaseModel
 
-from api.admin.schemas import RouteRead
 from application.use_cases.base import UseCase
 from application.use_cases.routes.dto import RouteFeedFiltersDTO
 from domain.validators.dto import PaginatedResponse
@@ -23,11 +23,12 @@ class RouteFeedListUseCase(UseCase):
         self,
         request: Request,
         filters: RouteFeedFiltersDTO,
+        PaginatorModel: BaseModel,
         page: int = 1,
         page_size: int = 10,
-    ) -> PaginatedResponse[RouteRead]:
+    ) -> PaginatedResponse[BaseModel]:
         add_filters = {"is_custom": False}
         async with self._uow(autocommit=True):
             result = await self._uow.routes.get_list_by_filters(filters, add_filters)
 
-        return await Paginator(RouteRead).paginate(result, request, page, page_size)
+        return await Paginator(PaginatorModel).paginate(result, request, page, page_size)

@@ -7,7 +7,6 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.admin.schemas import MiniRouteSchema, RoutePatchSchema, RouteRead
-from api.handlers.dto import RoutePlacesOrderUpdateDTO
 from application.use_cases.common.dto import ModelPhotoDTO
 from application.use_cases.common.photo.delete import DeletePhotoUseCase
 from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
@@ -16,6 +15,7 @@ from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.routes.dto import RouteCreateDTO
 from application.use_cases.routes.enums import RouteGenerationMode as Mode
 from application.use_cases.routes.places.add import RoutePlaceAddUseCase
+from application.use_cases.routes.places.dto import RoutePlacesOrderUpdateDTO
 from application.use_cases.routes.places.remove import RoutePlaceRemoveUseCase
 from application.use_cases.routes.places.update_order import RoutePlaceUpdateOrderUseCase
 from application.use_cases.tasks.route_generate import StartChatGPTRouteGenerateTaskUseCase
