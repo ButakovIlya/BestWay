@@ -14,18 +14,6 @@ class LikeDTO(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-class CommentDTO(BaseModel):
-    id: int
-    author_id: int
-    route_id: Optional[int]
-    place_id: Optional[int]
-    timestamp: datetime
-    comment: Optional[str]
-    photo: Optional[str]
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 class LikeCreate(BaseModel):
     route_id: Optional[int] = None
     place_id: Optional[int] = None

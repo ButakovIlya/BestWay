@@ -9,6 +9,7 @@ class Comment(Entity):
         self,
         id: Optional[int] = None,
         author_id: Optional[int] = None,
+        author: Optional[dict] = None,
         route_id: Optional[int] = None,
         place_id: Optional[int] = None,
         timestamp: Optional[datetime] = None,
@@ -16,6 +17,7 @@ class Comment(Entity):
     ) -> None:
         super().__init__(id)
         self.author_id = author_id
+        self.author = author
         self.route_id = route_id
         self.place_id = place_id
         self.timestamp = timestamp or datetime.now()

@@ -9,6 +9,9 @@ from application.use_cases import UserCreateUseCase
 from application.use_cases.auth.check_code import VerifySmsCodeUseCase
 from application.use_cases.auth.phone_change import VerifyPhoneChangeSmsCodeUseCase
 from application.use_cases.auth.send_code import SendSmsCodeUseCase
+from application.use_cases.comments.create import CommentCreateUseCase
+from application.use_cases.comments.edit import CommentEditUseCase
+from application.use_cases.comments.remove import CommentRemoveUseCase
 from application.use_cases.common import PhotoUpdateUseCase
 from application.use_cases.common.create import ModelObjectCreateUseCase
 from application.use_cases.common.delete import ModelObjectDeleteUseCase
@@ -332,13 +335,17 @@ class Container(containers.DeclarativeContainer):
         uow=db.container.uow,
     )
 
-    # LIKES
-    comment_create_use_case: providers.Provider[LikeCreateUseCase] = providers.Factory(
-        LikeCreateUseCase,
+    # COMMENTS
+    comment_create_use_case: providers.Provider[CommentCreateUseCase] = providers.Factory(
+        CommentCreateUseCase,
         uow=db.container.uow,
     )
-    remove_comment_use_case: providers.Provider[LikeRemoveUseCase] = providers.Factory(
-        LikeRemoveUseCase,
+    remove_comment_use_case: providers.Provider[CommentRemoveUseCase] = providers.Factory(
+        CommentRemoveUseCase,
+        uow=db.container.uow,
+    )
+    edit_create_use_case: providers.Provider[CommentEditUseCase] = providers.Factory(
+        CommentEditUseCase,
         uow=db.container.uow,
     )
 

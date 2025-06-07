@@ -5,6 +5,7 @@ from api.admin.routes import router as route_router
 from api.admin.surveys import router as survey_router
 from api.admin.users import router as user_router
 from api.public.auth import router as auth_router
+from api.public.comments import router as public_comment_router
 from api.public.health import router as health_router
 from api.public.likes import router as public_like_router
 from api.public.places import router as public_place_router
@@ -29,4 +30,5 @@ public_routers = [
     public_route_router,
     public_survey_router,
     public_like_router,
+    public_comment_router,
 ]

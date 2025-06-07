@@ -1,8 +1,10 @@
-from typing import List
+from typing import Any, List
 
-from sqlalchemy import select
+from sqlalchemy import func, select
+from sqlalchemy.orm import joinedload
 
-from application.use_cases.likes.dto import CommentDTO
+from application.use_cases.comments.dto import CommentBaseDTO, CommentDTO
+from common.exceptions import APIException
 from domain.entities.comment import Comment
 from infrastructure.models.alchemy.routes import Comment as CommentModel
 from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository
@@ -13,6 +15,15 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
     MODEL = CommentModel
     ENTITY = Comment
     LIST_DTO = CommentDTO
+
+    async def count_by_user_and_object(self, data: CommentBaseDTO) -> int:
+        stmt = select(func.count()).where(
+            CommentModel.route_id == data.route_id,
+            CommentModel.place_id == data.place_id,
+            CommentModel.author_id == data.author_id,
+        )
+        result = await self._session.execute(stmt)
+        return result.scalar_one()
 
     async def get_list_by_route_id(self, route_id: int) -> List[Comment]:
         result = await self._session.execute(select(CommentModel).where(CommentModel.route_id == route_id))
@@ -25,6 +36,35 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
     async def get_list_by_user_id(self, user_id: int) -> List[Comment]:
         result = await self._session.execute(select(CommentModel).where(CommentModel.author_id == user_id))
         return [self.convert_to_entity(row) for row in result.scalars().all()]
+
+    async def get_by_id(self, model_id: int, **filters: Any) -> Comment:
+        """Получить комментарий по id и фильтрам"""
+        filters_with_id = {"id": model_id, **filters}
+        stmt = (
+            select(CommentModel)
+            .filter_by(**filters_with_id)
+            .options(
+                joinedload(CommentModel.author),
+            )
+        )
+        result = await self._session.execute(stmt)
+        model = result.unique().scalar_one_or_none()
+        if not model:
+            raise APIException(
+                code=404, message=f"Комментарий c id={model_id} не найден"
+            )
+        return self.convert_to_entity(model)
+
+    async def get_list_models(self, **filters: Any) -> List[Comment]:
+        """Получить маршруты по фильтрам"""
+        stmt = (
+            select(CommentModel)
+            .filter_by(**filters)
+            .options(
+                joinedload(CommentModel.author),
+            )
+        )
+        return await self._session.execute(stmt)
 
     def convert_to_model(self, entity: Comment) -> CommentModel:
         return CommentModel(
@@ -40,6 +80,7 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
         return Comment(
             id=model.id,
             author_id=model.author_id,
+            author=model.author,
             route_id=model.route_id,
             place_id=model.place_id,
             timestamp=model.timestamp,

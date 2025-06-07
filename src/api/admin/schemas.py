@@ -363,13 +363,6 @@ class CommentBase(BaseModel):
     photo: Optional[str] = None
 
 
-class CommentCreateDTO(BaseModel):
-    comment: str
-    author_id: Optional[int] = None
-    route_id: Optional[int] = None
-    place_id: Optional[int] = None
-
-
 class CommentPutDTO(CommentBase):
     author_id: int
     route_id: int
@@ -378,9 +371,7 @@ class CommentPutDTO(CommentBase):
 
 
 class CommentUpdateDTO(BaseModel):
-    route_id: Optional[int] = None
-    place_id: Optional[int] = None
-    comment: Optional[str] = None
+    comment: str = Field(max_length=250, min_length=1)
 
 
 class CommentRead(CommentBase):

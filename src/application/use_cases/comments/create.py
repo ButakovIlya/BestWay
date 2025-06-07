@@ -1,7 +1,8 @@
+from application.constants import USERS_MAX_COMMENTS_COUNT
 from application.use_cases.base import UseCase
-from application.use_cases.likes.dto import CommentCreateDTO, CommentRead
+from application.use_cases.comments.dto import CommentCreateDTO, CommentRead
 from common.exceptions import APIException
-from domain.entities.like import Comment
+from domain.entities.comment import Comment
 from infrastructure.uow.base import UnitOfWork
 
 
@@ -16,9 +17,9 @@ class CommentCreateUseCase(UseCase):
     async def execute(self, data: CommentCreateDTO) -> CommentRead:
         async with self._uow(autocommit=True):
             await self._validate_data(data)
-            await self._check_if_like_exists(data)
-            like: Comment = await self._uow.likes.create(Comment(**data.model_dump()))
-            return CommentRead.model_validate(like)
+            await self._check_if_comment_limit_exceeded(data)
+            comment: Comment = await self._uow.comments.create(Comment(**data.model_dump()))
+            return CommentRead.model_validate(comment)
 
     async def _validate_data(self, data: CommentCreateDTO) -> None:
         if not data.place_id and not data.route_id:
@@ -36,9 +37,10 @@ class CommentCreateUseCase(UseCase):
             if not exists:
                 raise APIException(code=400, message=f"Маршрут с id = '{data.route_id}' не существует")
 
-    async def _check_if_like_exists(self, data: CommentCreateDTO) -> None:
-        exists = await self._uow.likes.check_if_user_has_like(data=data)
-        if exists:
+    async def _check_if_comment_limit_exceeded(self, data: CommentCreateDTO) -> None:
+        comments_count = await self._uow.comments.count_by_user_and_object(data=data)
+        if comments_count > USERS_MAX_COMMENTS_COUNT:
             raise APIException(
-                code=400, message=f"Лайк с такими данными уже существует: {data.model_dump()}"
+                code=400,
+                message=f"У пользователя уже есть более {USERS_MAX_COMMENTS_COUNT} комментариев",
             )
