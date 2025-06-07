@@ -34,6 +34,12 @@ jobs:
 
             echo "📦 Создаём .env"
             cat <<EOF > .env
+            PYTHONPATH=${{ secrets.PYTHONPATH }}
+            PYTHONUNBUFFERED=${{ secrets.PYTHONUNBUFFERED }}
+            CELERY_APP_NAME=${{ secrets.CELERY_APP_NAME }}
+            CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
+            CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
+
             APP__NAME=${{ secrets.APP__NAME }}
             APP__DEBUG=${{ secrets.APP__DEBUG }}
 
