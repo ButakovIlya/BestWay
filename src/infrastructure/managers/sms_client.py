@@ -15,7 +15,7 @@ class SmsClient:
 
     SPAM_ATTEMPT_KEY_PREFIX: str = "sms_attempts:"
     SPAM_TIMESTAMP_KEY: str = "sms_last_attempt:"
-    MAX_ATTEMPTS: int = 50
+    MAX_ATTEMPTS: int = 5000
     COOLDOWN_SECONDS: int = 1  # 5 минут
     BLOCK_SECONDS: int = 24 * 60 * 60  # 1 день
 
