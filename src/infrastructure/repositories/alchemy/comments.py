@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from sqlalchemy import func, select
+from sqlalchemy import Result, desc, func, select
 from sqlalchemy.orm import joinedload
 
 from application.use_cases.comments.dto import CommentBaseDTO, CommentDTO
@@ -50,19 +50,18 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
         result = await self._session.execute(stmt)
         model = result.unique().scalar_one_or_none()
         if not model:
-            raise APIException(
-                code=404, message=f"Комментарий c id={model_id} не найден"
-            )
+            raise APIException(code=404, message=f"Комментарий c id={model_id} не найден")
         return self.convert_to_entity(model)
 
-    async def get_list_models(self, **filters: Any) -> List[Comment]:
-        """Получить маршруты по фильтрам"""
+    async def get_list_models(self, **filters: Any) -> Result:
+        """Получить коментарии по фильтрам"""
         stmt = (
             select(CommentModel)
             .filter_by(**filters)
             .options(
                 joinedload(CommentModel.author),
             )
+            .order_by(desc(CommentModel.timestamp))
         )
         return await self._session.execute(stmt)
 

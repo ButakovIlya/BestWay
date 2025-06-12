@@ -255,6 +255,7 @@ class Container(containers.DeclarativeContainer):
         providers.Factory(
             StartChatGPTRouteGenerateTaskUseCase,
             uow=db.container.uow,
+            redis_client=clients.container.redis_cache,
             route_generate_gpt_task=tasks.container.chatgpt_process_route,
         )
     )
@@ -262,6 +263,7 @@ class Container(containers.DeclarativeContainer):
     route_chatgpt_generate_use_case: providers.Provider[ChatGPTRouteGenerateUseCase] = providers.Factory(
         ChatGPTRouteGenerateUseCase,
         uow=db.container.uow,
+        redis_client=clients.container.redis_cache,
         notifier=clients.container.notifier,
         route_generate_gpt_manager=clients.container.route_generate_gpt_manager,
     )

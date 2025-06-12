@@ -1,34 +1,10 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from application.utils import get_settings
+from common.dto import UserRead
 from domain.entities.comment import Comment
-
-
-
-class UserRead(BaseModel):
-    id: int
-    first_name: str | None = None
-    last_name: str | None = None
-    middle_name: str | None = None
-    photo: str | None = None
-
-    model_config = {"from_attributes": True}
-
-    @classmethod
-    def model_validate(cls, user: Any) -> "UserRead":
-        if not user:
-            return None
-        return cls(
-            id=user.id,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            middle_name=user.middle_name,
-            photo=f"{get_settings().app.base_url}/{user.photo.lstrip('/')}" if user.photo else None,
-            description=user.description,
-        )
 
 
 class CommentDTO(BaseModel):

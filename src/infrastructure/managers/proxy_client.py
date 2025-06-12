@@ -20,13 +20,12 @@ class ProxyClient:
         self.proxy_username = proxy_username
         self.proxy_password = proxy_password
 
-        self.proxies = {
-            "http://": f"http://{self.proxy_username}:{self.proxy_password}@{self.proxy_host}:{self.proxy_http_port}",
-            "https://": f"http://{self.proxy_username}:{self.proxy_password}@{self.proxy_host}:{self.proxy_http_port}",
-        }
+        proxy_url = (
+            f"http://{self.proxy_username}:{self.proxy_password}@{self.proxy_host}:{self.proxy_http_port}"
+        )
+        transport = httpx.HTTPTransport(proxy=proxy_url)
 
-        self.client = httpx.Client(proxies=self.proxies)
-        # self.client = httpx.Client()
+        self.client = httpx.Client(transport=transport)
 
     def post(self, url: str, json: dict, headers: dict):
         response = self.client.post(url, json=json, headers=headers, timeout=self.CHATGPT_REQUEST_TIMEOUT)

@@ -4,18 +4,18 @@ from typing import Any, List, Optional
 from pydantic import BaseModel, Field, field_validator
 
 from application.utils import get_settings
+from common.dto import UserRead
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 from domain.entities.place import Place
 from domain.entities.route import Route
 from domain.filters import BaseFilter
-
-# from infrastructure.models.alchemy.routes import Place, Route
 
 
 class CommonPlaceBase(BaseModel):
     name: str
     category: PlaceCategory
     city: Optional[CityCategory] = None
+    object_id: Optional[int] = None
     type: Optional[PlaceType] = None
     tags: Optional[str] = None
     coordinates: Optional[List[float]] = None
@@ -41,6 +41,7 @@ class PlacePut(CommonPlaceBase):
     type: PlaceType = None
     tags: str = None
     coordinates: List[float] = None
+    object_id: int = None
     map_name: str = None
 
 
@@ -83,6 +84,7 @@ class PlaceRead(CommonPlaceBase):
             type=place.type,
             tags=place.tags,
             coordinates=place.coordinates,
+            object_id=place.object_id,
             photo=f"{get_settings().app.base_url}/{place.photo.lstrip('/')}" if place.photo else None,
             map_name=place.map_name,
             photos=[PhotoRead.model_validate(photo) for photo in place.photos] if place.photos else None,
@@ -190,38 +192,6 @@ class RoutePlaceRead(BaseModel):
         )
 
 
-class UserRead(BaseModel):
-    id: int
-    phone: str
-    first_name: str | None = None
-    last_name: str | None = None
-    middle_name: str | None = None
-    registration_date: datetime | None = None
-    is_banned: bool = False
-    is_admin: bool = False
-    photo: str | None = None
-    description: str | None = None
-
-    model_config = {"from_attributes": True}
-
-    @classmethod
-    def model_validate(cls, user: Any) -> "UserRead":
-        if not user:
-            return None
-        return cls(
-            id=user.id,
-            phone=user.phone,
-            first_name=user.first_name,
-            last_name=user.last_name,
-            middle_name=user.middle_name,
-            registration_date=user.registration_date,
-            is_banned=user.is_banned,
-            is_admin=user.is_admin,
-            photo=f"{get_settings().app.base_url}/{user.photo.lstrip('/')}" if user.photo else None,
-            description=user.description,
-        )
-
-
 class RouteRead(CommonRouteBase):
     id: int
     author_id: int
@@ -234,11 +204,15 @@ class RouteRead(CommonRouteBase):
     photos: Optional[List[PhotoRead]]
     places: list[RoutePlaceRead]
 
+    yandex_maps_url: Optional[str] = None
+
     model_config = {"from_attributes": True}
 
     @classmethod
     def model_validate(cls, route: Route) -> "RouteRead":
-        return cls(
+        sorted_places = sorted(route.places, key=lambda p: p.order)
+
+        obj = cls(
             id=route.id,
             name=route.name,
             city=route.city,
@@ -250,9 +224,54 @@ class RouteRead(CommonRouteBase):
             created_at=route.created_at,
             updated_at=route.updated_at,
             author=UserRead.model_validate(route.author),
-            photos=[PhotoRead.model_validate(p) for p in route.photos] if route.photos else [],
-            places=[RoutePlaceRead.model_validate(place) for place in route.places],
+            photos=[PhotoRead.model_validate(p) for p in route.photos],
+            places=([RoutePlaceRead.model_validate(place) for place in sorted_places]),
         )
+        obj.yandex_maps_url = obj._compute_yandex_maps_url()
+        return obj
+
+    def _compute_yandex_maps_url(self) -> Optional[str]:
+        if not self.places:
+            return None
+
+        # Сортировка по порядку
+        sorted_places = sorted(self.places, key=lambda x: x.order)
+
+        # Сбор координат в формате широта,долгота
+        coords = "~".join(
+            f"{p.place.coordinates[0]},{p.place.coordinates[1]}"
+            for p in sorted_places
+            if p.place and p.place.coordinates
+        )
+
+        # Сбор ruri (если есть object_id / oid)
+        ruris = "~".join(
+            f"ymapsbm1:/org?oid={p.place.object_id}"
+            for p in sorted_places
+            if p.place and getattr(p.place, "object_id", None) not in (None, "", 0)
+        )
+        # Расчёт центра карты (по первой точке)
+        first = sorted_places[0].place.coordinates if sorted_places else [0, 0]
+        ll = f"{first[1]},{first[0]}"  # долгота,широта
+
+        # Выбор типа маршрута
+        rtt_map = {
+            RouteType.WALKING: "pd",  # Пешком
+            RouteType.CAR: "auto",  # Машина
+            RouteType.VEHICLE: "auto",
+            RouteType.BUS: "mt",  # Общественный транспорт
+            RouteType.SCOOTER_BIKE: "bc",
+            RouteType.MIXED: "comparison",  # Смешанный
+        }
+        rtt_value = rtt_map.get(self.type, "mt")
+
+        # Финальная ссылка
+        base = f"https://yandex.ru/maps/?mode=routes&rtext={coords}&rtt={rtt_value}&z=14&ll={ll}"
+        if ruris:
+            base += f"&ruri={ruris}"
+        else:
+            base += "&ruri=~~"
+        return base
 
 
 class RouteFilter(BaseFilter):

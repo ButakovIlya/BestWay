@@ -1,5 +1,6 @@
 from datetime import timedelta, timezone
 
+USERS_MAX_ROUTES_COUNT = 10
 USERS_MAX_SURVEYS_COUNT = 5
 USERS_MAX_COMMENTS_COUNT = 5
 MIN_PLACES_COUNT = 2

@@ -20,6 +20,7 @@ from infrastructure.managers.ChatGPT.dto import (
     ChatGPTUserData,
 )
 from infrastructure.notifications.notifier import CentrifugoNotifier
+from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.repositories.interfaces.ChatGPT.base import ClassificationManager
 from infrastructure.uow import UnitOfWork
 
@@ -31,13 +32,16 @@ class ChatGPTRouteGenerateUseCase(UseCase):
         self,
         uow: UnitOfWork,
         notifier: CentrifugoNotifier,
+        redis_client: AbstractRedisCache,
         route_generate_gpt_manager: ClassificationManager,
     ) -> None:
         self._uow = uow
+        self._redis_cache = redis_client
         self._notifier = notifier
+
         self._route_generate_gpt_manager = route_generate_gpt_manager
 
-    async def execute(self, user_id: int, survey_id: int, mode: str = Mode.FULL.name) -> Route:
+    async def execute(self, user_id: int, survey_id: int, mode: str = Mode.FULL.value) -> Route:
         logger.info(
             f"Start route gpt generate use case for user: {user_id} with survey: {survey_id} in {mode} mode"
         )
@@ -45,17 +49,18 @@ class ChatGPTRouteGenerateUseCase(UseCase):
         # await self._notifier.notify_general(EventType.ROUTE_GENERATION_STARTED)
         data = await self._create_content(user_id, survey_id)
         logger.info(f"Content data: {data}")
-        # route_data = self._route_generate_gpt_manager.generate_route(data, Mode(mode))
-        route_data = {
-            "name": "Маршрут по Пермскому театру, ресторану и цирку",
-            "type": "На машине",
-            "places": [89, 92, 93],
-        }
+        route_data = self._route_generate_gpt_manager.generate_route(data, Mode(mode))
+        # route_data = {
+        #     "name": "Маршрут по Пермскому театру, ресторану и цирку",
+        #     "type": "На машине",
+        #     "places": [89, 92, 93],
+        # }
         validated_route_data = await self._validate_generated_route(route_data, user_id)
         logger.info(f"validated_route_data: {validated_route_data}")
         route = await self._create_route(validated_route_data, survey_id)
         logger.info("End route chatgpt generate use case")
         # await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_SUCCEDED)
+        self._redis_cache.unset_active_route_geration(user_id)
         return route
 
     async def _create_content(self, user_id: int, survey_id: int) -> ChatGPTContentData:
@@ -124,6 +129,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
                 logger.info(f"Created route: {route}")
                 logger.info(f"Created route_places: {route_places}")
 
+                route: Route = await self._uow.routes.get_by_id(route.id)
                 return route
 
             except APIException as message:

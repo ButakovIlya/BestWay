@@ -27,7 +27,7 @@ class RouteFeedListUseCase(UseCase):
         page: int = 1,
         page_size: int = 10,
     ) -> PaginatedResponse[BaseModel]:
-        add_filters = {"is_custom": False}
+        add_filters = {"is_publicated": True}
         async with self._uow(autocommit=True):
             result = await self._uow.routes.get_list_by_filters(filters, add_filters)
 

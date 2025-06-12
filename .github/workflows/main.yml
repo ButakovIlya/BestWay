@@ -41,6 +41,7 @@ jobs:
             CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
 
             APP__NAME=${{ secrets.APP__NAME }}
+            APP__BASE_URL=${{ secrets.APP__BASE_URL }}
             APP__DEBUG=${{ secrets.APP__DEBUG }}
 
             UPTRACE__ENABLED=False

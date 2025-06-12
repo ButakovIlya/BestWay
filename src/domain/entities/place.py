@@ -12,6 +12,7 @@ class Place(Entity):
         name: str | None = None,
         category: PlaceCategory | None = None,
         type: PlaceType | None = None,
+        object_id: int | None = None,
         tags: str | None = None,
         coordinates: List[float] | None = None,
         photo: str | None = None,
@@ -26,6 +27,7 @@ class Place(Entity):
         self.type = type
         self.tags = tags
         self.coordinates = coordinates
+        self.object_id = object_id
         self.photo = photo
         self.photos = photos
         self.map_name = map_name

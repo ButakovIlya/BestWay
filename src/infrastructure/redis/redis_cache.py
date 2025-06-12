@@ -33,3 +33,16 @@ class RedisCache(AbstractRedisCache):
         """Удаляет код по телефону"""
         keys = [f"sms_code:{phone}"]
         self._cache_connection.delete(*keys)
+
+    def set_active_route_geration(self, user_id: int, ttl: int = AbstractRedisCache.TTL_MINIUTE) -> None:
+        key = f"active_generation:{user_id}"
+        self._cache_connection.setex(key, ttl, "1")  # строка вместо bool
+
+    def unset_active_route_geration(self, user_id: int, ttl: int = AbstractRedisCache.TTL_MINIUTE) -> None:
+        key = f"active_generation:{user_id}"
+        self._cache_connection.setex(key, ttl, "0")  # строка вместо bool
+
+    def check_if_user_has_active_route_geration(self, user_id: int) -> bool:
+        key = f"active_generation:{user_id}"
+        value = self._cache_connection.get(key)
+        return value == b"1"

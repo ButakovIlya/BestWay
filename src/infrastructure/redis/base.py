@@ -7,6 +7,8 @@ class AbstractRedisCache:
     """Абстрактный класс для кеша в Redis."""
 
     TTL = 60 * 60 * 24  # 1 день
+    # TTL_MINIUTE = 60  # 1 минута
+    TTL_MINIUTE = 1
 
     def __init__(
         self,
@@ -43,4 +45,19 @@ class AbstractRedisCache:
     @abstractmethod
     def delete_code_by_phone(self, phone: str) -> None:
         """Удаляет код по телефону"""
+        pass
+
+    @abstractmethod
+    def set_active_route_geration(self, user_id: int, ttl: int = TTL_MINIUTE) -> str | None:
+        """Устанавливает флаг активной генерации маршрута"""
+        pass
+
+    @abstractmethod
+    def unset_active_route_geration(self, user_id: int, ttl: int = TTL_MINIUTE) -> str | None:
+        """Сбрасывает флаг активной генерации маршрута"""
+        pass
+
+    @abstractmethod
+    def check_if_user_has_active_route_geration(self, user_id: int) -> bool:
+        """Проверяет, есть ли у пользователя активная генерация маршрута"""
         pass

@@ -1,6 +1,6 @@
-from typing import Any, List
+from typing import Any
 
-from sqlalchemy import Result, Select, func, select
+from sqlalchemy import Result, Select, desc, func, select
 from sqlalchemy.orm import joinedload, selectinload
 
 from application.use_cases.routes.dto import RouteFeedFiltersDTO
@@ -37,7 +37,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             )
         return self.convert_to_entity(model)
 
-    async def get_list_models(self, **filters: Any) -> List[Route]:
+    async def get_list_models(self, **filters: Any) -> Result:
         """Получить маршруты по фильтрам"""
         stmt = (
             select(RouteModel)
@@ -47,6 +47,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
                 joinedload(RouteModel.photos),
                 joinedload(RouteModel.places).joinedload(RoutePlace.place).joinedload(Place.photos),
             )
+            .order_by(desc(RouteModel.created_at))
         )
         return await self._session.execute(stmt)
 
@@ -65,39 +66,46 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
                 selectinload(MODEL.places),
                 selectinload(MODEL.photos),
             )
-        )
-        raw_filters = filters.model_dump(exclude_unset=True)
-
-        # OUTER JOIN для фотографий (для has_photos) и обычный JOIN для places
-        stmt = (
-            stmt.outerjoin(Photo, Photo.route_id == MODEL.id)
+            .outerjoin(Photo, Photo.route_id == MODEL.id)
             .join(RoutePlace, RoutePlace.route_id == MODEL.id)
             .group_by(MODEL.id)
         )
 
+        raw_filters = filters.model_dump(exclude_unset=True)
+
+        # Простой фильтр по полям с оператором ==
+        simple_eq_fields = {
+            "type": MODEL.type,
+            "city": MODEL.city,
+            "is_custom": MODEL.is_custom,
+        }
+        for field_name, model_field in simple_eq_fields.items():
+            value = raw_filters.get(field_name)
+            if value is not None:
+                stmt = stmt.where(model_field == value)
+
+        # Фильтр по имени с ilike
+        name = raw_filters.get("name")
+        if name:
+            stmt = stmt.where(MODEL.name.ilike(f"%{name}%"))
+
         # Фильтр по аватарке
-        if "has_avatar" in raw_filters:
-            if raw_filters["has_avatar"]:
-                stmt = stmt.where(MODEL.photo.isnot(None))
-            else:
-                stmt = stmt.where(MODEL.photo.is_(None))
+        has_avatar = raw_filters.get("has_avatar")
+        if has_avatar is not None:
+            stmt = stmt.where(MODEL.photo.isnot(None) if has_avatar else MODEL.photo.is_(None))
 
-        # Фильтр по связанным фотографиям (Photo)
-        if "has_photos" in raw_filters:
-            if raw_filters["has_photos"]:
-                stmt = stmt.having(func.count(func.distinct(Photo.id)) > 0)
+        # Фильтр по наличию связанных фото
+        if raw_filters.get("has_photos"):
+            stmt = stmt.having(func.count(func.distinct(Photo.id)) > 0)
 
-        # Фильтры по количеству мест (RoutePlace)
-        places_count = raw_filters.get("places_count")
-        places_gte = raw_filters.get("places_gte")
-        places_lte = raw_filters.get("places_lte")
-
-        if places_count is not None:
-            stmt = stmt.having(func.count(func.distinct(RoutePlace.place_id)) == places_count)
-        if places_gte is not None:
-            stmt = stmt.having(func.count(func.distinct(RoutePlace.place_id)) >= places_gte)
-        if places_lte is not None:
-            stmt = stmt.having(func.count(func.distinct(RoutePlace.place_id)) <= places_lte)
+        # Фильтры по количеству мест
+        place_count_expr = func.count(func.distinct(RoutePlace.place_id))
+        if (val := raw_filters.get("places_count")) is not None:
+            stmt = stmt.having(place_count_expr == val)
+        if (val := raw_filters.get("places_gte")) is not None:
+            stmt = stmt.having(place_count_expr >= val)
+        if (val := raw_filters.get("places_lte")) is not None:
+            stmt = stmt.having(place_count_expr <= val)
 
         return stmt
 

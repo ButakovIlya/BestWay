@@ -4,7 +4,6 @@ from fastapi import Request
 from pydantic import BaseModel
 
 from application.use_cases.base import UseCase
-from common.exceptions import APIException
 from domain.entities.enums import ModelType
 from domain.validators.dto import PaginatedResponse
 from infrastructure.managers.paginator import Paginator

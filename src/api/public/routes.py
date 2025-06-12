@@ -72,6 +72,7 @@ async def routes_feed(
     routes: PaginatedResponse[RouteRead] = await use_case.execute(
         request=request,
         filters=filters,
+        PaginatorModel=RouteRead,
         page=page,
         page_size=page_size,
     )
@@ -86,7 +87,7 @@ async def routes_feed(
     use_case: RouteFeedRetrieveUseCase = Depends(Provide[Container.route_feed_retrieve_use_case]),
 ) -> RouteRead:
     """Получить маршрут из ленты"""
-    return await use_case.execute(route_id)
+    return await use_case.execute(route_id, PaginatorModel=RouteRead)
 
 
 # @router.post("/generate/{survey_id}", status_code=status.HTTP_200_OK)

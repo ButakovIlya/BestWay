@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, Enum, ForeignKey, String
+from sqlalchemy import JSON, DateTime, Enum, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
@@ -28,6 +28,7 @@ class Place(Base):
         default=None,
         server_default=None,
     )
+    object_id: Mapped[int] = mapped_column(Integer, nullable=True)
     tags: Mapped[str | None] = mapped_column(default=None, server_default=None)
     coordinates: Mapped[list | None] = mapped_column(JSON, default=None, server_default=None)
     photo: Mapped[str | None] = mapped_column(default=None, server_default=None)
@@ -76,14 +77,14 @@ class Route(Base):
 
     author: Mapped["User"] = relationship("User", back_populates="routes", lazy="selectin")
     places: Mapped[list["RoutePlace"]] = relationship(
-        "RoutePlace", back_populates="route", cascade="all, delete-orphan", lazy="selectin"
+        "RoutePlace", back_populates="route", cascade="all, delete-orphan", lazy="noload"
     )
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="route", cascade="all, delete-orphan")
     comments: Mapped[list["Comment"]] = relationship(
         "Comment", back_populates="route", cascade="all, delete-orphan"
     )
     photos: Mapped[list["Photo"]] = relationship(
-        "Photo", back_populates="route", cascade="all, delete-orphan", lazy="selectin"
+        "Photo", back_populates="route", cascade="all, delete-orphan", lazy="noload"
     )
 
 

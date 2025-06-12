@@ -36,21 +36,6 @@ class RouteCreateDTO(BaseModel):
         )
 
 
-class UserRead(BaseModel):
-    id: int
-    phone: str
-    first_name: str | None = None
-    last_name: str | None = None
-    middle_name: str | None = None
-    registration_date: datetime | None = None
-    is_banned: bool = False
-    is_admin: bool = False
-    photo: str | None = None
-    description: str | None = None
-
-    model_config = {"from_attributes": True}
-
-
 class RouteDTO(BaseModel):
     id: int
     name: str

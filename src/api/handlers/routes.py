@@ -80,7 +80,9 @@ async def remove_route_place(
 async def update_route_places_order(
     request: Request,
     route_id: int,
-    order_info: RoutePlacesOrderUpdateDTO = Body(..., example={"124": 1, "125": 3, "126": 2}),
+    order_info: RoutePlacesOrderUpdateDTO = Body(
+        ..., example={"place_id": 1, "place_id": 3, "place_id": 2}
+    ),
     use_case: RoutePlaceUpdateOrderUseCase = Depends(Provide[Container.route_place_update_order_use_case]),
 ) -> None:
     user_id: int = request.state.user.id
