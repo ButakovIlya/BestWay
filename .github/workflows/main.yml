@@ -74,6 +74,12 @@ jobs:
             SMS__SERVICE_URL=${{ secrets.SMS__SERVICE_URL }}
             SMS__API_KEY=${{ secrets.SMS__API_KEY }}
             SMS__CACHE_TIMEOUT=300
+
+            PUSHER__APP_ID=${{ secrets.PUSHER__APP_ID }}
+            PUSHER__KEY=${{ secrets.PUSHER__KEY }}
+            PUSHER__SECRET=${{ secrets.PUSHER__SECRET }}
+
+            CHATGPT__API_KEY=${{ secrets.CHATGPT__API_KEY }}
             EOF
 
             echo "📦 Создаём .env.db"

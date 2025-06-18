@@ -1,6 +1,5 @@
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, Query, Request, Response, status
-from sqlalchemy.orm import joinedload
 
 from api.handlers.routes import router as additional_router
 from api.permissions.is_admin import is_admin
@@ -9,10 +8,7 @@ from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
 from config.containers import Container
 from domain.entities.enums import ModelType
-
-# from domain.entities.route import Route
 from domain.validators.dto import PaginatedResponse
-from infrastructure.models.alchemy.routes import Route
 
 from .schemas import RouteRead
 

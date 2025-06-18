@@ -13,6 +13,7 @@ class Survey(Entity):
         author_id: int,
         status: SurveyStatus = SurveyStatus.DRAFT,
         data: Optional[dict] = None,
+        prompt: Optional[str] = None,
         places: Optional[dict] = None,
         id: Optional[int] = None,
         created_at: Optional[datetime] = None,
@@ -24,6 +25,7 @@ class Survey(Entity):
         self.author_id = author_id
         self.status = status
         self.data = data or {}
+        self.prompt = prompt
         self.places = places or {}
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()

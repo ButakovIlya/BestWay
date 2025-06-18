@@ -27,6 +27,7 @@ class ChatGPTPlaceData(BaseModel):
 
 class ChatGPTSurveyData(BaseModel):
     data: Optional[dict] = None
+    prompt: Optional[str] = None
     places: Optional[dict] = None
     city: Optional[CityCategory] = CityCategory.PERM
 

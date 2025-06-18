@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 BASE_DIRECTORY = Path(__file__).parents[2]
 
 
-class DBSettings(BaseModel):
+class DBSettings(BaseSettings):
     name: str = "bestway"
     host: str = "localhost"
     port: int = 5432
@@ -63,30 +63,34 @@ class ApiSettings(BaseModel):
         return f"{self.prefix}{self.public}"
 
 
-class JWTSettings(BaseModel):
+class JWTSettings(BaseSettings):
     secret_key: str = "secret"
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 600000
     refresh_token_expire_days: int = 600000
 
 
-class CentrifugoSettings(BaseModel):
-    host: str = "http://localhost:8001"
-    api_key: str = "secret"
-    publish_endpoint: str = "/api/publish"
+class PusherSettings(BaseSettings):
+    app_id: str
+    key: str
+    secret: str
+    cluster: str = "eu"
+    ssl: bool = True
 
-    @property
-    def headers(self) -> dict:
-        return {"Content-type": "application/json", "X-API-Key": self.api_key}
+    # @property
+    # def client(self) -> pusher.Pusher:
+    #     return pusher.Pusher(
+    #         app_id=self.app_id, key=self.key, secret=self.secret, cluster=self.cluster, ssl=self.ssl
+    #     )
 
 
-class RedisSettings(BaseModel):
+class RedisSettings(BaseSettings):
     host: str = "redis://localhost:6379/2"
     # host: str = "redis://redis:6379/2"
     password: str = ""
 
 
-class TaskSettings(BaseModel):
+class TaskSettings(BaseSettings):
     app_name: str = "bestway"
     broker_url: str = "redis://localhost:6379/0"
     result_url: str = "redis://localhost:6379/1"
@@ -100,12 +104,8 @@ class SmsSettings(BaseSettings):
     api_key: str = ""
     cache_timeout: int = 300  # По умолчанию 5 минут
 
-    class Config:
-        env_prefix = "SMS__"
-        env_nested_delimiter = ("__",)
 
-
-class StorageSettings(BaseModel):
+class StorageSettings(BaseSettings):
     storage_directory: str = "storage"
     media_directory: str = "media"
     max_file_size_mb: int = 10
@@ -131,7 +131,7 @@ class ChatGPTSettings(BaseSettings):
     service_url: str = "https://api.openai.com/v1/chat/completions"
     api_key: str = "secret"
     model: str = "gpt-4o-mini"
-    max_responses_per_day: int = 100
+    max_responses_per_day: int = 25
     request_delay: int = 1  # в секундах
     max_request_retries: int = 3
     chatgpt_request_timeout: int = 60
@@ -146,7 +146,7 @@ class Settings(BaseSettings):
     redis: RedisSettings = RedisSettings()
     api: ApiSettings = ApiSettings()
     jwt: JWTSettings = JWTSettings()
-    centrifugo: CentrifugoSettings = CentrifugoSettings()
+    pusher: PusherSettings
 
     chatgpt: ChatGPTSettings = ChatGPTSettings()
     proxy: ProxySettings = ProxySettings()

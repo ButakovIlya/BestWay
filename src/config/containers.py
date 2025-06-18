@@ -54,7 +54,7 @@ from infrastructure.managers.ChatGPT.route_chatgpt_manager import ChatGPTRouteGe
 from infrastructure.managers.jwt_manager import JWTManager
 from infrastructure.managers.local_storage import LocalStorageManager
 from infrastructure.managers.sms_client import SmsClient
-from infrastructure.notifications.notifier import CentrifugoNotifier
+from infrastructure.notifications.notifier import PusherNotifier
 from infrastructure.redis import init_redis_pool
 from infrastructure.redis.base import AbstractRedisCache
 from infrastructure.redis.redis_cache import RedisCache
@@ -78,10 +78,13 @@ class ClientsContainer(containers.DeclarativeContainer):
         cache_connection=redis_pool,
     )
 
-    notifier: providers.Provider[CentrifugoNotifier] = providers.Resource(
-        CentrifugoNotifier,
-        api_url=settings.provided.centrifugo.host,
-        api_key=settings.provided.centrifugo.api_key,
+    notifier: providers.Provider[PusherNotifier] = providers.Resource(
+        PusherNotifier,
+        app_id=settings.provided.pusher.app_id,
+        key=settings.provided.pusher.key,
+        secret=settings.provided.pusher.secret,
+        cluster=settings.provided.pusher.cluster,
+        ssl=True,
     )
 
     sms_client: providers.Provider[SmsClient] = providers.Resource(

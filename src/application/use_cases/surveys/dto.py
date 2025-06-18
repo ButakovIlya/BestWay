@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from application.constants import MAX_FIELD_SIZE, MAX_PLACES_COUNT, MIN_PLACES_COUNT
+from application.constants import MAX_FIELD_SIZE, MAX_PLACES_COUNT, MAX_PROMPT_LENGHT, MIN_PLACES_COUNT
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 
 
@@ -12,6 +12,7 @@ class CommonSurveyDTO(BaseModel):
     name: Optional[str]
     city: Optional[CityCategory]
     data: Optional[Dict]
+    prompt: Optional[str]
     places: Optional[Dict]
     status: Optional[SurveyStatus]
 
@@ -95,7 +96,14 @@ class SurveyUpdateDTO(BaseModel):
     name: Optional[str] = "Анкета маршрута"
     city: Optional[CityCategory] = CityCategory.PERM.value
     data: Optional[SurveyDataUpdateDTO] = None
+    prompt: Optional[str] = None
     places: Optional[Dict[int, PlaceInfo]] = None
+
+    @field_validator("prompt")
+    def validate_prompt_length(cls, v, _):
+        if v is not None and len(v) > MAX_PROMPT_LENGHT:
+            raise ValueError(f"Промпт не может быть длинее {MAX_PROMPT_LENGHT}")
+        return v
 
     @model_validator(mode="after")
     def validate_places_keys(self):

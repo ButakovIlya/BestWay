@@ -31,6 +31,8 @@ class SurveyUpdateUseCase(UseCase):
                 survey.city = validated_data["city"]
             if "data" in validated_data:
                 survey.data = validated_data["data"]
+            if "prompt" in validated_data:
+                survey.prompt = validated_data["prompt"]
             if "places" in validated_data:
                 await self._validate_places(data)
                 survey.places = validated_data["places"]

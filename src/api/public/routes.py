@@ -90,17 +90,17 @@ async def routes_feed(
     return await use_case.execute(route_id, PaginatorModel=RouteRead)
 
 
-# @router.post("/generate/{survey_id}", status_code=status.HTTP_200_OK)
-# @inject
-# async def generate_route(
-#     request: Request,
-#     survey_id: int,
-#     mode: Mode = Mode.FULL,
-#     use_case: StartChatGPTRouteGenerateTaskUseCase = Depends(
-#         Provide[Container.start_route_chatgpt_generate_task]
-#     ),
-# ) -> str:
-#     user_id: int = request.state.user.id
+@router.post("/generate/{survey_id}", status_code=status.HTTP_200_OK)
+@inject
+async def generate_route(
+    request: Request,
+    survey_id: int,
+    mode: Mode = Mode.FULL,
+    use_case: StartChatGPTRouteGenerateTaskUseCase = Depends(
+        Provide[Container.start_route_chatgpt_generate_task]
+    ),
+) -> str:
+    user_id: int = request.state.user.id
 
-#     await use_case.execute(user_id, survey_id, mode)
-#     return "Генерация маршрута запущена"
+    await use_case.execute(user_id, survey_id, mode)
+    return "Генерация маршрута запущена"

@@ -34,6 +34,7 @@ class Survey(Base):
     )
 
     data: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
+    prompt: Mapped[str | None] = mapped_column(String, default=None, server_default=None)
     places: Mapped[dict | None] = mapped_column(JSON, default=None, server_default=None)
 
     author: Mapped["User"] = relationship("User", back_populates="surveys")

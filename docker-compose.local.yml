@@ -15,23 +15,6 @@ services:
       - bestway-local
     command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
 
-  centrifugo:
-    container_name: centrifugo-local
-    image: centrifugo/centrifugo:v5
-    volumes:
-      - ./config/centrifugo.json:/centrifugo/config.json
-    command: centrifugo -c config.json --health --swagger
-    ports:
-      - 8003:8002
-    depends_on:
-      - redis
-    networks:
-      - bestway-local
-    ulimits:
-      nofile:
-        soft: 65535
-        hard: 65535
-
   redis:
     container_name: bestway-redis
     image: redis:latest

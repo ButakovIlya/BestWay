@@ -1,34 +1,33 @@
-from typing import Any, Optional
+from typing import Any
 
-import httpx
+import pusher
 
-from application.events import EventType
 from infrastructure.notifications.base import AbstractNotifier
 
 
-class CentrifugoNotifier(AbstractNotifier):
-    PERSONAL_PREFIX = "personal:"
-    GENERAL_PREFIX = "general:"
+class PusherNotifier(AbstractNotifier):
+    PERSONAL_PREFIX = "personal-"
+    GENERAL_PREFIX = "general-"
 
-    def __init__(self, api_url: str, api_key: str):
-        self.api_url = api_url
-        self.api_key = api_key
+    def __init__(self, app_id: str, key: str, secret: str, cluster: str, ssl: bool = True):
+        self.pusher_client = pusher.Pusher(app_id=app_id, key=key, secret=secret, cluster=cluster, ssl=ssl)
 
-    async def send(self, channel: str, data: Optional[dict[str, Any]] = None) -> Any:
-        payload = {"method": "publish", "params": {"channel": channel, "data": data}}
-        headers = {"Authorization": f"apikey {self.api_key}"}
-        async with httpx.AsyncClient() as client:
-            response = await client.post(self.api_url, json=payload, headers=headers)
-            response.raise_for_status()
-            return {"status": response.status_code}
+    async def send(self, channel: str, data: dict[str, Any]) -> Any:
+        return self.pusher_client.trigger(channel, "event", data)
 
     async def notify_user(
-        self, user_id: int, event_type: EventType, data: Optional[dict[str, Any]] = None
+        self, user_id: int, event_type: str, data: dict[str, Any] = {}, error: str | None = None
     ) -> Any:
         channel = f"{self.PERSONAL_PREFIX}{user_id}"
-        print(f"channel_name:{channel}")
-        return await self.send(channel, {"type": event_type.value, "data": data})
+        payload = {"type": event_type, "data": data}
+        if error:
+            payload["error"] = error
 
-    async def notify_general(self, event_type: EventType, data: Optional[dict[str, Any]] = None) -> Any:
+        return await self.send(channel, payload)
+
+    async def notify_general(self, event_type: str, data: dict[str, Any], error: str | None = None) -> Any:
         channel = f"{self.GENERAL_PREFIX}broadcast"
-        return await self.send(channel, {"type": event_type.value, "data": data})
+        payload = {"type": event_type, "data": data}
+        if error:
+            payload["error"] = error
+        return await self.send(channel, payload)
