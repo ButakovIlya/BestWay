@@ -50,3 +50,6 @@ class TokenDTO(BaseModel):
     status: str = Field("ok", example="ok")
     access_token: str = Field(..., example="eyJhbGciOiJIUzI1N...")
     refresh_token: str = Field(..., example="dGhpcyBpcyBhIHJlZnJlc2g...")
+
+    is_new_user: bool = Field(False, example=False)
+    user_id: int = Field(..., example=1)

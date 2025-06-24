@@ -45,4 +45,9 @@ class VerifyPhoneChangeSmsCodeUseCase(UseCase):
         access_token = self._jwt_manager.create_access_token(data)
         refresh_token = self._jwt_manager.create_refresh_token(data)
 
-        return TokenDTO(access_token=access_token, refresh_token=refresh_token)
+        return TokenDTO(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            is_new_user=False,
+            user_id=user.id
+        )

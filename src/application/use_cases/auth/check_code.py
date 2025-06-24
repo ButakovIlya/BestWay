@@ -27,14 +27,23 @@ class VerifySmsCodeUseCase(UseCase):
         # Удаляем код после успешной проверки
         self._redis_cache.delete_code_by_phone(data.phone)
 
+        is_new_user = False
         async with self._uow(autocommit=True):
             if await self._uow.users.exists(phone=data.phone):
                 user: User = await self._uow.users.get_by_phone(phone=data.phone)
+                is_new_user = False
             else:
                 user: User = await self._uow.users.create(User(phone=data.phone))
+                is_new_user = True
+
         # Генерация токенов
         data = UserCreateDTO(user_id=user.id, phone=user.phone, is_admin=user.is_admin)
         access_token = self._jwt_manager.create_access_token(data)
         refresh_token = self._jwt_manager.create_refresh_token(data)
 
-        return TokenDTO(access_token=access_token, refresh_token=refresh_token)
+        return TokenDTO(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            is_new_user=is_new_user,
+            user_id=user.id
+        )
