@@ -79,6 +79,12 @@ jobs:
             PUSHER__KEY=${{ secrets.PUSHER__KEY }}
             PUSHER__SECRET=${{ secrets.PUSHER__SECRET }}
 
+            PROXY__HOST=${{ secrets.PROXY__HOST }}
+            PROXY__HTTP_PORT=${{ secrets.PROXY__HTTP_PORT }}
+            PROXY__SOCKS5_PORT=${{ secrets.PROXY__SOCKS5_PORT }}
+            PROXY__USERNAME=${{ secrets.PROXY__USERNAME }}
+            PROXY__PASSWORD=${{ secrets.PROXY__PASSWORD }}
+
             CHATGPT__API_KEY=${{ secrets.CHATGPT__API_KEY }}
             EOF
 
