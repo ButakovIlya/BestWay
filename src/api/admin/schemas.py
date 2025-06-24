@@ -41,7 +41,7 @@ class PlacePut(CommonPlaceBase):
     type: PlaceType = None
     tags: str = None
     coordinates: List[float] = None
-    object_id: int = None
+    object_id: int | None = None
     map_name: str = None
 
 

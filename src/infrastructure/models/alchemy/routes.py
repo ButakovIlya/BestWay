@@ -39,7 +39,7 @@ class Place(Base):
         "RoutePlace", back_populates="place", lazy="selectin"
     )
     photos: Mapped[list["Photo"]] = relationship(
-        "Photo", back_populates="place", cascade="all, delete-orphan", lazy="selectin"
+        "Photo", back_populates="place", cascade="all, delete-orphan", lazy="noload"
     )
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="place", cascade="all, delete-orphan")
     comments: Mapped[list["Comment"]] = relationship(

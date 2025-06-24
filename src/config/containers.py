@@ -28,6 +28,7 @@ from application.use_cases.models.select_field_values import SelectFieldValuesUs
 from application.use_cases.places.add_photos import PlacePhotosAddUseCase
 from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
 from application.use_cases.places.create import PlaceCreateUseCase
+from application.use_cases.places.feed import PlaceFeedListUseCase
 from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
 from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
 from application.use_cases.routes.chatgpt_create import ChatGPTRouteGenerateUseCase
@@ -217,6 +218,11 @@ class Container(containers.DeclarativeContainer):
         storage_manager=storage_manager,
         update_photo_use_case=update_photo_use_case,
         upload_photos_use_case=upload_photos_use_case,
+    )
+
+    place_feed_use_case: providers.Provider[PlaceFeedListUseCase] = providers.Factory(
+        PlaceFeedListUseCase,
+        uow=db.container.uow,
     )
 
     place_avatar_update_use_case: providers.Provider[PlacePhotoUpdateUseCase] = providers.Factory(

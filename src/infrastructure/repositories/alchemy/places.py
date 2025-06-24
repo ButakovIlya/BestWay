@@ -1,10 +1,12 @@
 from typing import List
 
-from sqlalchemy import select
+from sqlalchemy import Result, func, select
 from sqlalchemy.orm import selectinload
 
 from application.use_cases.places.dto import PlaceDTO
+from common.dto import PlacesFiltersDTO
 from domain.entities.place import Place
+from infrastructure.models.alchemy.routes import Photo
 from infrastructure.models.alchemy.routes import Place as PlaceModel
 from infrastructure.models.alchemy.routes import Route, RoutePlace
 from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository
@@ -29,6 +31,53 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
 
         place_models = [rp.place for rp in route.places if rp.place]
         return [self.convert_to_entity(place_model) for place_model in place_models]
+
+    async def get_list_by_filters(self, filters: PlacesFiltersDTO) -> Result:
+        stmt = self._create_stmt_by_filters(filters)
+        result = await self._session.execute(stmt)
+        return result
+
+    def _create_stmt_by_filters(self, filters: PlacesFiltersDTO) -> List[Place]:
+        """Получить места по фильтрам"""
+        filters = filters.model_dump(exclude_unset=True)
+        MODEL = PlaceModel
+        stmt = select(MODEL).options(selectinload(MODEL.photos))
+
+        # Простой фильтр по полям с оператором ==
+        simple_eq_fields = {
+            "city": MODEL.city,
+        }
+        for field_name, model_field in simple_eq_fields.items():
+            value = filters.get(field_name)
+            if value is not None:
+                stmt = stmt.where(model_field == value)
+
+        # Фильтр по категориям: category IN (...)
+        if filters.get("categories"):
+            stmt = stmt.where(MODEL.category.in_(filters.get("categories")))
+
+        # Фильтр по типам: type IN (...)
+        if filters.get("types"):
+            stmt = stmt.where(MODEL.type.in_(filters.get("types")))
+
+        # Фильтр по имени с ilike
+        name = filters.get("name")
+        if name:
+            stmt = stmt.where(MODEL.name.ilike(f"%{name}%"))
+
+        # Фильтр по аватарке
+        has_avatar = filters.get("has_avatar")
+        if has_avatar is not None:
+            stmt = stmt.where(MODEL.photo.isnot(None) if has_avatar else MODEL.photo.is_(None))
+
+        # Фильтр по наличию связанных фото
+        if filters.get("has_photos"):
+            stmt = (
+                stmt.join(Photo, PlaceModel.photos)
+                .group_by(PlaceModel.id)
+                .having(func.count(func.distinct(Photo.id)) > 0)
+            )
+        return stmt
 
     def convert_to_model(self, entity: Place) -> PlaceModel:
         return PlaceModel(

@@ -17,7 +17,7 @@ class ModelFieldValuesUseCase(UseCase):
         name = data.name
 
         async with self._uow(autocommit=True):
-            repository = self._uow.get_model_repository(data.model_name.value)
+            repository = self._uow.get_model_repository(data.model_name)
             model_data = await repository.get_field_values(
                 per_page=per_page,
                 page=page,

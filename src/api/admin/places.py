@@ -6,6 +6,8 @@ from api.permissions.is_admin import is_admin
 from application.use_cases.common.delete import ModelObjectDeleteUseCase
 from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
+from application.use_cases.places.feed import PlaceFeedListUseCase
+from common.dto import PlacesFiltersDTO
 from config.containers import Container
 from domain.entities.enums import ModelType
 from domain.validators.dto import PaginatedResponse
@@ -21,17 +23,17 @@ router.include_router(additional_router)
 @inject
 async def list_places(
     request: Request,
+    filters: PlacesFiltersDTO = Depends(),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    use_case: ModelObjectListUseCase = Depends(Provide[Container.object_list_use_case]),
+    use_case: PlaceFeedListUseCase = Depends(Provide[Container.place_feed_use_case]),
 ) -> PaginatedResponse[PlaceRead]:
     """Получить список мест"""
     return await use_case.execute(
+        filters=filters,
         request=request,
-        model_type=ModelType.PLACES,
         page=page,
         page_size=page_size,
-        ObjectDTO=PlaceRead,
     )
 
 

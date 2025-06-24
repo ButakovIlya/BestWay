@@ -42,8 +42,5 @@ class VerifySmsCodeUseCase(UseCase):
         refresh_token = self._jwt_manager.create_refresh_token(data)
 
         return TokenDTO(
-            access_token=access_token,
-            refresh_token=refresh_token,
-            is_new_user=is_new_user,
-            user_id=user.id
+            access_token=access_token, refresh_token=refresh_token, is_new_user=is_new_user, user_id=user.id
         )

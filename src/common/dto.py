@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator, validator
 
 from application.utils import get_settings
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
@@ -201,3 +201,24 @@ class RouteRead(CommonRouteBase):
         else:
             base += "&ruri=~~"
         return base
+
+
+class PlacesFiltersDTO(BaseModel):
+    name: Optional[str] = Field(default=None, description="Поиск мест по имени")
+    city: Optional[CityCategory] = Field(default="Пермь", description="Фильтрация по городу")
+    categories: Optional[str] = Field(default=None, description="Категории через запятую")
+    types: Optional[str] = Field(default=None, description="Типы через запятую")
+    has_avatar: Optional[bool] = None
+    has_photos: Optional[bool] = None
+
+    @field_validator("categories")
+    def split_categories(cls, value):
+        if isinstance(value, str):
+            return [PlaceCategory(item.strip()) for item in value.split(",") if item.strip()]
+        return value
+
+    @field_validator("types")
+    def split_types(cls, value):
+        if isinstance(value, str):
+            return [PlaceType(item.strip()) for item in value.split(",") if item.strip()]
+        return value
