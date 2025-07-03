@@ -46,6 +46,22 @@ async def list_my_routes(
     )
 
 
+@router.delete("/my/{route_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+@inject
+async def delete_my_route(
+    request: Request,
+    route_id: int,
+    use_case: ModelObjectDeleteUseCase = Depends(Provide[Container.object_delete_use_case]),
+) -> None:
+    """Получить список моих маршрутов"""
+    user: User = request.state.user
+    await use_case.execute(
+        obj_id=route_id,
+        model_type=ModelType.ROUTES,
+        author_id=user.id,
+    )
+
+
 @router.get("/my/{route_id}", response_model=RouteRead, status_code=status.HTTP_200_OK)
 @inject
 async def retrieve_my_route(
@@ -57,24 +73,6 @@ async def retrieve_my_route(
     user: User = request.state.user
     return await use_case.execute(
         obj_id=route_id, model_type=ModelType.ROUTES, ObjectDTO=RouteRead, filters={"author_id": user.id}
-    )
-
-
-@router.get(
-    "/my/{route_id}/delete", response_model=PaginatedResponse[RouteRead], status_code=status.HTTP_200_OK
-)
-@inject
-async def delete_my_route(
-    request: Request,
-    route_id: int,
-    use_case: ModelObjectDeleteUseCase = Depends(Provide[Container.object_delete_use_case]),
-) -> PaginatedResponse[RouteRead]:
-    """Получить список моих маршрутов"""
-    user: User = request.state.user
-    return await use_case.execute(
-        obj_id=route_id,
-        model_type=ModelType.ROUTES,
-        author_id=user.id,
     )
 
 
