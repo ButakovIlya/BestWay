@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Query, Request, status
 
 from api.admin.schemas import RouteRead
 from api.handlers.routes import router as additional_router
+from application.use_cases.common.delete import ModelObjectDeleteUseCase
 from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
 from application.use_cases.routes.dto import RouteFeedFiltersDTO
@@ -56,6 +57,24 @@ async def retrieve_my_route(
     user: User = request.state.user
     return await use_case.execute(
         obj_id=route_id, model_type=ModelType.ROUTES, ObjectDTO=RouteRead, filters={"author_id": user.id}
+    )
+
+
+@router.get(
+    "/my/{route_id}/delete", response_model=PaginatedResponse[RouteRead], status_code=status.HTTP_200_OK
+)
+@inject
+async def delete_my_route(
+    request: Request,
+    route_id: int,
+    use_case: ModelObjectDeleteUseCase = Depends(Provide[Container.object_delete_use_case]),
+) -> PaginatedResponse[RouteRead]:
+    """Получить список моих маршрутов"""
+    user: User = request.state.user
+    return await use_case.execute(
+        obj_id=route_id,
+        model_type=ModelType.ROUTES,
+        author_id=user.id,
     )
 
 

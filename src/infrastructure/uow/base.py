@@ -8,6 +8,7 @@ from infrastructure.repositories.alchemy.likes import SqlAlchemyLikesRepository
 from infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
 from infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
 from infrastructure.repositories.alchemy.survey import SqlAlchemySurveysRepository
+from infrastructure.repositories.alchemy.user import SqlAlchemyUsersRepository
 from infrastructure.repositories.interfaces.comment import CommentRepository
 from infrastructure.repositories.interfaces.like import LikeRepository
 from infrastructure.repositories.interfaces.photo import PhotoRepository
@@ -55,6 +56,7 @@ class UnitOfWork(ABC):
         SqlAlchemyRoutePlacesRepository,
         SqlAlchemyRoutesRepository,
         SqlAlchemySurveysRepository,
+        SqlAlchemyUsersRepository,
     ]:
         pass
 

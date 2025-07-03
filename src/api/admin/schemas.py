@@ -8,7 +8,6 @@ from common.dto import UserRead
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 from domain.entities.place import Place
 from domain.entities.route import Route
-from domain.filters import BaseFilter
 
 
 class CommonPlaceBase(BaseModel):
@@ -89,21 +88,6 @@ class PlaceRead(CommonPlaceBase):
             map_name=place.map_name,
             photos=[PhotoRead.model_validate(photo) for photo in place.photos] if place.photos else None,
         )
-
-
-class PlaceFilter(BaseFilter):
-    name: Optional[str] = Field(None, description="Partial match for name")
-    city: Optional[CityCategory] = None
-    category: Optional[PlaceCategory] = None
-    type: Optional[PlaceType] = None
-    tags: Optional[str] = None
-    coordinates: Optional[list] = None
-    map_name: Optional[str] = None
-
-    name__list: Optional[List[str]] = None
-    city__list: Optional[List[CityCategory]] = None
-    type__list: Optional[List[PlaceType]] = None
-    category__list: Optional[List[PlaceCategory]] = None
 
 
 class PhotoSchema(BaseModel):
@@ -272,16 +256,6 @@ class RouteRead(CommonRouteBase):
         else:
             base += "&ruri=~~"
         return base
-
-
-class RouteFilter(BaseFilter):
-    name: Optional[str] = Field(None, description="Partial match for name")
-    city: Optional[CityCategory] = None
-    type: Optional[RouteType] = None
-
-    name__list: Optional[List[str]] = None
-    city__list: Optional[List[CityCategory]] = None
-    type__list: Optional[List[PlaceType]] = None
 
 
 class CommonSurveyBase(BaseModel):
