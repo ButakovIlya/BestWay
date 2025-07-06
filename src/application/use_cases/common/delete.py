@@ -28,7 +28,7 @@ class ModelObjectDeleteUseCase(UseCase):
                 )
 
             if author_id:
-                object = await repository.get_by_id(id=obj_id)
+                object = await repository.get_by_id(model_id=obj_id)
                 if hasattr(object, "author_id"):
                     if not object.author_id == author_id:
                         raise APIException(

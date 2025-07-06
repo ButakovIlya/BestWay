@@ -15,17 +15,7 @@ from domain.validators.dto import PaginatedResponse
 router = APIRouter(tags=["Users"], prefix="/users")
 
 
-@router.get("/{user_id}", status_code=status.HTTP_200_OK)
-@inject
-async def retrieve_user(
-    user_id: int,
-    use_case: UserRetrieveUseCase = Depends(Provide[Container.user_retrieve_use_case]),
-) -> UserDTO:
-    """Получить данные профиля"""
-    return await use_case.execute(user_id=user_id)
-
-
-@router.get("/", response_model=PaginatedResponse[UserDTO], status_code=status.HTTP_200_OK)
+@router.get("", response_model=PaginatedResponse[UserDTO], status_code=status.HTTP_200_OK)
 @inject
 async def list_users(
     request: Request,
@@ -35,6 +25,16 @@ async def list_users(
 ) -> PaginatedResponse[UserDTO]:
     """Получить список пользователей с пагинацией"""
     return await use_case.execute(request=request, page=page, page_size=page_size)
+
+
+@router.get("/{user_id}", status_code=status.HTTP_200_OK)
+@inject
+async def retrieve_user(
+    user_id: int,
+    use_case: UserRetrieveUseCase = Depends(Provide[Container.user_retrieve_use_case]),
+) -> UserDTO:
+    """Получить данные профиля"""
+    return await use_case.execute(user_id=user_id)
 
 
 @router.post("", status_code=status.HTTP_200_OK)
