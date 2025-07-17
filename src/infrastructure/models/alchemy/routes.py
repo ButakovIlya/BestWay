@@ -28,6 +28,7 @@ class Place(Base):
         default=None,
         server_default=None,
     )
+    description: Mapped[str] = mapped_column(String, nullable=True, server_default=None)
     object_id: Mapped[int] = mapped_column(Integer, nullable=True)
     tags: Mapped[str | None] = mapped_column(default=None, server_default=None)
     coordinates: Mapped[list | None] = mapped_column(JSON, default=None, server_default=None)

@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import Result, func, select
+from sqlalchemy import Result, Select, func, select
 from sqlalchemy.orm import selectinload
 
 from application.use_cases.places.dto import PlaceDTO
@@ -37,11 +37,11 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
         result = await self._session.execute(stmt)
         return result
 
-    def _create_stmt_by_filters(self, filters: PlacesFiltersDTO) -> List[Place]:
+    def _create_stmt_by_filters(self, filters: PlacesFiltersDTO) -> Select:
         """Получить места по фильтрам"""
         filters = filters.model_dump(exclude_unset=True)
         MODEL = PlaceModel
-        stmt = select(MODEL).options(selectinload(MODEL.photos))
+        stmt = select(MODEL).options(selectinload(MODEL.photos)).order_by(MODEL.id)
 
         # Простой фильтр по полям с оператором ==
         simple_eq_fields = {
@@ -84,6 +84,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
             id=entity.id,
             city=entity.city,
             name=entity.name,
+            description=entity.description,
             category=entity.category,
             object_id=entity.object_id,
             type=entity.type,
@@ -99,6 +100,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
             id=model.id,
             city=model.city,
             name=model.name,
+            description=model.description,
             category=model.category,
             type=model.type,
             tags=model.tags,

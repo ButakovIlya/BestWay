@@ -60,7 +60,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
             validated_route_data = await self._validate_generated_route(route_data, user_id)
             logger.info(f"validated_route_data: {validated_route_data}")
             route = await self._create_route(validated_route_data, survey_id)
-            logger.info("End route chatgpt generate use case")
+            logger.info("Finish route chatgpt generate use case")
             route_data = RouteRead.model_validate(route).model_dump(mode="json")
             await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_SUCCEDED.value, route_data)
             return route
@@ -71,6 +71,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
                 f"Exception: {e}"
             )
             await self._notifier.notify_user(user_id, EventType.ROUTE_GENERATION_FAILED.value)
+            raise
 
         finally:
             self._redis_cache.unset_active_route_geration(user_id)

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, DateTime, Enum, Integer, String, Text
+from sqlalchemy import Boolean, Date, DateTime, Enum, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from domain.entities.enums import Gender
@@ -31,7 +31,7 @@ class User(Base):
         index=True,
         default=Gender.MALE,
     )
-    birth_date: Mapped[date | None] = mapped_column(DateTime, nullable=True)
+    birth_date: Mapped[date | None] = mapped_column(Date, nullable=True)
 
     routes: Mapped[list["Route"]] = relationship("Route", back_populates="author")
     likes: Mapped[list["Like"]] = relationship("Like", back_populates="author")

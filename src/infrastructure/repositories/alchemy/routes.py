@@ -69,6 +69,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             .outerjoin(Photo, Photo.route_id == MODEL.id)
             .join(RoutePlace, RoutePlace.route_id == MODEL.id)
             .group_by(MODEL.id)
+            .order_by(MODEL.id)
         )
 
         raw_filters = filters.model_dump(exclude_unset=True)
