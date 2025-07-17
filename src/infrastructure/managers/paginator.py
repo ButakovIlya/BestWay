@@ -28,8 +28,9 @@ class Paginator(Generic[T]):
         start = (page - 1) * page_size
         end = start + page_size
         paginated_items = items[start:end]
+        print(self.schema_read)
         data = [self.schema_read.model_validate(obj) for obj in paginated_items]
-
+        print(data)
         base_url = str(request.url.replace_query_params())
         query_params = dict(request.query_params)
 
@@ -39,6 +40,7 @@ class Paginator(Generic[T]):
             params = {**query_params, "page": str(page_num), "page_size": str(page_size)}
             return f"{base_url}?{urlencode(params)}"
 
+        print(data)
         return PaginatedResponse[T](
             data=data,
             count=total_items,

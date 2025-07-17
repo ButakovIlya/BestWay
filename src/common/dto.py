@@ -66,6 +66,7 @@ class CommonRouteBase(BaseModel):
 
 class CommonPlaceBase(BaseModel):
     name: str
+    description: Optional[str] = None
     category: PlaceCategory
     city: Optional[CityCategory] = None
     object_id: Optional[int] = None
@@ -95,6 +96,7 @@ class PlaceRead(CommonPlaceBase):
         return cls(
             id=place.id,
             name=place.name,
+            description=place.description,
             city=place.city,
             category=place.category,
             type=place.type,

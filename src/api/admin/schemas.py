@@ -12,7 +12,7 @@ from domain.entities.route import Route
 
 class CommonPlaceBase(BaseModel):
     name: str
-    description: str
+    description: Optional[str] = None
     category: PlaceCategory
     city: Optional[CityCategory] = None
     object_id: Optional[int] = None
@@ -36,7 +36,7 @@ class PlaceCreate(CommonPlaceBase):
 
 class PlacePut(CommonPlaceBase):
     name: str
-    description: str
+    description: Optional[str] = None
     category: PlaceCategory
     city: CityCategory = None
     type: PlaceType = None
