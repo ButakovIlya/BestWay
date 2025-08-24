@@ -121,6 +121,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             updated_at=entity.updated_at,
             duration=entity.duration,
             distance=entity.distance,
+            is_publicated=entity.is_publicated,
             json_data=entity.json_data,
         )
 
@@ -136,6 +137,7 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
             duration=model.duration,
             distance=model.distance,
             json_data=model.json_data,
+            is_publicated=model.is_publicated,
             places=[place for place in model.places] if model.places else [],
             photos=[photo for photo in model.photos] if model.photos else [],
         )

@@ -12,6 +12,7 @@ class Route(Entity):
         name: Optional[str] = None,
         city: CityCategory = CityCategory.PERM,
         type: RouteType = RouteType.MIXED,
+        is_publicated: bool = False,
         photo: str | None = None,
         photos: List[str] | None = None,
         author_id: Optional[int] = None,
@@ -41,6 +42,7 @@ class Route(Entity):
         self.duration = duration
         self.distance = distance
         self.is_custom = is_custom
+        self.is_publicated = is_publicated
         self.json_data = json_data
 
         self.places = places or []

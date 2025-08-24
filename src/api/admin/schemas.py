@@ -108,6 +108,7 @@ class CommonRouteBase(BaseModel):
     name: str
     city: Optional[CityCategory] = None
     type: Optional[RouteType] = None
+    is_publicated: bool = False
 
 
 class MiniRouteSchema(CommonRouteBase):
@@ -210,6 +211,7 @@ class RouteRead(CommonRouteBase):
             author_id=route.author_id,
             duration=route.duration,
             distance=route.distance,
+            is_publicated=route.is_publicated,
             created_at=route.created_at,
             updated_at=route.updated_at,
             author=UserRead.model_validate(route.author),
