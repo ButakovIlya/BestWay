@@ -146,6 +146,7 @@ class RoutePatchSchema(BaseModel):
     author: Optional[int] = None
     duration: Optional[int] = None
     distance: Optional[int] = None
+    is_publicated: Optional[bool] = False
 
 
 class RouteCreateSchema(CommonRouteBase):
