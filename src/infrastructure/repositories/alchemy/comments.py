@@ -16,6 +16,16 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
     ENTITY = Comment
     LIST_DTO = CommentDTO
 
+    async def create(self, data: Comment) -> Comment:
+        model = self.convert_to_model(data)
+        self._session.add(model)
+        await self._session.flush()
+        await self._session.refresh(
+            model,
+            attribute_names=["author", "route", "place"],
+        )
+        return self.convert_to_entity(model)
+
     async def count_by_user_and_object(self, data: CommentBaseDTO) -> int:
         stmt = select(func.count()).where(
             CommentModel.route_id == data.route_id,
