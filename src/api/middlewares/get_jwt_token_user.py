@@ -65,7 +65,6 @@ class JwtTokenUserMiddleware(BaseHTTPMiddleware):
         self._validate_token_type(payload)
         self._validate_expiration_time(payload)
         validated = self._validate_payload(payload)
-        print(validated)
         async with self.session_factory() as session:
             user_from_db: UserModel = await session.get(UserModel, validated.id)
             if not user_from_db:

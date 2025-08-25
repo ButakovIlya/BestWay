@@ -109,6 +109,7 @@ class CommonRouteBase(BaseModel):
     city: Optional[CityCategory] = None
     type: Optional[RouteType] = None
     is_publicated: bool = False
+    description: Optional[str] = None
 
 
 class MiniRouteSchema(CommonRouteBase):
@@ -148,6 +149,7 @@ class RoutePatchSchema(BaseModel):
     duration: Optional[int] = None
     distance: Optional[int] = None
     is_publicated: Optional[bool] = False
+    description: Optional[str] = None
 
 
 class RouteCreateSchema(CommonRouteBase):
@@ -205,6 +207,7 @@ class RouteRead(CommonRouteBase):
         obj = cls(
             id=route.id,
             name=route.name,
+            description=route.description,
             city=route.city,
             type=route.type,
             photo=route.photo,

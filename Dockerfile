@@ -31,3 +31,7 @@ RUN apt update \
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 COPY . .
+
+# создать папки, если они отсутствуют
+RUN mkdir -p /src/storage/media \
+    && mkdir -p /src/logs

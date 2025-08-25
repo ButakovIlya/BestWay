@@ -63,6 +63,7 @@ class Route(Base):
     )
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
 
+    description: Mapped[str | None] = mapped_column(default=None, server_default=None)
     duration: Mapped[int | None] = mapped_column(default=None, server_default=None)
     distance: Mapped[int | None] = mapped_column(default=None, server_default=None)
     is_custom: Mapped[bool] = mapped_column(default=False, server_default="false")

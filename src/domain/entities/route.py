@@ -10,6 +10,7 @@ class Route(Entity):
         self,
         id: Optional[int] = None,
         name: Optional[str] = None,
+        description: Optional[str] = None,
         city: CityCategory = CityCategory.PERM,
         type: RouteType = RouteType.MIXED,
         is_publicated: bool = False,
@@ -33,6 +34,7 @@ class Route(Entity):
         self.name = name
         self.city = city
         self.author_id = author_id
+        self.description = description
         self.author = author
         self.photo = photo
         self.photos = photos
