@@ -129,7 +129,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
                 survey: Survey = await self._uow.surveys.get_by_id(survey_id)
 
                 route: Route = await self._uow.routes.create(
-                    Route(**validated_route_data.model_dump(), city=survey.city, name=survey.name)
+                    Route(**validated_route_data.model_dump(exclude={"name"}), city=survey.city, name=survey.name)
                 )
 
                 route_places: List[RoutePlaces] = await self._uow.route_places.bulk_create(
