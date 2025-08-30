@@ -6,6 +6,7 @@ from sqlalchemy.orm import joinedload
 from common.exceptions import APIException
 from domain.entities.post import Post
 from infrastructure.models.alchemy.posts import Post as PostModel
+from infrastructure.models.alchemy.routes import Place, Route, RoutePlace
 from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository
 from infrastructure.repositories.interfaces.post import PostRepository
 
@@ -32,7 +33,10 @@ class SqlAlchemyPostsRepository(SqlAlchemyModelRepository[Post], PostRepository)
             .filter_by(**filters_with_id)
             .options(
                 joinedload(PostModel.author),
-                joinedload(PostModel.route),
+                joinedload(PostModel.route)
+                .selectinload(Route.places)
+                .joinedload(RoutePlace.place)
+                .selectinload(Place.photos),
             )
         )
         result = await self._session.execute(stmt)
