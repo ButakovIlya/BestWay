@@ -110,6 +110,14 @@ class SqlAlchemyRoutesRepository(SqlAlchemyModelRepository[Route], RouteReposito
 
         return stmt
 
+    async def copy(self, route: Route, user_id: int) -> Route:
+        """Скопировать маршрут в мои маршруты"""
+        route.author_id = user_id
+        route.id = None
+        route = await self.create(route)
+
+        return await self.get_by_id(route.id)
+
     def convert_to_model(self, entity: Route) -> RouteModel:
         return RouteModel(
             id=entity.id,

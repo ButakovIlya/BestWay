@@ -153,7 +153,7 @@ class SqlAlchemyModelRepository(SqlAlchemyRepository, ModelRepository[TModel]):
         await self._session.flush()
         return self.convert_to_entity(model)
 
-    async def bulk_create(self, data: list[TModel]) -> list:
+    async def bulk_create(self, data: list[TModel]) -> list[TModel]:
         models = [self.convert_to_model(entity) for entity in data]
         self._session.add_all(models)
         await self._session.flush(models)

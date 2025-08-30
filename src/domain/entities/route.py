@@ -3,6 +3,8 @@ from typing import List, Optional
 
 from domain.entities.entity import Entity
 from domain.entities.enums import CityCategory, RouteType
+from domain.entities.photo import Photo
+from domain.entities.route_places import RoutePlaces
 
 
 class Route(Entity):
@@ -15,7 +17,6 @@ class Route(Entity):
         type: RouteType = RouteType.MIXED,
         is_publicated: bool = False,
         photo: str | None = None,
-        photos: List[str] | None = None,
         author_id: Optional[int] = None,
         author: Optional[dict] = None,
         created_at: Optional[datetime] = None,
@@ -24,10 +25,8 @@ class Route(Entity):
         distance: Optional[int] = None,
         is_custom: Optional[bool] = False,
         json_data: Optional[dict] = None,
-        places: Optional[List[int]] = None,
-        photo_ids: Optional[List[int]] = None,
-        like_ids: Optional[List[int]] = None,
-        comment_ids: Optional[List[int]] = None,
+        places: Optional[List[RoutePlaces]] = None,
+        photos: Optional[List[Photo]] = None,
     ) -> None:
         super().__init__(id)
 
@@ -37,7 +36,6 @@ class Route(Entity):
         self.description = description
         self.author = author
         self.photo = photo
-        self.photos = photos
         self.type = type
         self.created_at = created_at or datetime.now()
         self.updated_at = updated_at or datetime.now()
@@ -48,6 +46,4 @@ class Route(Entity):
         self.json_data = json_data
 
         self.places = places or []
-        self.photo_ids = photo_ids or []
-        self.like_ids = like_ids or []
-        self.comment_ids = comment_ids or []
+        self.photos = photos or []

@@ -23,3 +23,8 @@ class RouteRepository(ModelRepository):
     async def get_list_models(self) -> List[Any]:
         """Получить список маршрутов"""
         pass
+
+    @abstractmethod
+    async def copy(self, route: Route, user_id: int) -> Route:
+        """Скопировать маршрут в мои маршруты"""
+        pass

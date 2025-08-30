@@ -56,7 +56,7 @@ async def add_route_place(
     place_id: int,
     use_case: RoutePlaceAddUseCase = Depends(Provide[Container.route_place_add_use_case]),
 ) -> None:
-    user_id: int = request.state.user.id
+    # user_id: int = request.state.user.id
 
     return await use_case.execute(route_id, place_id)
 
@@ -70,7 +70,7 @@ async def remove_route_place(
     use_case: RoutePlaceRemoveUseCase = Depends(Provide[Container.route_place_remove_use_case]),
 ) -> None:
     """Удалить место по id или удалить все, если ничего не передано"""
-    user_id: int = request.state.user.id
+    # user_id: int = request.state.user.id
 
     return await use_case.execute(route_id, route_place_id)
 

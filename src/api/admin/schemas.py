@@ -9,6 +9,7 @@ from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteT
 from domain.entities.place import Place
 from domain.entities.post import Post
 from domain.entities.route import Route
+from domain.entities.route_places import RoutePlaces
 
 
 class CommonPlaceBase(BaseModel):
@@ -178,10 +179,10 @@ class RoutePlaceRead(BaseModel):
     model_config = {"from_attributes": True}
 
     @classmethod
-    def model_validate(cls, data: Any) -> "RoutePlaceRead":
+    def model_validate(cls, route_place: RoutePlaces) -> "RoutePlaceRead":
         return cls(
-            order=getattr(data, "order", 0),
-            place=PlaceRead.model_validate(data.place),
+            order=getattr(route_place, "order", 0),
+            place=PlaceRead.model_validate(route_place.place),
         )
 
 
@@ -203,7 +204,7 @@ class RouteRead(CommonRouteBase):
 
     @classmethod
     def model_validate(cls, route: Route) -> "RouteRead":
-        sorted_places = sorted(route.places, key=lambda p: p.order)
+        sorted_places: List[RoutePlaces] = sorted(route.places, key=lambda p: p.order)
 
         obj = cls(
             id=route.id,

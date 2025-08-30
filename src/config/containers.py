@@ -33,6 +33,7 @@ from application.use_cases.posts.create import PostCreateUseCase
 from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
 from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
 from application.use_cases.routes.chatgpt_create import ChatGPTRouteGenerateUseCase
+from application.use_cases.routes.copy import RouteCopyUseCase
 from application.use_cases.routes.create import RouteCreateUseCase
 from application.use_cases.routes.feed.list import RouteFeedListUseCase
 from application.use_cases.routes.feed.retrieve import RouteFeedRetrieveUseCase
@@ -268,6 +269,11 @@ class Container(containers.DeclarativeContainer):
             redis_client=clients.container.redis_cache,
             route_generate_gpt_task=tasks.container.chatgpt_process_route,
         )
+    )
+
+    copy_route_use_case: providers.Provider[RouteCopyUseCase] = providers.Factory(
+        RouteCopyUseCase,
+        uow=db.container.uow,
     )
 
     route_chatgpt_generate_use_case: providers.Provider[ChatGPTRouteGenerateUseCase] = providers.Factory(

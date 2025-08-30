@@ -3,9 +3,11 @@ from fastapi import APIRouter, Depends, Query, Request, status
 
 from api.admin.schemas import RouteRead
 from api.handlers.routes import router as additional_router
+from api.permissions.is_authenticated import is_authenticated
 from application.use_cases.common.delete import ModelObjectDeleteUseCase
 from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
+from application.use_cases.routes.copy import RouteCopyUseCase
 from application.use_cases.routes.dto import RouteFeedFiltersDTO
 from application.use_cases.routes.enums import RouteGenerationMode as Mode
 from application.use_cases.routes.feed.list import RouteFeedListUseCase
@@ -27,6 +29,7 @@ router.include_router(additional_router)
 
 
 @router.get("/my", response_model=PaginatedResponse[RouteRead], status_code=status.HTTP_200_OK)
+# @is_authenticated
 @inject
 async def list_my_routes(
     request: Request,
@@ -47,6 +50,7 @@ async def list_my_routes(
 
 
 @router.delete("/my/{route_id}/delete", status_code=status.HTTP_204_NO_CONTENT)
+# @is_authenticated
 @inject
 async def delete_my_route(
     request: Request,
@@ -63,6 +67,7 @@ async def delete_my_route(
 
 
 @router.get("/my/{route_id}", response_model=RouteRead, status_code=status.HTTP_200_OK)
+# @is_authenticated
 @inject
 async def retrieve_my_route(
     request: Request,
@@ -108,6 +113,7 @@ async def routes_feed(
 
 
 @router.post("/generate/{survey_id}", status_code=status.HTTP_200_OK)
+# @is_authenticated
 @inject
 async def generate_route(
     request: Request,
@@ -121,3 +127,15 @@ async def generate_route(
 
     await use_case.execute(user_id, survey_id, mode)
     return "Генерация маршрута запущена"
+
+
+@router.post("/copy/{route_id}", status_code=status.HTTP_201_CREATED)
+# @is_authenticated
+@inject
+async def copy_route(
+    request: Request,
+    route_id: int,
+    use_case: RouteCopyUseCase = Depends(Provide[Container.copy_route_use_case]),
+) -> RouteRead:
+    user_id: int = request.state.user.id
+    return await use_case.execute(route_id, user_id)

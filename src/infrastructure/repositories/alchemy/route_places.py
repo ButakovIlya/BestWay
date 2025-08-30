@@ -24,6 +24,19 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
         result = await self._session.execute(stmt)
         return bool(result.rowcount)
 
+    async def copy(self, route_id: int, places: list[RoutePlaces]) -> list[RoutePlaces]:
+        """Скопировать места маршрута в новый маршрут"""
+        new_places: list[RoutePlaces] = []
+        for place in places:
+            new_place = RoutePlaces(
+                route_id=route_id,
+                place_id=place.place_id,
+                order=place.order if hasattr(place, "order") else 1,
+            )
+            new_places.append(new_place)
+
+        return await self.bulk_create(new_places)
+
     def convert_to_model(self, entity: RoutePlaces) -> RoutePlaceModel:
         return RoutePlaceModel(
             id=entity.id,
@@ -38,4 +51,5 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
             route_id=model.route_id,
             place_id=model.place_id,
             order=model.order,
+            place=model.place,
         )
