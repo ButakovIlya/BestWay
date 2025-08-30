@@ -10,6 +10,16 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
     MODEL = RoutePlaceModel
     ENTITY = RoutePlaces
 
+    async def create(self, data: RoutePlaces) -> RoutePlaces:
+        model = self.convert_to_model(data)
+        self._session.add(model)
+        await self._session.flush()
+        await self._session.refresh(
+            model,
+            attribute_names=["place"],
+        )
+        return self.convert_to_entity(model)
+
     async def get_last_order_by_route_id(self, route_id: int) -> int:
         stmt = select(func.max(RoutePlaceModel.order)).where(RoutePlaceModel.route_id == route_id)
         result = await self._session.execute(stmt)
@@ -51,5 +61,5 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
             route_id=model.route_id,
             place_id=model.place_id,
             order=model.order,
-            place=model.place,
+            place=model.place if model.place else None,
         )

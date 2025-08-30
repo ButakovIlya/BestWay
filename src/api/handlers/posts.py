@@ -9,7 +9,6 @@ from sqlalchemy.orm import selectinload
 
 from api.admin.schemas import PostPatch, PostPut, PostRead
 from application.use_cases.common.dto import ModelPhotoDTO
-from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
 from application.use_cases.posts.create import PostCreateUseCase
 from application.use_cases.posts.dto import CreatePostDTO

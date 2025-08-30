@@ -3,7 +3,6 @@ from openai import BaseModel
 
 from application.use_cases.base import UseCase
 from common.dto import PostsFiltersDTO
-from domain.entities.post import Post
 from domain.validators.dto import PaginatedResponse
 from infrastructure.managers.paginator import Paginator
 from infrastructure.uow.base import UnitOfWork

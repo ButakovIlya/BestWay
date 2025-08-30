@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from pydantic import BaseModel, Field, field_validator, validator
+from pydantic import BaseModel, Field, field_validator
 
 from application.utils import get_settings
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType
