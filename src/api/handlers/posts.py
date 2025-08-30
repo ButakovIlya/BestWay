@@ -13,6 +13,8 @@ from application.use_cases.common.list import ModelObjectListUseCase
 from application.use_cases.common.retrieve import ModelObjectRetrieveUseCase
 from application.use_cases.posts.create import PostCreateUseCase
 from application.use_cases.posts.dto import CreatePostDTO
+from application.use_cases.posts.feed import PostFeedFilterUseCase
+from common.dto import PostsFiltersDTO
 from common.exceptions import APIException
 from config.containers import Container
 from domain.entities.enums import ModelType
@@ -26,18 +28,18 @@ router = APIRouter()
 @inject
 async def list_posts(
     request: Request,
-    # filters: PlacesFiltersDTO = Depends(),
+    filters: PostsFiltersDTO = Depends(),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
-    use_case: ModelObjectListUseCase = Depends(Provide[Container.object_list_use_case]),
+    use_case: PostFeedFilterUseCase = Depends(Provide[Container.post_feed_use_case]),
 ) -> PaginatedResponse[PostRead]:
     """Получить список постов"""
     return await use_case.execute(
         request=request,
-        model_type=ModelType.POSTS,
+        filters=filters,
+        PaginatorModel=PostRead,
         page=page,
         page_size=page_size,
-        ObjectDTO=PostRead,
     )
 
 

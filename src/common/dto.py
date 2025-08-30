@@ -224,3 +224,35 @@ class PlacesFiltersDTO(BaseModel):
         if isinstance(value, str):
             return [PlaceType(item.strip()) for item in value.split(",") if item.strip()]
         return value
+
+
+class PostsFiltersDTO(BaseModel):
+    title: Optional[str] = Field(default=None, description="Поиск поста по имени (частичное совпадение)")
+    description: Optional[str] = Field(
+        default=None, description="Поиск поста по описанию (частичное совпадение)"
+    )
+    route_name: Optional[str] = Field(
+        default=None, description="Поиск маршрута по имени (частичное совпадение)"
+    )
+    city: Optional[CityCategory] = Field(
+        default=CityCategory.PERM, description="Фильтрация по городу. По умолчанию — Пермь"
+    )
+    type: Optional[RouteType] = Field(default=None, description="Тип маршрута")
+    places_count: Optional[int] = Field(
+        default=None, description="Фильтрация по ТОЧНОМУ количеству мест в маршруте"
+    )
+    places_gte: Optional[int] = Field(
+        default=None, description="Количество мест в маршруте должно быть БОЛЬШЕ ИЛИ РАВНО этому значению"
+    )
+    places_lte: Optional[int] = Field(
+        default=None, description="Количество мест в маршруте должно быть МЕНЬШЕ ИЛИ РАВНО этому значению"
+    )
+    has_avatar: Optional[bool] = Field(
+        default=None, description="Если True — возвращать только маршруты с аватаркой"
+    )
+    has_photos: Optional[bool] = Field(
+        default=None, description="Если True — возвращать только маршруты с фото"
+    )
+    is_custom: Optional[bool] = Field(
+        default=None, description="Фильтрация по пользовательским маршрутам (True/False)"
+    )

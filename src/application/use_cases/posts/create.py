@@ -27,7 +27,6 @@ class PostCreateUseCase(UseCase):
 
     async def execute(self, data: CreatePostDTO, user_id: int) -> PostDTO:
         async with self._uow(autocommit=True):
-            print(data.model_dump())
             post: Post = await self._uow.posts.create(
                 Post(**data.model_dump(exclude=["photo"]), author_id=user_id)
             )

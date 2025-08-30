@@ -1,12 +1,13 @@
 from typing import Any
 
-from sqlalchemy import Result, desc, select
-from sqlalchemy.orm import joinedload
+from sqlalchemy import Result, Select, desc, func, select
+from sqlalchemy.orm import joinedload, selectinload
 
+from common.dto import PostsFiltersDTO
 from common.exceptions import APIException
 from domain.entities.post import Post
 from infrastructure.models.alchemy.posts import Post as PostModel
-from infrastructure.models.alchemy.routes import Place, Route, RoutePlace
+from infrastructure.models.alchemy.routes import Photo, Place, Route, RoutePlace
 from infrastructure.repositories.alchemy.base import SqlAlchemyModelRepository
 from infrastructure.repositories.interfaces.post import PostRepository
 
@@ -59,6 +60,72 @@ class SqlAlchemyPostsRepository(SqlAlchemyModelRepository[Post], PostRepository)
             .order_by(desc(PostModel.created_at))
         )
         return await self._session.execute(stmt)
+
+    async def get_list_by_filters(self, filters: PostsFiltersDTO) -> Result:
+        """Получить маршруты по фильтрам"""
+        stmt = await self._create_stmt_by_filters(filters)
+        result = await self._session.execute(stmt)
+        return result
+
+    async def _create_stmt_by_filters(self, filters: PostsFiltersDTO) -> Select:
+        MODEL = PostModel
+        ROUTE = Route
+
+        stmt = (
+            select(MODEL)
+            .join(ROUTE, ROUTE.id == MODEL.route_id)
+            .outerjoin(Photo, Photo.route_id == ROUTE.id)
+            .options(
+                joinedload(MODEL.author),
+                joinedload(MODEL.route)
+                .joinedload(ROUTE.places)
+                .joinedload(RoutePlace.place)
+                .joinedload(Place.photos),
+            )
+            .group_by(MODEL.id, ROUTE.id)
+            .order_by(MODEL.id)
+        )
+
+        raw_filters = filters.model_dump(exclude_unset=True)
+
+        # --- фильтры по посту ---
+        if title := raw_filters.get("title"):
+            stmt = stmt.where(MODEL.title.ilike(f"%{title}%"))
+
+        if desc := raw_filters.get("description"):
+            stmt = stmt.where(MODEL.description.ilike(f"%{desc}%"))
+
+        # --- фильтры по маршруту ---
+        if route_name := raw_filters.get("route_name"):
+            stmt = stmt.where(ROUTE.name.ilike(f"%{route_name}%"))
+
+        if city := raw_filters.get("city"):
+            stmt = stmt.where(ROUTE.city == city)
+
+        if rtype := raw_filters.get("type"):
+            stmt = stmt.where(ROUTE.type == rtype)
+
+        if (is_custom := raw_filters.get("is_custom")) is not None:
+            stmt = stmt.where(ROUTE.is_custom == is_custom)
+
+        # аватарка маршрута
+        if (has_avatar := raw_filters.get("has_avatar")) is not None:
+            stmt = stmt.where(ROUTE.photo.isnot(None) if has_avatar else ROUTE.photo.is_(None))
+
+        # наличие связанных фото маршрута
+        if raw_filters.get("has_photos"):
+            stmt = stmt.having(func.count(func.distinct(Photo.id)) > 0)
+
+        # фильтры по количеству мест маршрута
+        place_count_expr = func.count(func.distinct(RoutePlace.place_id))
+        if (val := raw_filters.get("places_count")) is not None:
+            stmt = stmt.having(place_count_expr == val)
+        if (val := raw_filters.get("places_gte")) is not None:
+            stmt = stmt.having(place_count_expr >= val)
+        if (val := raw_filters.get("places_lte")) is not None:
+            stmt = stmt.having(place_count_expr <= val)
+
+        return stmt
 
     def convert_to_model(self, entity: Post) -> PostModel:
         return PostModel(

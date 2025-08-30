@@ -1,4 +1,5 @@
 from openai import BaseModel
+
 from application.use_cases.base import UseCase
 from infrastructure.uow import UnitOfWork
 
