@@ -138,4 +138,4 @@ async def copy_route(
     use_case: RouteCopyUseCase = Depends(Provide[Container.copy_route_use_case]),
 ) -> RouteRead:
     user_id: int = request.state.user.id
-    return await use_case.execute(route_id, user_id)
+    return await use_case.execute(route_id, user_id, RouteRead)

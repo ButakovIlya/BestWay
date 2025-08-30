@@ -1,6 +1,5 @@
-from api.admin.schemas import RouteRead
+from openai import BaseModel
 from application.use_cases.base import UseCase
-from application.use_cases.routes.dto import RouteDTO
 from infrastructure.uow import UnitOfWork
 
 
@@ -15,7 +14,7 @@ class RouteCopyUseCase(UseCase):
     ) -> None:
         self._uow = uow
 
-    async def execute(self, route_id: int, user_id: int) -> RouteRead:
+    async def execute(self, route_id: int, user_id: int, dto: BaseModel) -> BaseModel:
         async with self._uow(autocommit=True):
             destination_route = await self._uow.routes.get_by_id(route_id)
             my_route = await self._uow.routes.copy(destination_route, user_id)
@@ -24,4 +23,4 @@ class RouteCopyUseCase(UseCase):
                 destination_route.places,
             )
 
-        return RouteRead.model_validate(my_route)
+        return dto.model_validate(my_route)
