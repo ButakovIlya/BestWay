@@ -7,6 +7,7 @@ from application.utils import get_settings
 from common.dto import UserRead
 from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteType, SurveyStatus
 from domain.entities.place import Place
+from domain.entities.post import Post
 from domain.entities.route import Route
 
 
@@ -394,3 +395,48 @@ class CommentFilter(BaseModel):
     author_id__list: Optional[List[int]] = None
     route_id__list: Optional[List[int]] = None
     place_id__list: Optional[List[int]] = None
+
+
+class CommonPostBase(BaseModel):
+    title: str
+    description: Optional[str] = None
+
+
+class PostPut(CommonPostBase):
+    title: str
+    description: str
+    route_id: int
+
+
+class PostPatch(CommonPostBase):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    route_id: Optional[int] = None
+
+
+class PostRead(CommonPostBase):
+    id: int
+    route_id: int
+    author_id: int
+    created_at: datetime
+    updated_at: datetime
+    photo: Optional[str] = None
+
+    author: Optional[UserRead] = None
+    route: Optional[RouteRead] = None
+    model_config = {"from_attributes": True, "use_enum_values": False}
+
+    @classmethod
+    def model_validate(cls, post: Post) -> "PostRead":
+        return cls(
+            id=post.id,
+            title=post.title,
+            description=post.description,
+            photo=f"{get_settings().app.base_url}/{post.photo.lstrip('/')}" if post.photo else None,
+            route_id=post.route_id,
+            author_id=post.author_id,
+            created_at=post.created_at,
+            updated_at=post.updated_at,
+            author=UserRead.model_validate(post.author) if post.author else None,
+            route=RouteRead.model_validate(post.route) if post.route else None,
+        )

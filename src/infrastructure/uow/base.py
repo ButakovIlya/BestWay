@@ -13,6 +13,7 @@ from infrastructure.repositories.interfaces.comment import CommentRepository
 from infrastructure.repositories.interfaces.like import LikeRepository
 from infrastructure.repositories.interfaces.photo import PhotoRepository
 from infrastructure.repositories.interfaces.place import PlaceRepository
+from infrastructure.repositories.interfaces.post import PostRepository
 from infrastructure.repositories.interfaces.route import RouteRepository
 from infrastructure.repositories.interfaces.route_places import RoutePlacesRepository
 from infrastructure.repositories.interfaces.survey import SurveyRepository
@@ -24,6 +25,7 @@ class UnitOfWork(ABC):
     places: PlaceRepository
     route_places: RoutePlacesRepository
     routes: RouteRepository
+    posts: PostRepository
     surveys: SurveyRepository
     photos: PhotoRepository
 

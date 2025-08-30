@@ -1,19 +1,42 @@
+import logging
 from typing import Any
 
 import pusher
+from requests import ReadTimeout, RequestException
 
 from infrastructure.notifications.base import AbstractNotifier
+
+logger = logging.getLogger(__name__)
 
 
 class PusherNotifier(AbstractNotifier):
     PERSONAL_PREFIX = "personal-"
     GENERAL_PREFIX = "general-"
 
-    def __init__(self, app_id: str, key: str, secret: str, cluster: str, ssl: bool = True):
-        self.pusher_client = pusher.Pusher(app_id=app_id, key=key, secret=secret, cluster=cluster, ssl=ssl)
+    def __init__(
+        self, app_id: str, key: str, secret: str, cluster: str, ssl: bool = True, timeout: int = 5
+    ):
+        self.pusher_client = pusher.Pusher(
+            app_id=app_id,
+            key=key,
+            secret=secret,
+            cluster=cluster,
+            ssl=ssl,
+            timeout=timeout,
+        )
 
     async def send(self, channel: str, data: dict[str, Any]) -> Any:
-        return self.pusher_client.trigger(channel, "event", data)
+        try:
+            return self.pusher_client.trigger(channel, "event", data)
+        except ReadTimeout as e:
+            logger.warning(f"Pusher timeout when sending to {channel}: {e}")
+            return None
+        except RequestException as e:
+            logger.error(f"Pusher request error when sending to {channel}: {e}")
+            return None
+        except Exception as e:
+            logger.exception(f"Unexpected Pusher error: {e}")
+            return None
 
     async def notify_user(
         self, user_id: int, event_type: str, data: dict[str, Any] = {}, error: str | None = None

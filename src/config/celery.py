@@ -24,10 +24,12 @@ def create_app() -> Celery:
             "api.admin.comments",
             "api.admin.likes",
             "api.admin.places",
+            "api.admin.posts",
             "api.admin.routes",
             "api.admin.surveys",
             "api.public.surveys",
             "api.public.places",
+            "api.public.posts",
             "api.public.routes",
             "api.public.likes",
             "api.public.comments",
@@ -35,6 +37,7 @@ def create_app() -> Celery:
             "api.handlers.places",
             "api.handlers.likes",
             "api.handlers.comments",
+            "api.handlers.posts",
         ]
     )
     container.wire(packages=["infrastructure"])

@@ -18,7 +18,11 @@ class DeletePhotoUseCase(UseCase):
         self._storage_manager = storage_manager
 
     async def execute(
-        self, photo_id: int, place_id: int | None = None, route_id: int | None = None
+        self,
+        photo_id: int,
+        place_id: int | None = None,
+        route_id: int | None = None,
+        post_id: int | None = None,
     ) -> None:
         async with self._uow(autocommit=True):
             photo: Photo = await self._uow.photos.get_by_id(model_id=photo_id)

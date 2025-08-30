@@ -9,3 +9,4 @@ class ModelType(str, Enum):
     USERS = "users"
     PLACES = "places"
     ROUTES = "routes"
+    POSTS = "posts"

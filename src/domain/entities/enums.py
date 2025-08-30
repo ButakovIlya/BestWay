@@ -134,6 +134,7 @@ class RouteType(Enum):
 class ModelType(Enum):
     PLACES = "places"
     ROUTES = "routes"
+    POSTS = "posts"
     USERS = "users"
     COMMENTS = "comments"
     LIKES = "liks"

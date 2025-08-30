@@ -29,6 +29,7 @@ from application.use_cases.places.add_photos import PlacePhotosAddUseCase
 from application.use_cases.places.avatar import PlacePhotoUpdateUseCase
 from application.use_cases.places.create import PlaceCreateUseCase
 from application.use_cases.places.feed import PlaceFeedListUseCase
+from application.use_cases.posts.create import PostCreateUseCase
 from application.use_cases.routes.add_photos import RoutePhotosAddUseCase
 from application.use_cases.routes.avatar import RoutePhotoUpdateUseCase
 from application.use_cases.routes.chatgpt_create import ChatGPTRouteGenerateUseCase
@@ -358,6 +359,14 @@ class Container(containers.DeclarativeContainer):
     edit_create_use_case: providers.Provider[CommentEditUseCase] = providers.Factory(
         CommentEditUseCase,
         uow=db.container.uow,
+    )
+
+    # POSTS
+    create_post_use_case: providers.Provider[PostCreateUseCase] = providers.Factory(
+        PostCreateUseCase,
+        uow=db.container.uow,
+        storage_manager=storage_manager,
+        update_photo_use_case=update_photo_use_case,
     )
 
     # COMMON CRUD USE_CASES

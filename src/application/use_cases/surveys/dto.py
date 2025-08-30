@@ -80,13 +80,13 @@ class SurveyDataUpdateDTO(BaseModel):
     @field_validator("experience", "preferences")
     def validate_length(cls, v, field):
         if v is not None and len(v) > 250:
-            raise ValueError(f"{field.name} не может содержать больше 250 символов")
+            raise ValueError(f"experience и preferences не может содержать больше 250 символов")
         return v
 
     @field_validator("places_count")
     def validate_length_places_count(cls, v, field):
         if v is not None and v < MIN_PLACES_COUNT:
-            raise ValueError(f"{field.name} не может быть меньше {MIN_PLACES_COUNT}")
+            raise ValueError(f"places_count не может быть меньше {MIN_PLACES_COUNT}")
         return v
 
     model_config = {"from_attributes": True, "use_enum_values": True}

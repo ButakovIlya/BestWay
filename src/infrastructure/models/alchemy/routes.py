@@ -8,6 +8,7 @@ from domain.entities.enums import CityCategory, PlaceCategory, PlaceType, RouteT
 from infrastructure.models.alchemy.base import Base
 
 if TYPE_CHECKING:
+    from infrastructure.models.alchemy.posts import Post
     from infrastructure.models.alchemy.users import User
 
 
@@ -88,6 +89,7 @@ class Route(Base):
     photos: Mapped[list["Photo"]] = relationship(
         "Photo", back_populates="route", cascade="all, delete-orphan", lazy="noload"
     )
+    posts: Mapped[list["Post"]] = relationship("Post", back_populates="route", cascade="all, delete-orphan")
 
 
 class RoutePlace(Base):

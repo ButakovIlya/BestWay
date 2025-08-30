@@ -8,6 +8,7 @@ from infrastructure.repositories.alchemy import (
 )
 from infrastructure.repositories.alchemy.comments import SqlAlchemyCommentsRepository
 from infrastructure.repositories.alchemy.likes import SqlAlchemyLikesRepository
+from infrastructure.repositories.alchemy.posts import SqlAlchemyPostsRepository
 from infrastructure.repositories.alchemy.route_places import SqlAlchemyRoutePlacesRepository
 from infrastructure.repositories.alchemy.routes import SqlAlchemyRoutesRepository
 from infrastructure.repositories.alchemy.survey import SqlAlchemySurveysRepository
@@ -25,6 +26,7 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
         self.users = SqlAlchemyUsersRepository(self._session)
         self.places = SqlAlchemyPlacesRepository(self._session)
         self.routes = SqlAlchemyRoutesRepository(self._session)
+        self.posts = SqlAlchemyPostsRepository(self._session)
         self.route_places = SqlAlchemyRoutePlacesRepository(self._session)
         self.surveys = SqlAlchemySurveysRepository(self._session)
         self.photos = SqlAlchemyPhotosRepository(self._session)
@@ -42,6 +44,8 @@ class SqlAlchemyUnitOfWork(UnitOfWork):
                 return self.users
             case ModelType.ROUTES:
                 return self.routes
+            case ModelType.POSTS:
+                return self.posts
             case ModelType.COMMENTS:
                 return self.comments
             case ModelType.LIKES:
