@@ -1,4 +1,4 @@
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, select, update
 
 from domain.entities.route_places import RoutePlaces
 from infrastructure.models.alchemy.routes import RoutePlace as RoutePlaceModel
@@ -19,6 +19,11 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
             attribute_names=["place"],
         )
         return self.convert_to_entity(model)
+
+    async def update_order(self, route_place_id: int, order: int) -> None:
+        """Изменить порядок места маршрута"""
+        stmt = update(self.MODEL).where(self.MODEL.id == route_place_id).values(order=order)
+        await self._session.execute(stmt)
 
     async def get_last_order_by_route_id(self, route_id: int) -> int:
         stmt = select(func.max(RoutePlaceModel.order)).where(RoutePlaceModel.route_id == route_id)

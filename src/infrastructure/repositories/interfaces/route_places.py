@@ -19,3 +19,8 @@ class RoutePlacesRepository(ModelRepository):
     async def copy(self, route_id: int, places: list[RoutePlaces]) -> list[RoutePlaces]:
         """Скопировать места маршрута из маршрута"""
         pass
+
+    @abstractmethod
+    async def update_order(self, route_place_id: int, order: int) -> None:
+        """Изменить порядок места маршрута"""
+        pass
