@@ -23,7 +23,12 @@ async def create_like(
     user: Like = request.state.user
 
     return await use_case.execute(
-        data=LikeCreateDTO(author_id=user.id, place_id=data.place_id, route_id=data.route_id),
+        data=LikeCreateDTO(
+            author_id=user.id,
+            place_id=data.place_id,
+            route_id=data.route_id,
+            post_id=data.post_id,
+        ),
     )
 
 

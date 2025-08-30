@@ -109,11 +109,13 @@ class Like(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    post_id: Mapped[int | None] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
 
     author: Mapped["User"] = relationship("User", back_populates="likes", lazy="selectin")
     route: Mapped["Route"] = relationship("Route", back_populates="likes", lazy="selectin")
     place: Mapped["Place"] = relationship("Place", back_populates="likes", lazy="selectin")
+    post: Mapped["Post"] = relationship("Post", back_populates="likes", lazy="selectin")
 
 
 class Comment(Base):
@@ -122,12 +124,14 @@ class Comment(Base):
     author_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     route_id: Mapped[int | None] = mapped_column(ForeignKey("routes.id", ondelete="CASCADE"))
     place_id: Mapped[int | None] = mapped_column(ForeignKey("places.id", ondelete="CASCADE"))
+    post_id: Mapped[int | None] = mapped_column(ForeignKey("posts.id", ondelete="CASCADE"))
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.now)
     comment: Mapped[str] = mapped_column(String)
 
     author: Mapped["User"] = relationship("User", back_populates="comments", lazy="selectin")
     route: Mapped["Route"] = relationship("Route", back_populates="comments", lazy="selectin")
     place: Mapped["Place"] = relationship("Place", back_populates="comments", lazy="selectin")
+    post: Mapped["Post"] = relationship("Post", back_populates="comments", lazy="selectin")
 
 
 class Photo(Base):

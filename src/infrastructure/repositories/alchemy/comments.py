@@ -22,7 +22,7 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
         await self._session.flush()
         await self._session.refresh(
             model,
-            attribute_names=["author", "route", "place"],
+            attribute_names=["author", "route", "place", "post"],
         )
         return self.convert_to_entity(model)
 
@@ -30,10 +30,15 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
         stmt = select(func.count()).where(
             CommentModel.route_id == data.route_id,
             CommentModel.place_id == data.place_id,
+            CommentModel.post_id == data.post_id,
             CommentModel.author_id == data.author_id,
         )
         result = await self._session.execute(stmt)
         return result.scalar_one()
+
+    async def get_list_by_post_id(self, post_id: int) -> List[Comment]:
+        result = await self._session.execute(select(CommentModel).where(CommentModel.post_id == post_id))
+        return [self.convert_to_entity(row) for row in result.scalars().all()]
 
     async def get_list_by_route_id(self, route_id: int) -> List[Comment]:
         result = await self._session.execute(select(CommentModel).where(CommentModel.route_id == route_id))
@@ -81,6 +86,7 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
             author_id=entity.author_id,
             route_id=entity.route_id,
             place_id=entity.place_id,
+            post_id=entity.post_id,
             timestamp=entity.timestamp,
             comment=entity.comment,
         )
@@ -92,6 +98,7 @@ class SqlAlchemyCommentsRepository(SqlAlchemyModelRepository[Comment], CommentRe
             author=model.author,
             route_id=model.route_id,
             place_id=model.place_id,
+            post_id=model.post_id,
             timestamp=model.timestamp,
             comment=model.comment,
         )

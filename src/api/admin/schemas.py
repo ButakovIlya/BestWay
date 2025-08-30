@@ -332,12 +332,14 @@ class LikeBase(BaseModel):
     author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
+    post_id: Optional[int] = None
 
 
 class LikeCreate(BaseModel):
     author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
+    post_id: Optional[int] = None
 
 
 class LikeRead(LikeBase):
@@ -351,17 +353,20 @@ class LikeFilter(BaseModel):
     author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
+    post_id: Optional[int] = None
     timestamp: Optional[datetime] = None
 
     author_id__list: Optional[List[int]] = None
     route_id__list: Optional[List[int]] = None
     place_id__list: Optional[List[int]] = None
+    post_id__list: Optional[List[int]] = None
 
 
 class CommentBase(BaseModel):
     author_id: int
     route_id: Optional[int] = None
     place_id: Optional[int] = None
+    post_id: Optional[int] = None
     timestamp: Optional[datetime] = None
     comment: Optional[str] = None
     photo: Optional[str] = None
@@ -371,6 +376,7 @@ class CommentPutDTO(CommentBase):
     author_id: int
     route_id: int
     place_id: int
+    post_id: int
     comment: Optional[str]
 
 
@@ -388,6 +394,7 @@ class CommentFilter(BaseModel):
     author_id: Optional[int] = None
     route_id: Optional[int] = None
     place_id: Optional[int] = None
+    post_id: Optional[int] = None
     timestamp: Optional[datetime] = None
     comment: Optional[str] = None
     photo: Optional[str] = None
@@ -395,6 +402,7 @@ class CommentFilter(BaseModel):
     author_id__list: Optional[List[int]] = None
     route_id__list: Optional[List[int]] = None
     place_id__list: Optional[List[int]] = None
+    post_id__list: Optional[List[int]] = None
 
 
 class CommonPostBase(BaseModel):

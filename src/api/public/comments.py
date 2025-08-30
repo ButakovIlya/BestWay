@@ -26,7 +26,11 @@ async def create_comment(
 
     return await use_case.execute(
         data=CommentCreateDTO(
-            author_id=user.id, place_id=data.place_id, route_id=data.route_id, comment=data.comment
+            author_id=user.id,
+            place_id=data.place_id,
+            route_id=data.route_id,
+            post_id=data.post_id,
+            comment=data.comment,
         ),
     )
 

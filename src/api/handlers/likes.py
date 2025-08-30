@@ -17,6 +17,7 @@ async def list_likes(
     request: Request,
     place_id: int = Query(None, ge=1),
     route_id: int = Query(None, ge=1),
+    post_id: int = Query(None, ge=1),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
     use_case: ModelObjectListUseCase = Depends(Provide[Container.object_list_use_case]),
@@ -28,7 +29,7 @@ async def list_likes(
         page=page,
         page_size=page_size,
         ObjectDTO=LikeRead,
-        filters={"place_id": place_id, "route_id": route_id},
+        filters={"place_id": place_id, "route_id": route_id, "post_id": post_id},
     )
 
 

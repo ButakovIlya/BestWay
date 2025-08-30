@@ -1,4 +1,5 @@
 from datetime import datetime
+from tokenize import Comment
 from typing import TYPE_CHECKING
 
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text
@@ -7,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from infrastructure.models.alchemy.base import Base
 
 if TYPE_CHECKING:
-    from infrastructure.models.alchemy.routes import Route
+    from infrastructure.models.alchemy.routes import Comment, Like, Route
     from infrastructure.models.alchemy.users import User
 
 
@@ -30,3 +31,5 @@ class Post(Base):
 
     route: Mapped["Route"] = relationship("Route", back_populates="posts", lazy="selectin")
     author: Mapped["User"] = relationship("User", back_populates="posts", lazy="selectin")
+    likes: Mapped[list["Like"]] = relationship("Like", back_populates="post", cascade="all, delete-orphan")
+    comments: Mapped[list["Comment"]] = relationship("Comment", back_populates="post", cascade="all, delete-orphan")  # type: ignore

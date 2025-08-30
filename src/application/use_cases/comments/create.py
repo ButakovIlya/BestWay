@@ -22,8 +22,11 @@ class CommentCreateUseCase(UseCase):
             return CommentRead.model_validate(comment)
 
     async def _validate_data(self, data: CommentCreateDTO) -> None:
-        if not data.place_id and not data.route_id:
-            raise APIException(code=400, message="Оба поля 'place_id' и 'route_id' не могут быть пустыми")
+        if not data.place_id and not data.route_id and not data.post_id:
+            raise APIException(
+                code=400,
+                message="Одновременно поля 'post_id', 'place_id' и 'route_id' не могут быть пустыми",
+            )
         if data.place_id and data.route_id:
             raise APIException(code=400, message="Нельзя одновременно передать 'place_id' и 'route_id'")
 

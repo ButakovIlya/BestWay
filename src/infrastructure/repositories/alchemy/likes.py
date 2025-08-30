@@ -31,6 +31,7 @@ class SqlAlchemyLikesRepository(SqlAlchemyModelRepository[Like], LikeRepository)
             and_(
                 LikeModel.route_id == data.route_id,
                 LikeModel.place_id == data.place_id,
+                LikeModel.post_id == data.post_id,
                 LikeModel.author_id == data.author_id,
             )
         )
@@ -42,6 +43,7 @@ class SqlAlchemyLikesRepository(SqlAlchemyModelRepository[Like], LikeRepository)
             id=entity.id,
             author_id=entity.author_id,
             route_id=entity.route_id,
+            post_id=entity.post_id,
             place_id=entity.place_id,
             timestamp=entity.timestamp,
         )
@@ -52,5 +54,6 @@ class SqlAlchemyLikesRepository(SqlAlchemyModelRepository[Like], LikeRepository)
             author_id=model.author_id,
             route_id=model.route_id,
             place_id=model.place_id,
+            post_id=model.post_id,
             timestamp=model.timestamp,
         )
