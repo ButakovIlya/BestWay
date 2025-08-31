@@ -32,44 +32,49 @@ jobs:
           script: |
             cd /home/bestway-app
 
-            echo "📦 Создаём .env"
+            echo "📦 Создаём .env (для Docker)"
             cat <<EOF > .env
-            PYTHONPATH=${{ secrets.PYTHONPATH }}
-            PYTHONUNBUFFERED=${{ secrets.PYTHONUNBUFFERED }}
-            CELERY_APP_NAME=${{ secrets.CELERY_APP_NAME }}
-            CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}
-            CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}
-
-            APP__NAME=${{ secrets.APP__NAME }}
-            APP__BASE_URL=${{ secrets.APP__BASE_URL }}
-            APP__DEBUG=${{ secrets.APP__DEBUG }}
-
-            UPTRACE__ENABLED=False
-            UPTRACE__DSN=
+            PYTHONPATH=/app/src
+            PYTHONUNBUFFERED=1
+            CELERY_APP_NAME=bestway
+            CELERY_BROKER_URL=redis://redis:6379/0
+            CELERY_RESULT_BACKEND=redis://redis:6379/1
 
             REDIS__HOST=redis://redis:6379/2
             REDIS__PASSWORD=
 
-            TASK__APP_NAME=bestway
-            TASK__BROKER_URL=redis://redis:6379/0
-            TASK__RESULT_URL=redis://redis:6379/1
+            DB__NAME=${{ secrets.DB__NAME }}
+            DB__USER=${{ secrets.DB__USER }}
+            DB__PASSWORD=${{ secrets.DB__PASSWORD }}
+            DB__HOST=db
+            DB__PORT=5432
+            DB__POOL_SIZE=2
+            DB__MAX_OVERFLOW=4
+            EOF
+
+            echo "📦 Создаём .env.db (для Postgres)"
+            cat <<EOF > .env.db
+            POSTGRES_DB=${{ secrets.DB__NAME }}
+            POSTGRES_USER=${{ secrets.DB__USER }}
+            POSTGRES_PASSWORD=${{ secrets.DB__PASSWORD }}
+            EOF
+
+            echo "📦 Создаём .env.fastapi (для запуска FastAPI напрямую)"
+            cat <<EOF > .env.fastapi
+            APP__NAME=${{ secrets.APP__NAME }}
+            APP__BASE_URL=${{ secrets.APP__BASE_URL }}
+            APP__DEBUG=${{ secrets.APP__DEBUG }}
 
             DB__NAME=${{ secrets.DB__NAME }}
             DB__USER=${{ secrets.DB__USER }}
             DB__PASSWORD=${{ secrets.DB__PASSWORD }}
-            DB__HOST=${{ secrets.DB__HOST }}
-            DB__PORT=${{ secrets.DB__PORT }}
-            DB__POOL_SIZE=2
-            DB__MAX_OVERFLOW=4
-
-            UVICORN_HOST=0.0.0.0
-            UVICORN_PORT=8000
-            UVICORN_WORKERS=4
-            UVICORN_RELOAD=false
-            UVICORN_TIMEOUT_KEEP_ALIVE=5
+            DB__HOST=localhost
+            DB__PORT=5432
 
             JWT__SECRET_KEY=${{ secrets.JWT__SECRET_KEY }}
             JWT__ALGORITHM=${{ secrets.JWT__ALGORITHM }}
+
+            REDIS__HOST=redis://localhost:6379/2
 
             SMS__SERVICE_URL=${{ secrets.SMS__SERVICE_URL }}
             SMS__API_KEY=${{ secrets.SMS__API_KEY }}
@@ -86,13 +91,12 @@ jobs:
             PROXY__PASSWORD=${{ secrets.PROXY__PASSWORD }}
 
             CHATGPT__API_KEY=${{ secrets.CHATGPT__API_KEY }}
-            EOF
 
-            echo "📦 Создаём .env.db"
-            cat <<EOF > .env.db
-            POSTGRES_DB=${{ secrets.DB_NAME }}
-            POSTGRES_USER=${{ secrets.DB_USER }}
-            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+            UVICORN_HOST=0.0.0.0
+            UVICORN_PORT=8004
+            UVICORN_WORKERS=4
+            UVICORN_RELOAD=false
+            UVICORN_TIMEOUT_KEEP_ALIVE=5
             EOF
 
             echo "🧹 Останавливаем старые контейнеры (если есть)..."
@@ -100,5 +104,8 @@ jobs:
 
             echo "🚀 Собираем и запускаем новые контейнеры..."
             docker compose up -d --build
+
+            echo "🟢 Перезапускаем FastAPI сервер..."
+            nohup uvicorn src.main:app --host 0.0.0.0 --port 8004 --env-file .env.fastapi > uvicorn.log 2>&1 &
 
             echo "✅ Готово!"
