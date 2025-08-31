@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from datetime import date
 from typing import List, TypeVar
 
 from domain.entities.model import Model
@@ -26,4 +27,8 @@ class UserRepository(ModelRepository):
     @abstractmethod
     async def delete_by_phone(self, phone: str) -> bool:
         """Удалить пользователя по телефону"""
+        pass
+
+    @abstractmethod
+    async def update_birth_date(self, user_id: int, birth_date: date) -> None:
         pass

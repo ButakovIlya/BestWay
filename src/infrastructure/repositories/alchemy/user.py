@@ -1,6 +1,7 @@
+from datetime import date
 from typing import List, Optional
 
-from sqlalchemy import delete, exists, select
+from sqlalchemy import delete, exists, select, update
 
 from domain.entities.user import User
 from infrastructure.models.alchemy.users import User as UserModel
@@ -35,6 +36,11 @@ class SqlAlchemyUsersRepository(SqlAlchemyModelRepository[User], UserRepository)
         result = await self._session.execute(stmt)
         await self._session.commit()
         return result.rowcount > 0
+
+    async def update_birth_date(self, user_id: int, birth_date: date) -> None:
+        await self._session.execute(
+            update(self.MODEL).where(self.MODEL.id == user_id).values(birth_date=birth_date)
+        )
 
     def convert_to_model(self, entity: User) -> UserModel:
         return UserModel(

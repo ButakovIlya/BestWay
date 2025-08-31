@@ -39,6 +39,7 @@ class UserUpdateUseCase(UseCase):
                     setattr(user, key, value)
 
             await self._uow.users.update(user)
-            user: User = await self._uow.users.get_by_id(user.id)
+            if data.birth_date:
+                await self._uow.users.update_birth_date(user.id, data.birth_date)
 
         return UserDTO.model_validate(user)
