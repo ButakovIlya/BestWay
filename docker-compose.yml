@@ -6,8 +6,10 @@ services:
     build:
       context: .
     volumes:
-      - ./:/app
-      - ./storage/media:/app/storage/media  
+    - ./src:/app/src
+    - ./storage/media:/app/storage/media
+    - ./migrations:/app/migrations
+
     env_file:
       - ./.env
     depends_on:
