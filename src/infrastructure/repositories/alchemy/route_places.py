@@ -20,9 +20,9 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
         )
         return self.convert_to_entity(model)
 
-    async def update_order(self, route_place_id: int, order: int) -> None:
+    async def update_order(self, place_id: int, order: int) -> None:
         """Изменить порядок места маршрута"""
-        stmt = update(self.MODEL).where(self.MODEL.id == route_place_id).values(order=order)
+        stmt = update(self.MODEL).where(self.MODEL.place_id == place_id).values(order=order)
         await self._session.execute(stmt)
 
     async def get_last_order_by_route_id(self, route_id: int) -> int:
@@ -30,11 +30,20 @@ class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], Ro
         result = await self._session.execute(stmt)
         return result.scalar_one_or_none() or 0
 
-    async def remove_route_place_by_id(self, route_id: int, route_place_id: int | None) -> bool:
+    async def exists_by_place_id(self, route_id: int, place_id: int) -> bool:
+        """Проверить наличие мест в маршруте"""
+        stmt = delete(RoutePlaceModel).where(
+            RoutePlaceModel.route_id == route_id,
+            RoutePlaceModel.place_id == place_id,
+        )
+        result = await self._session.execute(stmt)
+        return bool(result.rowcount)
+
+    async def remove_route_place_by_id(self, route_id: int, place_id: int | None) -> bool:
         stmt = delete(RoutePlaceModel).where(RoutePlaceModel.route_id == route_id)
 
-        if route_place_id is not None:
-            stmt = stmt.where(RoutePlaceModel.id == route_place_id)
+        if place_id is not None:
+            stmt = stmt.where(RoutePlaceModel.place_id == place_id)
 
         result = await self._session.execute(stmt)
         return bool(result.rowcount)

@@ -11,8 +11,13 @@ class RoutePlacesRepository(ModelRepository):
         pass
 
     @abstractmethod
-    async def remove_route_place_by_id(self, route_id: int, route_place_id: int | None) -> bool:
+    async def remove_route_place_by_id(self, route_id: int, place_id: int | None) -> bool:
         """Удалить место из маршрута или очистить список мест"""
+        pass
+
+    @abstractmethod
+    async def exists_by_place_id(self, route_id: int, place_id: int) -> bool:
+        """Проверить наличие мест в маршруте"""
         pass
 
     @abstractmethod
@@ -21,6 +26,6 @@ class RoutePlacesRepository(ModelRepository):
         pass
 
     @abstractmethod
-    async def update_order(self, route_place_id: int, order: int) -> None:
+    async def update_order(self, place_id: int, order: int) -> None:
         """Изменить порядок места маршрута"""
         pass

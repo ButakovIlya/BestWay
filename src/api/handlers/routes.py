@@ -85,7 +85,7 @@ async def update_route_places_order(
     ),
     use_case: RoutePlaceUpdateOrderUseCase = Depends(Provide[Container.route_place_update_order_use_case]),
 ) -> None:
-    user_id: int = request.state.user.id
+    # user_id: int = request.state.user.id
 
     return await use_case.execute(route_id, order_info)
 

@@ -13,15 +13,15 @@ class RoutePlaceRemoveUseCase(UseCase):
     def __init__(self, uow: UnitOfWork) -> None:
         self._uow = uow
 
-    async def execute(self, route_id: int, route_place_id: int | None) -> None:
+    async def execute(self, route_id: int, place_id: int | None) -> None:
         async with self._uow(autocommit=True):
             route: Route = await self._uow.routes.get_by_id(route_id)
             if not route:
                 raise APIException(code=404, message=f"Маршрут с id={route_id} не найден")
 
-            if route_place_id:
-                place: Place = await self._uow.route_places.get_by_id(route_place_id)
-                if not place:
-                    raise APIException(code=404, message=f"Место с id={route_place_id} не найдено")
+            if place_id:
+                route_place = await self._uow.route_places.exists_by_place_id(route_id, place_id)
+                if not route_place:
+                    raise APIException(code=404, message=f"Место с id={place_id} не найдено")
 
-            await self._uow.route_places.remove_route_place_by_id(route_id, route_place_id)
+            await self._uow.route_places.remove_route_place_by_id(route_id, place_id)

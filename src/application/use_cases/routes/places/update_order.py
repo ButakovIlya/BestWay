@@ -20,5 +20,5 @@ class RoutePlaceUpdateOrderUseCase(UseCase):
             if not route:
                 raise APIException(code=404, message=f"Маршрут с id={route_id} не найден")
 
-            for route_place_id, order in data.order_dict.items():
-                await self._uow.route_places.update_order(route_place_id, order)
+            for place_id, order in data.order_dict.items():
+                await self._uow.route_places.update_order(place_id, order)
