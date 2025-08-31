@@ -96,9 +96,10 @@ jobs:
             docker compose up -d redis db
 
             echo "⏳ Ждём пока поднимутся Redis и Postgres..."
-            sleep 5
+            sleep 15
 
             echo "🟢 Перезапускаем FastAPI сервер..."
+            pkill -f "uvicorn src.main:app" || true
             nohup uvicorn src.main:app --host 0.0.0.0 --port 8004 --env-file .env.fastapi > uvicorn.log 2>&1 &
 
             echo "🚀 Запускаем Celery и Flower..."
