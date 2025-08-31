@@ -36,15 +36,13 @@ def create_app(settings: Settings) -> FastAPI:
     include_routers(app, settings)
     add_exception_hanlers(app)
 
-    MEDIA_DIR = Path("storage/media")
+    # MEDIA_DIR = Path("storage/media")
 
-    # 🛠 Важно: check_dir=False отключает предзагрузку содержимого папки
-    # Теперь FastAPI будет смотреть файлы прямо из ФС при каждом запросе
-    app.mount(
-        "/media",
-        StaticFiles(directory=MEDIA_DIR, check_dir=False),
-        name="media",
-    )
+    # app.mount(
+    #     "/media",
+    #     StaticFiles(directory=MEDIA_DIR, check_dir=False),
+    #     name="media",
+    # )
 
     app.openapi = custom_openapi(app, settings)  # type: ignore
 
