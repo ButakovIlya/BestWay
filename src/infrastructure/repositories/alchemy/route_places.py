@@ -1,4 +1,5 @@
 from sqlalchemy import delete, func, select, update
+from sqlalchemy.orm import selectinload
 
 from domain.entities.route_places import RoutePlaces
 from infrastructure.models.alchemy.routes import RoutePlace as RoutePlaceModel
@@ -9,6 +10,19 @@ from infrastructure.repositories.interfaces.route_places import RoutePlacesRepos
 class SqlAlchemyRoutePlacesRepository(SqlAlchemyModelRepository[RoutePlaces], RoutePlacesRepository):
     MODEL = RoutePlaceModel
     ENTITY = RoutePlaces
+
+    async def bulk_create(self, data: list[RoutePlaces]) -> list[RoutePlaces]:
+        models = [self.convert_to_model(entity) for entity in data]
+        self._session.add_all(models)
+        await self._session.flush(models)
+
+        stmt = (
+            select(RoutePlaceModel)
+            .where(RoutePlaceModel.id.in_([m.id for m in models]))
+            .options(selectinload(RoutePlaceModel.place))
+        )
+        result = await self._session.execute(stmt)
+        return [self.convert_to_entity(m) for m in result.scalars().all()]
 
     async def create(self, data: RoutePlaces) -> RoutePlaces:
         model = self.convert_to_model(data)
