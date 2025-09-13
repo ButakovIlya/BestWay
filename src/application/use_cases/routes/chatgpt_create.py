@@ -40,7 +40,6 @@ class ChatGPTRouteGenerateUseCase(UseCase):
         self._uow = uow
         self._redis_cache = redis_client
         self._notifier = notifier
-
         self._route_generate_gpt_manager = route_generate_gpt_manager
 
     async def execute(self, user_id: int, survey_id: int, mode: str = Mode.FULL.value) -> Route:
