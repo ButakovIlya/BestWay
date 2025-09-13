@@ -83,6 +83,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
         return PlaceModel(
             id=entity.id,
             city=entity.city,
+            website_url=entity.website_url,
             name=entity.name,
             description=entity.description,
             category=entity.category,
@@ -98,6 +99,7 @@ class SqlAlchemyPlacesRepository(SqlAlchemyModelRepository[Place], PlaceReposito
     def convert_to_entity(self, model: PlaceModel) -> Place:
         return Place(
             id=model.id,
+            website_url=model.website_url,
             city=model.city,
             name=model.name,
             description=model.description,

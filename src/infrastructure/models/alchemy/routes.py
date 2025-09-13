@@ -16,6 +16,7 @@ class Place(Base):
     __tablename__ = "places"
 
     name: Mapped[str] = mapped_column(String, index=True)
+    website_url: Mapped[str | None] = mapped_column(String, nullable=True)
     city: Mapped[str] = mapped_column(
         Enum(CityCategory, name="place_category", native_enum=False, length=16),
         index=True,

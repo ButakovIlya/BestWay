@@ -76,6 +76,9 @@ class ChatGPTRouteGenerateUseCase(UseCase):
         finally:
             self._redis_cache.unset_active_route_geration(user_id)
 
+            async with self._uow(autocommit=True):
+                await self._uow.surveys.delete_by_id(survey_id)
+
     async def _create_content(self, user_id: int, survey_id: int) -> ChatGPTContentData:
         async with self._uow(autocommit=True):
             user: User = await self._uow.users.get_by_id(user_id)

@@ -14,6 +14,7 @@ from domain.entities.route_places import RoutePlaces
 
 class CommonPlaceBase(BaseModel):
     name: str
+    website_url: Optional[str] = None
     description: Optional[str] = None
     category: PlaceCategory
     city: Optional[CityCategory] = None
@@ -83,6 +84,7 @@ class PlaceRead(CommonPlaceBase):
         return cls(
             id=place.id,
             name=place.name,
+            website_url=place.website_url,
             description=place.description,
             city=place.city,
             category=place.category,

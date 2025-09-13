@@ -9,6 +9,7 @@ class Place(Entity):
         self,
         id: int | None = None,
         city: CityCategory | None = None,
+        website_url: str | None = None,
         name: str | None = None,
         description: str | None = None,
         category: PlaceCategory | None = None,
@@ -23,6 +24,7 @@ class Place(Entity):
         super().__init__(id)
 
         self.name = name
+        self.website_url = website_url
         self.description = description
         self.city = city
         self.category = category
