@@ -30,7 +30,7 @@ router = APIRouter()
 async def create(
     request: Request,
     name: str = Form(...),
-    description: str = Form(...),
+    description: Optional[str] = Form(None),
     category: PlaceCategory = Form(...),
     city: Optional[CityCategory] = Form(None),
     type: Optional[PlaceType] = Form(None),
