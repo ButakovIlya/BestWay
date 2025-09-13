@@ -10,6 +10,7 @@ class PlaceDTO(BaseModel):
     id: int
     city: CityCategory
     name: str
+    description: str
     website_url: Optional[str]
     category: PlaceCategory
     type: Optional[PlaceType]
@@ -24,6 +25,7 @@ class PlaceDTO(BaseModel):
 class CreatePlaceDTO(BaseModel):
     city: CityCategory
     name: str
+    description: str
     category: PlaceCategory
     type: Optional[PlaceType]
     tags: Optional[str]

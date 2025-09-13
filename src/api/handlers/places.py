@@ -30,6 +30,7 @@ router = APIRouter()
 async def create(
     request: Request,
     name: str = Form(...),
+    description: str = Form(...),
     category: PlaceCategory = Form(...),
     city: Optional[CityCategory] = Form(None),
     type: Optional[PlaceType] = Form(None),
@@ -61,6 +62,7 @@ async def create(
 
     data = CreatePlaceDTO(
         name=name,
+        description=description,
         city=city,
         type=type,
         tags=tags,

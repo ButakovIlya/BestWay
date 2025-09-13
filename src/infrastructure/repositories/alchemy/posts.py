@@ -83,7 +83,7 @@ class SqlAlchemyPostsRepository(SqlAlchemyModelRepository[Post], PostRepository)
                 .joinedload(Place.photos),
             )
             .group_by(MODEL.id, ROUTE.id)
-            .order_by(MODEL.id)
+            .order_by(MODEL.created_at.desc())
         )
 
         raw_filters = filters.model_dump(exclude_unset=True)
