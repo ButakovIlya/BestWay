@@ -130,7 +130,7 @@ class ProxySettings(BaseSettings):
 class ChatGPTSettings(BaseSettings):
     service_url: str = "https://api.openai.com/v1/chat/completions"
     api_key: str = "secret"
-    model: str = "gpt-5"
+    model: str = "gpt-4o-mini"
     max_responses_per_day: int = 25
     request_delay: int = 1  # в секундах
     max_request_retries: int = 3
