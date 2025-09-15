@@ -46,7 +46,7 @@ class PlacePut(CommonPlaceBase):
     tags: Optional[str] = None
     coordinates: List[float] = None
     object_id: int | None = None
-    map_name: str = None
+    map_name: Optional[str] = None
 
 
 class PlacePatch(CommonPlaceBase):

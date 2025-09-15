@@ -31,6 +31,7 @@ async def create(
     request: Request,
     name: str = Form(...),
     description: Optional[str] = Form(None),
+    website_url: Optional[str] = Form(None),
     category: PlaceCategory = Form(...),
     city: Optional[CityCategory] = Form(None),
     type: Optional[PlaceType] = Form(None),
@@ -63,6 +64,7 @@ async def create(
     data = CreatePlaceDTO(
         name=name,
         description=description,
+        website_url=website_url,
         city=city,
         type=type,
         tags=tags,
