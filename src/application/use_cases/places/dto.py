@@ -25,6 +25,7 @@ class PlaceDTO(BaseModel):
 class CreatePlaceDTO(BaseModel):
     city: CityCategory
     name: str
+    website_url: Optional[str]
     description: Optional[str]
     category: PlaceCategory
     type: Optional[PlaceType]
