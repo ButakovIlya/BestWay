@@ -128,7 +128,7 @@ class BaseClassificationManager(ClassificationManager):
             payload = self._create_request_payload(content, system_prompt)
 
             response = self.proxy_client.post(
-                "https://api.openai.com/v1/chat/completions",
+                self.settings.chatgpt.service_url,
                 json=payload,
                 headers={"Authorization": f"Bearer {self.settings.chatgpt.api_key}"},
             )

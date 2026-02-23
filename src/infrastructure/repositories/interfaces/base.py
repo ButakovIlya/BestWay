@@ -77,6 +77,7 @@ class ModelRepository(Repository, Generic[TModel]):
     @abstractmethod
     async def all_exist_by_id_list(self, id_lst: list) -> bool:
         """Проверяет, существуют ли все объекты из списка id"""
+        pass
 
     # UPDATE
     @abstractmethod
