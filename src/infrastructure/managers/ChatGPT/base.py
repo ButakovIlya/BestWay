@@ -149,7 +149,6 @@ class BaseClassificationManager(ClassificationManager):
                     "Authorization": f"Bearer {self.settings.chatgpt.api_key}",
                     "Content-Type": "application/json",
                 },
-                timeout=getattr(self.settings.chatgpt, "chatgpt_request_timeout", 60),
             )
 
             if response.status_code >= 400:
