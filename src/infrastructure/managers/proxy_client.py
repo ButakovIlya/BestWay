@@ -1,6 +1,10 @@
+import logging
+
 import httpx
 
 from config.settings import Settings
+
+logger = logging.getLogger(__name__)
 
 
 class ProxyClient:
@@ -29,7 +33,8 @@ class ProxyClient:
 
     def post(self, url: str, json: dict, headers: dict):
         response = self.client.post(url, json=json, headers=headers, timeout=self.CHATGPT_REQUEST_TIMEOUT)
+        if response.status_code >= 400:
+            logger.error("OpenAI error %s: %s", response.status_code, response.text)
         response.raise_for_status()
-        # logger.info(f"Response headers: {response.headers}")
 
         return response.json()

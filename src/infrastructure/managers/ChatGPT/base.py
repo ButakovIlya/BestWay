@@ -90,27 +90,43 @@ class BaseClassificationManager(ClassificationManager):
         """
         return {
             "model": self.CHATGPT_MODEL,
-            "messages": [
+            "input": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": content.model_dump_json()},
             ],
             "temperature": 0,
-            "max_tokens": 2000,
-            "top_p": 1,
-            "frequency_penalty": 0,
-            "presence_penalty": 0,
+            "max_output_tokens": 2000,
+            "truncation": "auto",
         }
 
-    # TODO переделать валидацию
-    def _parse_chatgpt_response(self, response: dict) -> dict:
+    def _parse_chatgpt_response(self, response) -> dict:
         """
-        Разбирает ответ от ChatGPT, пытается сначала интерпретировать
-        как JSON, при неудаче – вернуть список объектов (или пустой).
+        Парсит ответ от OpenAI Responses API.
+        Ожидаем, что модель вернёт JSON-строку. Если нет — кидаем APIException.
         """
         logger.info("Received response from ChatGPT API")
 
-        response_content = response.get("choices", [])[0].get("message", {}).get("content", [])
+        try:
+            response.raise_for_status()
+            data = response.json()
+        except Exception as ex:
+            logger.error(f"Failed to decode OpenAI response: {str(ex)}")
+            raise APIException(message=f"Failed to decode OpenAI response: {str(ex)}")
+
+        response_content = data.get("output_text")
+
+        if not response_content:
+            parts = []
+            for out_item in data.get("output", []):
+                for c in out_item.get("content", []):
+                    if isinstance(c, dict) and "text" in c:
+                        parts.append(c["text"])
+            response_content = "".join(parts).strip() if parts else None
+
         logger.info(f"ChatGPT response_content: {response_content}")
+
+        if not response_content:
+            raise APIException(message=f"ChatGPT responded with empty content: {data}")
 
         try:
             return json.loads(response_content)
@@ -128,9 +144,12 @@ class BaseClassificationManager(ClassificationManager):
             payload = self._create_request_payload(content, system_prompt)
 
             response = self.proxy_client.post(
-                self.settings.chatgpt.service_url,
+                "https://api.openai.com/v1/responses",
                 json=payload,
-                headers={"Authorization": f"Bearer {self.settings.chatgpt.api_key}"},
+                headers={
+                    "Authorization": f"Bearer {self.settings.chatgpt.api_key}",
+                    "Content-Type": "application/json",
+                },
             )
 
             parsed_content = self._parse_chatgpt_response(response)
