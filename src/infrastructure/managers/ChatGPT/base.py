@@ -2,6 +2,9 @@ import datetime
 import json
 import logging
 from time import sleep
+from typing import Any
+
+import httpx
 
 from openai import OpenAI
 
@@ -98,50 +101,47 @@ class BaseClassificationManager(ClassificationManager):
             "truncation": "auto",
         }
 
-    def _parse_chatgpt_response(self, response) -> dict:
+    def _parse_chatgpt_response(self, response: httpx.Response) -> dict[str, Any]:
         """
-        Парсит ответ от OpenAI Responses API.
-        Ожидаем, что модель вернёт JSON-строку. Если нет — кидаем APIException.
+        Парсит ответ Responses API.
+        Ожидаем JSON-строку в output_text (или в output[].content[].text).
         """
-        logger.info("Received response from ChatGPT API")
+        logger.info("Received response from OpenAI API")
 
-        try:
-            response.raise_for_status()
-            data = response.json()
-        except Exception as ex:
-            logger.error(f"Failed to decode OpenAI response: {str(ex)}")
-            raise APIException(message=f"Failed to decode OpenAI response: {str(ex)}")
+        response.raise_for_status()
+        data = response.json()
 
-        response_content = data.get("output_text")
+        response_content: str | None = data.get("output_text")
 
         if not response_content:
             parts = []
-            for out_item in data.get("output", []):
-                for c in out_item.get("content", []):
+            for out_item in data.get("output", []) or []:
+                for c in (out_item.get("content", []) or []):
                     if isinstance(c, dict) and "text" in c:
                         parts.append(c["text"])
             response_content = "".join(parts).strip() if parts else None
 
-        logger.info(f"ChatGPT response_content: {response_content}")
-
         if not response_content:
-            raise APIException(message=f"ChatGPT responded with empty content: {data}")
+            raise APIException(message=f"Empty response from OpenAI: {data}")
+
+        response_content = response_content.strip()
 
         try:
             return json.loads(response_content)
         except Exception:
-            logger.info("ChatGPT responded with non-JSON content")
-            raise APIException(message=f"ChatGPT responded with non-JSON content: {str(response_content)}")
+            raise APIException(message=f"OpenAI returned non-JSON content: {response_content}")
 
     @retry_on_status_code(code=429, max_retries=CHATGPT_MAX_REQUEST_RETRIES, delay=CHATGPT_REQUEST_DELAY)
-    def _send_request(self, content: ChatGPTContentData, system_prompt: str) -> dict:
+    def _send_request(self, content, system_prompt: str) -> dict[str, Any]:
+        """
+        Делает запрос в OpenAI. Возвращает dict (распарсенный JSON, который вернула модель).
+        """
+        self._check_response_availability()
+        sleep(self.CHATGPT_REQUEST_DELAY)
+
+        payload = self._create_request_payload(content, system_prompt)
+
         try:
-            self._check_response_availability()
-
-            sleep(self.CHATGPT_REQUEST_DELAY)
-
-            payload = self._create_request_payload(content, system_prompt)
-
             response = self.proxy_client.post(
                 "https://api.openai.com/v1/responses",
                 json=payload,
@@ -149,11 +149,17 @@ class BaseClassificationManager(ClassificationManager):
                     "Authorization": f"Bearer {self.settings.chatgpt.api_key}",
                     "Content-Type": "application/json",
                 },
+                timeout=getattr(self.settings.chatgpt, "chatgpt_request_timeout", 60),
             )
 
-            parsed_content = self._parse_chatgpt_response(response)
+            if response.status_code >= 400:
+                logger.error("OpenAI error %s: %s", response.status_code, response.text)
 
-            return parsed_content
+            return self._parse_chatgpt_response(response)
+
+        except httpx.HTTPError as ex:
+            logger.error(f"HTTP error while sending request to OpenAI: {str(ex)}")
+            raise
         except Exception as ex:
-            logger.error(f"Error while sending the request to ChatGPT: {str(ex)}")
-            raise ex
+            logger.error(f"Error while sending the request to OpenAI: {str(ex)}")
+            raise
