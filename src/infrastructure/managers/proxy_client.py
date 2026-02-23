@@ -1,4 +1,5 @@
 import logging
+from typing import Any, Dict, Optional
 
 import httpx
 
@@ -9,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 class ProxyClient:
     settings = Settings()
-
     CHATGPT_REQUEST_TIMEOUT = settings.chatgpt.chatgpt_request_timeout
 
     def __init__(
@@ -31,10 +31,13 @@ class ProxyClient:
 
         self.client = httpx.Client(transport=transport)
 
-    def post(self, url: str, json: dict, headers: dict):
-        response = self.client.post(url, json=json, headers=headers, timeout=self.CHATGPT_REQUEST_TIMEOUT)
-        if response.status_code >= 400:
-            logger.error("OpenAI error %s: %s", response.status_code, response.text)
-        response.raise_for_status()
-
-        return response.json()
+    def post(
+        self,
+        url: str,
+        json: Dict[str, Any],
+        headers: Dict[str, str],
+        timeout: Optional[float] = None,
+    ) -> httpx.Response:
+        t = timeout if timeout is not None else self.CHATGPT_REQUEST_TIMEOUT
+        response = self.client.post(url, json=json, headers=headers, timeout=t)
+        return response

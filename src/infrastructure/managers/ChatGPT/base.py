@@ -156,6 +156,9 @@ class BaseClassificationManager(ClassificationManager):
 
             return self._parse_chatgpt_response(response)
 
+        except httpx.ReadTimeout as ex:
+            logger.error(f"OpenAI ReadTimeout: {str(ex)}")
+            raise
         except httpx.HTTPError as ex:
             logger.error(f"HTTP error while sending request to OpenAI: {str(ex)}")
             raise
