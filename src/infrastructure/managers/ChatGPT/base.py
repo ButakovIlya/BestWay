@@ -94,7 +94,6 @@ class BaseClassificationManager(ClassificationManager):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": content.model_dump_json()},
             ],
-            "temperature": 0,
             "max_output_tokens": 2000,
             "truncation": "auto",
         }
