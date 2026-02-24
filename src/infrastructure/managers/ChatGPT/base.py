@@ -97,7 +97,7 @@ class BaseClassificationManager(ClassificationManager):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": content.model_dump_json()},
             ],
-            "max_output_tokens": 2000,
+            "max_output_tokens": 60000,
             "truncation": "auto",
         }
 
@@ -106,7 +106,7 @@ class BaseClassificationManager(ClassificationManager):
         Парсит ответ Responses API.
         Ожидаем JSON-строку в output_text (или в output[].content[].text).
         """
-        logger.info("Received response from OpenAI API")
+        logger.info(f"Received response from OpenAI API: {response.json()}")
 
         response.raise_for_status()
         data = response.json()
@@ -122,7 +122,7 @@ class BaseClassificationManager(ClassificationManager):
             response_content = "".join(parts).strip() if parts else None
 
         if not response_content:
-            raise APIException(message=f"Empty response from OpenAI: {data}")
+            raise APIException(message=f"Empty response from OpenAI: {data}", code=400)
 
         response_content = response_content.strip()
 
