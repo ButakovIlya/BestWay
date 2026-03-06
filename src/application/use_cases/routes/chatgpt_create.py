@@ -94,7 +94,7 @@ class ChatGPTRouteGenerateUseCase(UseCase):
                 birth_date=user.birth_date,
             )
 
-            survey_dto = ChatGPTSurveyData(city=survey.city, data=survey.data, places=survey.places)
+            survey_dto = ChatGPTSurveyData(city=survey.city, data=survey.data, places=survey.places, prompt=survey.prompt)
 
             places_dto = [
                 ChatGPTPlaceData(
